@@ -7,33 +7,15 @@ const links = [
 ];
 ---
 
-<header
-  id="site-nav"
-  class="fixed inset-x-0 top-0 z-50 border-b border-line bg-ink/85 backdrop-blur-sm"
->
-  <nav class="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 md:px-8">
-    <!-- wordmark: type-based, no logo yet -->
-    <a href="#top" class="heading flex items-baseline gap-1.5 text-sm tracking-tight text-paper no-underline" aria-label="Infini Black — home">
+<header id="site-nav">
+  <!-- mobile top bar -->
+  <div class="card card-dark fixed inset-x-4 top-4 z-50 flex h-14 items-center justify-between px-5 lg:hidden">
+    <a href="#top" class="heading text-sm text-paper no-underline" aria-label="Infini Black — home">
       INFINI<span class="text-acid">/</span>BLACK
     </a>
-
-    <!-- desktop links -->
-    <ul class="hidden items-center gap-8 md:flex">
-      {
-        links.map(({ href, label, n }) => (
-          <li>
-            <a href={href} class="label-mono transition-colors hover:text-acid active:text-acid">
-              <span class="text-acid/60">{n}</span> {label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-
-    <!-- hamburger (tap only) -->
     <button
       id="nav-toggle"
-      class="flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
+      class="-mr-2 flex h-10 w-10 flex-col items-center justify-center gap-1.5"
       aria-label="Open menu"
       aria-expanded="false"
       aria-controls="nav-menu"
@@ -42,26 +24,70 @@ const links = [
       <span class="block h-px w-5 bg-paper transition-opacity duration-300"></span>
       <span class="block h-px w-5 bg-paper transition-transform duration-300"></span>
     </button>
-  </nav>
+  </div>
 
-  <!-- mobile menu -->
-  <div id="nav-menu" class="hidden border-t border-line bg-ink md:hidden" hidden>
-    <ul class="flex flex-col px-5 py-4">
+  <!-- mobile menu sheet -->
+  <div id="nav-menu" class="card card-dark fixed inset-x-4 top-[4.75rem] z-50 hidden p-3 lg:hidden" hidden>
+    <ul class="flex flex-col gap-2">
       {
         links.map(({ href, label, n }) => (
           <li>
             <a
               href={href}
-              class="label-mono block border-b border-line py-4 text-sm last:border-b-0"
               data-nav-close
+              class="card card-dark flex items-center justify-between px-5 py-4 no-underline transition-colors hover:bg-acid hover:text-ink active:bg-acid active:text-ink"
             >
-              <span class="text-acid">{n}</span> — {label}
+              <span class="heading text-base">{label}</span>
+              <span class="label-mono text-acid">{n} ↗</span>
             </a>
           </li>
         ))
       }
+      <li>
+        <a
+          href="#contact"
+          data-nav-close
+          class="card card-acid flex items-center justify-between px-5 py-4 no-underline"
+        >
+          <span class="heading text-base">Start a build</span>
+          <span class="font-mono text-xs">↳</span>
+        </a>
+      </li>
     </ul>
   </div>
+
+  <!-- desktop sidebar -->
+  <aside class="fixed bottom-4 left-4 top-4 z-50 hidden w-40 flex-col gap-3 lg:flex">
+    <a href="#top" class="card card-paper block p-4 no-underline" aria-label="Infini Black — home">
+      <span class="heading block text-lg leading-none">INFINI<span class="block">BLACK<span class="text-ink">.</span></span></span>
+      <span class="label-mono mt-2 block">AI studio</span>
+    </a>
+
+    {
+      links.map(({ href, label, n }) => (
+        <a
+          href={href}
+          data-flicker
+          class="card card-dark group flex flex-1 flex-col justify-between p-4 no-underline transition-colors hover:bg-acid hover:text-ink active:bg-acid active:text-ink"
+        >
+          <span class="flex items-center justify-between">
+            <span class="label-mono transition-colors group-hover:text-ink/60 group-active:text-ink/60">{n}</span>
+            <span class="font-mono text-[10px] text-acid transition-colors group-hover:text-ink group-active:text-ink">↗</span>
+          </span>
+          <span class="heading text-sm">{label}</span>
+        </a>
+      ))
+    }
+
+    <a
+      href="#contact"
+      data-flicker
+      class="card card-acid flex min-h-20 flex-col justify-between p-4 no-underline"
+    >
+      <span class="font-mono text-[10px]">↳</span>
+      <span class="heading text-sm leading-tight">Start a build</span>
+    </a>
+  </aside>
 </header>
 
 <script>

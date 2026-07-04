@@ -1,63 +1,58 @@
----
-const steps = [
-  {
-    index: "P/01",
-    title: "Brief",
-    desc: "Lock scope, success criteria, constraints. One document, no ambiguity.",
-  },
-  {
-    index: "P/02",
-    title: "Architecture",
-    desc: "System design, data flows, model choice. A wireframe of the build, before a line of code.",
-  },
-  {
-    index: "P/03",
-    title: "Build",
-    desc: "Assemble in short cycles, demo weekly. Tests automated, not an afterthought.",
-  },
-  {
-    index: "P/04",
-    title: "Ship",
-    desc: "Deploy, instrument, hand over docs and training. Iterate on real usage.",
-  },
-];
----
+<section id="process" class="relative" data-assemble aria-label="How we build">
+  <p class="label-mono" data-piece="left">03 — How we build</p>
+  <h2 class="heading mt-4 text-4xl md:text-6xl">
+    <span data-typein>Four steps. No drift.</span>
+  </h2>
 
-<section id="process" class="relative overflow-hidden border-t border-line" data-assemble aria-label="How we build">
-  <div class="draft-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden="true"></div>
-  <div class="ghost-num" aria-hidden="true">03</div>
-
-  <div class="relative z-10 mx-auto max-w-6xl px-5 py-24 md:px-8 md:py-32">
-    <p class="label-mono" data-piece="left">03 — How we build</p>
-
-    <h2 class="heading mt-6 text-4xl md:text-6xl">
-      <span data-typein>Four steps. No drift.</span>
-    </h2>
-
-    <!-- scrub-driven build progress: fills acid as the section scrolls through -->
-    <div class="mt-14 h-px w-full bg-line md:mt-20" aria-hidden="true">
-      <div id="process-line" class="h-px bg-acid"></div>
-    </div>
-
-    <ol class="grid grid-cols-1 border border-t-0 border-line md:grid-cols-4">
-      {
-        steps.map((step, i) => (
-          <li
-            data-piece={i % 2 === 0 ? "left" : "right"}
-            data-flicker
-            class:list={[
-              "draft-corners group relative border-line p-6 transition-colors hover:border-acid active:border-acid md:p-8",
-              i > 0 ? "border-t md:border-t-0 md:border-l" : "",
-            ]}
-          >
-            <p class="label-mono text-acid/60 transition-colors group-hover:text-acid group-active:text-acid">
-              {step.index}
-            </p>
-            <h3 class="heading mt-5 text-lg text-paper md:text-xl">{step.title}</h3>
-            <p class="mt-3 max-w-xs text-sm text-dim md:text-base">{step.desc}</p>
-          </li>
-        ))
-      }
-    </ol>
+  <div class="mt-8 h-1.5 w-full overflow-hidden rounded-full bg-line/50 md:mt-10" aria-hidden="true">
+    <div id="process-line" class="h-full rounded-full bg-acid"></div>
   </div>
+
+  <ol class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <li class="card card-dark flex min-h-[240px] flex-col justify-between p-7 md:p-8" data-piece="left" data-flicker>
+      <span class="heading text-6xl text-paper/15">01</span>
+      <div>
+        <p class="label-mono">P/01</p>
+        <h3 class="heading mt-2 text-xl md:text-2xl">Brief</h3>
+        <p class="mt-2 text-sm text-dim md:text-base">
+          Lock scope, success criteria, constraints — one doc, no ambiguity.
+        </p>
+      </div>
+    </li>
+
+    <li class="card card-dark flex min-h-[240px] flex-col justify-between p-7 md:p-8" data-piece="right" data-flicker>
+      <span class="heading text-6xl text-paper/15">02</span>
+      <div>
+        <p class="label-mono">P/02</p>
+        <h3 class="heading mt-2 text-xl md:text-2xl">Architecture</h3>
+        <p class="mt-2 text-sm text-dim md:text-base">
+          System design, data flows, model choice — wireframe before code.
+        </p>
+      </div>
+    </li>
+
+    <li class="card card-dark flex min-h-[240px] flex-col justify-between p-7 md:p-8" data-piece="left" data-flicker>
+      <span class="heading text-6xl text-paper/15">03</span>
+      <div>
+        <p class="label-mono">P/03</p>
+        <h3 class="heading mt-2 text-xl md:text-2xl">Build</h3>
+        <p class="mt-2 text-sm text-dim md:text-base">
+          Short cycles, weekly demos, automated tests.
+        </p>
+      </div>
+    </li>
+
+    <li class="card card-dark flex min-h-[240px] flex-col justify-between p-7 md:p-8" data-piece="right" data-flicker>
+      <span class="heading text-6xl text-acid/80">04</span>
+      <div>
+        <p class="label-mono">P/04</p>
+        <h3 class="heading mt-2 text-xl md:text-2xl">Ship</h3>
+        <p class="mt-2 text-sm text-dim md:text-base">
+          Deploy, instrument, hand over docs + training; iterate on real usage.
+        </p>
+      </div>
+    </li>
+  </ol>
+
+  <p class="label-mono mt-6" data-piece="left">Average brief-to-ship: 6 weeks.</p>
 </section>

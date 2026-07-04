@@ -1,53 +1,65 @@
 ---
 const services = [
   {
-    index: "S/01",
-    title: "AI Systems",
-    desc: "Custom LLM-powered products, agents, retrieval and evals. Built to reason on your data, not a demo.",
-  },
-  {
     index: "S/02",
     title: "Automation",
-    desc: "Pipelines that remove manual work end-to-end. Fewer handoffs, fewer humans in the loop.",
+    desc: "Pipelines removing manual work end-to-end.",
   },
   {
     index: "S/03",
     title: "Websites",
-    desc: "Fast, precise marketing and product sites. Built for conversion, not decoration.",
+    desc: "Fast, precise marketing and product sites.",
   },
   {
     index: "S/04",
     title: "Apps",
-    desc: "Web and mobile products, shipped production-grade. From first commit to first user.",
+    desc: "Web and mobile, shipped production-grade.",
   },
 ];
 ---
 
-<section id="services" class="relative overflow-hidden border-t border-line" data-assemble aria-label="Services">
-  <div class="ghost-num" aria-hidden="true">01</div>
-  <div class="relative z-10 mx-auto max-w-6xl px-5 py-24 md:px-8 md:py-32">
-    <p class="label-mono" data-piece="left">01 — Services</p>
+<section id="services" class="relative" data-assemble aria-label="Services">
+  <p class="label-mono" data-piece="left">01 — Services</p>
 
-    <h2 class="heading mt-6 text-4xl md:text-6xl">
-      <span data-typein>What we assemble.</span>
-    </h2>
+  <h2 class="heading mt-4 text-4xl md:text-6xl">
+    <span data-typein>What we assemble.</span>
+  </h2>
 
-    <div class="mt-14 grid grid-cols-1 gap-px border border-line bg-line md:mt-20 md:grid-cols-2">
-      {
-        services.map((service) => (
-          <article
-            data-piece
-            data-flicker
-            class="draft-corners group bg-ink p-6 transition-colors hover:bg-acid/[0.03] active:bg-acid/[0.03] md:p-10"
-          >
-            <p class="label-mono text-acid/60 transition-colors group-hover:text-acid group-active:text-acid">
-              {service.index}
-            </p>
-            <h3 class="heading mt-5 text-2xl text-paper md:text-3xl">{service.title}</h3>
+  <div class="mb-8 grid grid-cols-1 gap-4 mt-8 md:mb-10 md:mt-10 md:grid-cols-2">
+    <article
+      data-piece="scale"
+      data-flicker
+      class="card card-acid flex flex-col justify-between p-7 md:min-h-[300px] md:p-10"
+    >
+      <div class="flex items-start justify-between">
+        <p class="label-mono">S/01</p>
+        <span aria-hidden="true">↗</span>
+      </div>
+      <div>
+        <h3 class="heading text-3xl md:text-4xl">AI Systems</h3>
+        <p class="mt-4 max-w-sm text-sm text-ink/70 md:text-base">
+          Custom LLM products, agents, retrieval, evals — reasoning on your data, not a demo.
+        </p>
+      </div>
+    </article>
+
+    {
+      services.map((service, i) => (
+        <article
+          data-piece={i === 0 ? "left" : i === 1 ? "up" : "right"}
+          data-flicker
+          class="card card-dark flex flex-col justify-between p-7 md:p-10"
+        >
+          <div class="flex items-start justify-between">
+            <p class="label-mono">{service.index}</p>
+            <span class="text-acid" aria-hidden="true">↗</span>
+          </div>
+          <div>
+            <h3 class="heading text-3xl md:text-4xl">{service.title}</h3>
             <p class="mt-4 max-w-sm text-sm text-dim md:text-base">{service.desc}</p>
-          </article>
-        ))
-      }
-    </div>
+          </div>
+        </article>
+      ))
+    }
   </div>
 </section>
