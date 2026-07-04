@@ -23,17 +23,23 @@ const steps = [
 ];
 ---
 
-<section id="process" class="relative border-t border-line" data-assemble aria-label="How we build">
+<section id="process" class="relative overflow-hidden border-t border-line" data-assemble aria-label="How we build">
   <div class="draft-grid pointer-events-none absolute inset-0 opacity-40" aria-hidden="true"></div>
+  <div class="ghost-num" aria-hidden="true">03</div>
 
-  <div class="relative mx-auto max-w-6xl px-5 py-24 md:px-8 md:py-32">
+  <div class="relative z-10 mx-auto max-w-6xl px-5 py-24 md:px-8 md:py-32">
     <p class="label-mono" data-piece="left">03 — How we build</p>
 
     <h2 class="heading mt-6 text-4xl md:text-6xl">
       <span data-typein>Four steps. No drift.</span>
     </h2>
 
-    <ol class="mt-14 grid grid-cols-1 border border-line md:mt-20 md:grid-cols-4">
+    <!-- scrub-driven build progress: fills acid as the section scrolls through -->
+    <div class="mt-14 h-px w-full bg-line md:mt-20" aria-hidden="true">
+      <div id="process-line" class="h-px bg-acid"></div>
+    </div>
+
+    <ol class="grid grid-cols-1 border border-t-0 border-line md:grid-cols-4">
       {
         steps.map((step, i) => (
           <li

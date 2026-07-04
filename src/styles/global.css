@@ -29,6 +29,88 @@ body {
   color: var(--color-ink);
 }
 
+/* anchor nav lands below the sticky 3.5rem header */
+section[id] {
+  scroll-margin-top: 3.5rem;
+}
+
+/* ---------- atmosphere ---------- */
+
+/* film grain over everything — kills the flat-black emptiness */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* faint off-center glow — depth on true black */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 600px at 75% -5%, rgba(244, 244, 242, 0.045), transparent 60%),
+    radial-gradient(700px 500px at 10% 110%, rgba(180, 255, 57, 0.03), transparent 55%);
+}
+
+/* huge outlined section numeral, barely there */
+.ghost-num {
+  position: absolute;
+  top: 2.5rem;
+  right: -0.5rem;
+  z-index: 0;
+  font-family: var(--font-grotesk);
+  font-variation-settings: "wdth" 125;
+  font-weight: 800;
+  font-size: clamp(8rem, 24vw, 18rem);
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(244, 244, 242, 0.06);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* fixed vertical rails, desktop only */
+.edge-rail {
+  position: fixed;
+  top: 50%;
+  z-index: 30;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(244, 244, 242, 0.22);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- marquee strip ---------- */
+
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+.marquee {
+  overflow: hidden;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 36s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
+
 /* ---------- type utilities ---------- */
 
 .label-mono {
@@ -103,29 +185,85 @@ body {
 
 /* JS (assembly.ts) sets initial draft state; without JS everything is final. */
 [data-piece] {
-  will-change: transform, opacity;
+  position: relative;
 }
 
 /* wireframe ghost drawn around a piece while it is "under construction" */
 .piece-ghost {
-  outline: 1px solid rgba(244, 244, 242, 0.28);
-  outline-offset: 4px;
+  outline: 1px dashed rgba(244, 244, 242, 0.35);
+  outline-offset: 5px;
+}
+
+/* live dimension tag pinned to a ghost while it assembles (JS-injected) */
+.ghost-dim {
+  position: absolute;
+  top: -1.2rem;
+  right: 0;
+  z-index: 10;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.12em;
+  color: rgba(180, 255, 57, 0.65);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ---------- loading screen ---------- */
+
+/* hidden unless JS present (html.js set by inline head script), so no-JS
+   visitors and reduced-motion users go straight to the finished page */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  background: var(--color-ink);
+}
+.js #loader {
+  display: flex;
+}
+@media (prefers-reduced-motion: reduce) {
+  #loader {
+    display: none !important;
+  }
+}
+#loader-bar {
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+/* ---------- schematic wires ---------- */
+
+.wire {
+  fill: none;
+  stroke: rgba(244, 244, 242, 0.22);
+  stroke-width: 1;
+}
+@keyframes wiredash {
+  to { stroke-dashoffset: -20; }
+}
+.wire.live {
+  stroke-dasharray: 3 7;
+  animation: wiredash 1.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wire.live { animation: none; }
 }
 
 /* ---------- re-assemble flicker (hover + tap, CSS-only) ---------- */
 
 @keyframes reassemble {
-  0%   { transform: translate(0, 0); opacity: 1; }
-  20%  { transform: translate(-2px, 1px); opacity: 0.55; outline: 1px solid rgba(180, 255, 57, 0.5); outline-offset: 3px; }
-  40%  { transform: translate(1px, -1px); opacity: 0.8; }
-  60%  { transform: translate(-1px, 0); opacity: 0.65; }
-  100% { transform: translate(0, 0); opacity: 1; }
+  0%, 100% { transform: translate(0, 0); opacity: 1; box-shadow: none; }
+  15% { transform: translate(-2px, 1px); opacity: 0.45; box-shadow: 0 0 0 1px rgba(180, 255, 57, 0.55); }
+  30% { transform: translate(2px, -1px); opacity: 0.9; }
+  45% { transform: translate(-1px, 1px); opacity: 0.55; box-shadow: 0 0 0 1px rgba(180, 255, 57, 0.35); }
+  60% { transform: translate(0, 0); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   [data-flicker]:hover,
   [data-flicker]:active {
-    animation: reassemble 0.28s steps(2, end);
+    animation: reassemble 0.3s linear;
   }
 }
 
@@ -152,8 +290,8 @@ body {
 }
 .caret {
   display: inline-block;
-  width: 0.55em;
-  height: 1em;
+  width: 0.38em;
+  height: 0.9em;
   margin-left: 0.08em;
   background: var(--color-acid);
   vertical-align: -0.08em;

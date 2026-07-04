@@ -4,6 +4,7 @@ import '@fontsource-variable/archivo';
 import '@fontsource-variable/martian-mono';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import Loader from '../components/Loader.astro';
 
 interface Props {
   title?: string;
@@ -29,9 +30,13 @@ const {
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
     <title>{title}</title>
+    <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body class="bg-ink text-paper antialiased">
+    <Loader />
     <Nav />
+    <span class="edge-rail left-3 hidden lg:block" aria-hidden="true">Infini Black — build system v1.0</span>
+    <span class="edge-rail right-3 hidden lg:block" aria-hidden="true">scroll / assemble — ∞</span>
     <main>
       <slot />
     </main>

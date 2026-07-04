@@ -1,0 +1,18 @@
+---
+const items = ['AI systems', 'Automation', 'Websites', 'Apps', 'Agents', 'Pipelines'];
+// track duplicated once; CSS translates -50% for a seamless loop
+const track = [...items, ...items];
+---
+
+<div class="marquee py-3" aria-hidden="true">
+  <div class="marquee-track">
+    {
+      track.map((item) => (
+        <span class="label-mono flex shrink-0 items-center whitespace-nowrap">
+          <span class="px-6">{item}</span>
+          <span class="text-acid">/</span>
+        </span>
+      ))
+    }
+  </div>
+</div>

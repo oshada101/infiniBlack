@@ -23,8 +23,9 @@ const services = [
 ];
 ---
 
-<section id="services" class="relative border-t border-line" data-assemble aria-label="Services">
-  <div class="mx-auto max-w-6xl px-5 py-24 md:px-8 md:py-32">
+<section id="services" class="relative overflow-hidden border-t border-line" data-assemble aria-label="Services">
+  <div class="ghost-num" aria-hidden="true">01</div>
+  <div class="relative z-10 mx-auto max-w-6xl px-5 py-24 md:px-8 md:py-32">
     <p class="label-mono" data-piece="left">01 — Services</p>
 
     <h2 class="heading mt-6 text-4xl md:text-6xl">
@@ -37,7 +38,7 @@ const services = [
           <article
             data-piece
             data-flicker
-            class="draft-corners group border border-line bg-ink p-6 transition-colors hover:border-acid active:border-acid md:p-10"
+            class="draft-corners group bg-ink p-6 transition-colors hover:bg-acid/[0.03] active:bg-acid/[0.03] md:p-10"
           >
             <p class="label-mono text-acid/60 transition-colors group-hover:text-acid group-active:text-acid">
               {service.index}
