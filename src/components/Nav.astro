@@ -1,0 +1,86 @@
+---
+const links = [
+  { href: '#services', label: 'Services', n: '01' },
+  { href: '#work', label: 'Work', n: '02' },
+  { href: '#process', label: 'Process', n: '03' },
+  { href: '#contact', label: 'Contact', n: '04' },
+];
+---
+
+<header
+  id="site-nav"
+  class="fixed inset-x-0 top-0 z-50 border-b border-line bg-ink/85 backdrop-blur-sm"
+>
+  <nav class="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 md:px-8">
+    <!-- wordmark: type-based, no logo yet -->
+    <a href="#top" class="heading flex items-baseline gap-1.5 text-sm tracking-tight text-paper no-underline" aria-label="Infini Black — home">
+      INFINI<span class="text-acid">/</span>BLACK
+    </a>
+
+    <!-- desktop links -->
+    <ul class="hidden items-center gap-8 md:flex">
+      {
+        links.map(({ href, label, n }) => (
+          <li>
+            <a href={href} class="label-mono transition-colors hover:text-acid active:text-acid">
+              <span class="text-acid/60">{n}</span> {label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <!-- hamburger (tap only) -->
+    <button
+      id="nav-toggle"
+      class="flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
+      aria-label="Open menu"
+      aria-expanded="false"
+      aria-controls="nav-menu"
+    >
+      <span class="block h-px w-5 bg-paper transition-transform duration-300"></span>
+      <span class="block h-px w-5 bg-paper transition-opacity duration-300"></span>
+      <span class="block h-px w-5 bg-paper transition-transform duration-300"></span>
+    </button>
+  </nav>
+
+  <!-- mobile menu -->
+  <div id="nav-menu" class="hidden border-t border-line bg-ink md:hidden" hidden>
+    <ul class="flex flex-col px-5 py-4">
+      {
+        links.map(({ href, label, n }) => (
+          <li>
+            <a
+              href={href}
+              class="label-mono block border-b border-line py-4 text-sm last:border-b-0"
+              data-nav-close
+            >
+              <span class="text-acid">{n}</span> — {label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('nav-toggle')!;
+  const menu = document.getElementById('nav-menu')!;
+  const bars = toggle.querySelectorAll('span');
+
+  function setOpen(open: boolean) {
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    menu.hidden = !open;
+    menu.classList.toggle('hidden', !open);
+    bars[0].style.transform = open ? 'translateY(6.5px) rotate(45deg)' : '';
+    bars[1].style.opacity = open ? '0' : '1';
+    bars[2].style.transform = open ? 'translateY(-6.5px) rotate(-45deg)' : '';
+  }
+
+  toggle.addEventListener('click', () => setOpen(menu.hidden));
+  menu.querySelectorAll('[data-nav-close]').forEach((a) =>
+    a.addEventListener('click', () => setOpen(false)),
+  );
+</script>

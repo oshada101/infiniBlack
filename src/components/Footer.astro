@@ -1,0 +1,24 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-line">
+  <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 md:flex-row md:items-center md:justify-between md:px-8">
+    <p class="heading text-sm">
+      INFINI<span class="text-acid">/</span>BLACK
+      <span class="label-mono ml-3 normal-case tracking-normal">© {year}</span>
+    </p>
+
+    <div class="flex items-center gap-8">
+      <a href="mailto:hello@infiniblack.com" class="label-mono link-acid">hello@infiniblack.com</a>
+      <button
+        type="button"
+        data-rebuild
+        class="label-mono cursor-pointer text-acid transition-opacity hover:opacity-70 active:opacity-70"
+        aria-label="Replay the intro animation"
+      >
+        rebuild ↻
+      </button>
+    </div>
+  </div>
+</footer>

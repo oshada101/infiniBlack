@@ -1,0 +1,50 @@
+---
+---
+
+<section id="hero" class="relative flex min-h-svh flex-col justify-end overflow-hidden pt-14" aria-label="Intro">
+  <!-- blueprint grid, fades to faint after intro -->
+  <div class="draft-grid pointer-events-none absolute inset-0 opacity-50" aria-hidden="true"></div>
+
+  <!-- skip control, only visible while the intro plays -->
+  <button
+    id="intro-skip"
+    type="button"
+    class="label-mono invisible fixed right-5 top-16 z-40 cursor-pointer border border-line px-3 py-2 opacity-0 transition-colors hover:border-acid hover:text-acid active:border-acid md:right-8"
+  >
+    skip ↳
+  </button>
+
+  <div class="relative mx-auto w-full max-w-6xl px-5 pb-16 md:px-8 md:pb-20">
+    <p class="label-mono mb-6" data-piece="left">00 — Infini Black · AI studio</p>
+
+    <h1 class="heading text-[13.5vw] leading-[0.95] sm:text-7xl md:text-8xl lg:text-9xl">
+      <span class="block" data-piece="left"><span data-typein>We build systems</span></span>
+      <span class="block" data-piece="right"><span data-typein>that build</span></span>
+      <span class="block" data-piece="left"
+        ><span data-typein>themselves.</span><span class="caret" aria-hidden="true"></span></span
+      >
+    </h1>
+
+    <div class="mt-10 flex flex-col gap-8 md:mt-14 md:flex-row md:items-end md:justify-between">
+      <p class="max-w-md text-base text-dim md:text-lg" data-piece="up">
+        AI systems, automation, websites and apps — designed, assembled and shipped
+        by a studio that automates its own work first.
+      </p>
+
+      <a
+        href="#contact"
+        data-piece="up"
+        data-flicker
+        class="label-mono draft-corners inline-flex w-fit items-center gap-3 border border-line px-6 py-4 text-paper transition-colors hover:border-acid hover:text-acid active:border-acid"
+      >
+        Start a build <span class="text-acid">↳</span>
+      </a>
+    </div>
+
+    <div class="draft-rule mt-12 md:mt-16" data-piece="scale"></div>
+    <div class="mt-4 flex items-center justify-between" data-piece="up">
+      <p class="label-mono">scroll — the rest assembles below</p>
+      <p class="label-mono text-acid" aria-hidden="true">▼</p>
+    </div>
+  </div>
+</section>
