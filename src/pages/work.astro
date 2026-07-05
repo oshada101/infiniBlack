@@ -1,0 +1,165 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Marquee from '../components/Marquee.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout
+  title="Work — INFINI BLACK"
+  description="Case studies from Infini Black: websites, apps and AI systems, designed and shipped."
+>
+  <div id="top"></div>
+
+  <!-- page hero -->
+  <section class="relative pt-28 lg:pt-20" data-assemble aria-label="Work index">
+    <span class="ghost-num" aria-hidden="true">02</span>
+    <p class="label-mono" data-piece="left">Index — all projects</p>
+    <h1 class="heading mt-4 text-5xl md:text-7xl lg:text-8xl">
+      <span data-typein>Work.</span>
+    </h1>
+    <div class="mt-8 flex flex-wrap items-center gap-4" data-piece="up">
+      <span class="badge-shipped">1 shipped</span>
+      <span class="badge-live">1 in progress</span>
+      <span class="label-mono">// more on the bench</span>
+    </div>
+    <div class="draft-rule mt-10"></div>
+  </section>
+
+  <!-- 01 — Glorious Fitness Center -->
+  <section id="glorious" class="relative" data-assemble aria-label="Glorious Fitness Center">
+    <article class="card card-dark draft-corners overflow-hidden">
+      <div class="project-card group" data-piece="scale">
+        <div class="project-media aspect-[16/8] rounded-b-none" transition:name="media-glorious">
+          <img src={`${base}projects/glorious.webp`} alt="Glorious Fitness Center website" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-8 p-7 md:p-10 lg:grid-cols-[1fr_320px]">
+        <div data-piece="left">
+          <div class="flex flex-wrap items-center gap-4">
+            <p class="label-mono text-acid">W/01</p>
+            <span class="badge-shipped">Shipped</span>
+          </div>
+          <h2 class="heading mt-4 text-3xl md:text-5xl">Glorious Fitness Center</h2>
+          <p class="text-dim mt-4 max-w-xl text-lg">
+            Full website for a fitness center — programs, trainer profiles, membership
+            plans and contact, built to load fast and convert walk-ins into sign-ups.
+          </p>
+          <ul class="mt-6 flex flex-wrap gap-2">
+            {['Web design', 'Development', 'SEO'].map((t) => (
+              <li class="rounded-full border border-line px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-dim">{t}</li>
+            ))}
+          </ul>
+          <a
+            href="https://gloriousfitness.lk/"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-flicker
+            class="label-mono mt-8 inline-block rounded-full bg-acid px-6 py-3.5 !text-ink no-underline transition-transform hover:scale-[1.03] active:scale-[0.98]"
+          >
+            Visit live site ↗
+          </a>
+        </div>
+
+        <dl class="card card-paper h-fit p-6" data-piece="right">
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">Client</dt>
+            <dd class="font-mono text-xs">Glorious Fitness</dd>
+          </div>
+          <div class="draft-rule"></div>
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">Year</dt>
+            <dd class="font-mono text-xs">2025</dd>
+          </div>
+          <div class="draft-rule"></div>
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">Type</dt>
+            <dd class="font-mono text-xs">Website</dd>
+          </div>
+          <div class="draft-rule"></div>
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">Status</dt>
+            <dd class="font-mono text-xs">Live</dd>
+          </div>
+          <div class="draft-rule"></div>
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">URL</dt>
+            <dd class="font-mono text-xs">
+              <a href="https://gloriousfitness.lk/" target="_blank" rel="noopener noreferrer" class="underline">gloriousfitness.lk ↗</a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </article>
+  </section>
+
+  <!-- 02 — Kartos -->
+  <section id="kartos" class="relative" data-assemble aria-label="Kartos">
+    <article class="card card-dark draft-corners overflow-hidden">
+      <div class="project-card group" data-piece="scale">
+        <div class="project-media aspect-[16/8] rounded-b-none" transition:name="media-kartos">
+          <img src={`${base}projects/kartos.webp`} alt="Kartos gym management system" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-8 p-7 md:p-10 lg:grid-cols-[1fr_320px]">
+        <div data-piece="left">
+          <div class="flex flex-wrap items-center gap-4">
+            <p class="label-mono text-crimson">W/02</p>
+            <span class="badge-live">In progress</span>
+          </div>
+          <h2 class="heading mt-4 text-3xl md:text-5xl">Kartos</h2>
+          <p class="text-dim mt-4 max-w-xl text-lg">
+            Gym management system in active development — member profiles, plans and
+            billing, attendance tracking and staff tools in one dashboard.
+          </p>
+          <ul class="mt-6 flex flex-wrap gap-2">
+            {['SaaS', 'Dashboards', 'Full-stack'].map((t) => (
+              <li class="rounded-full border border-line px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-dim">{t}</li>
+            ))}
+          </ul>
+        </div>
+
+        <dl class="card card-crimson h-fit p-6" data-piece="right">
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">Client</dt>
+            <dd class="font-mono text-xs">Product / internal</dd>
+          </div>
+          <div class="draft-rule"></div>
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">Year</dt>
+            <dd class="font-mono text-xs">2026 —</dd>
+          </div>
+          <div class="draft-rule"></div>
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">Type</dt>
+            <dd class="font-mono text-xs">Web app</dd>
+          </div>
+          <div class="draft-rule"></div>
+          <div class="flex justify-between py-2">
+            <dt class="label-mono">Status</dt>
+            <dd class="font-mono text-xs">Building</dd>
+          </div>
+        </dl>
+      </div>
+    </article>
+  </section>
+
+  <Marquee />
+
+  <!-- CTA -->
+  <section class="relative" data-assemble aria-label="Start a project">
+    <a
+      href="/#contact"
+      data-piece="up"
+      class="nav-item card card-dark flex flex-col justify-between gap-10 p-8 no-underline md:p-12"
+    >
+      <p class="label-mono">Next slot open</p>
+      <span class="flex items-end justify-between gap-6">
+        <span class="heading text-3xl md:text-6xl">Your project here.</span>
+        <span class="nav-arrow font-mono text-2xl text-acid">↗</span>
+      </span>
+    </a>
+  </section>
+</Layout>

@@ -130,65 +130,6 @@ function buildLoader(): gsap.core.Timeline | null {
   return tl;
 }
 
-/* ---------------- schematic ---------------- */
-
-const PULSES: Array<{ dot: string; path: [number, number][] }> = [
-  { dot: '#pulse1', path: [[112, 22], [210, 22], [210, 100]] },
-  { dot: '#pulse2', path: [[270, 136], [359, 136], [359, 210]] },
-];
-
-let pulseTls: gsap.core.Timeline[] = [];
-
-function schematicIntro(tl: gsap.core.Timeline, at: number) {
-  const root = document.querySelector<HTMLElement>('#schematic');
-  if (!root) return;
-
-  const nodes = gsap.utils.toArray<HTMLElement>('.node', root);
-  const wires = gsap.utils.toArray<SVGPolylineElement>('.wire', root);
-
-  // hidden until their moment (loader covers the first beats)
-  tl.set(nodes, { autoAlpha: 0 }, 0);
-  tl.set(wires, { opacity: 0 }, 0);
-
-  tl.fromTo(nodes, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.08 }, at);
-
-  wires.forEach((w, i) => {
-    const len = w.getTotalLength();
-    tl.fromTo(
-      w,
-      { strokeDasharray: len, strokeDashoffset: len, opacity: 1 },
-      {
-        strokeDashoffset: 0,
-        duration: 0.5,
-        ease: 'power2.inOut',
-        onComplete: () => {
-          gsap.set(w, { clearProps: 'strokeDasharray,strokeDashoffset' });
-          w.classList.add('live'); // marching-ants current, CSS-driven
-        },
-      },
-      at + 0.3 + i * 0.12,
-    );
-  });
-
-  // acid packets travelling the wires, forever
-  tl.call(() => {
-    pulseTls.forEach((p) => p.kill()); // no duplicates after a rebuild
-    pulseTls = [];
-    PULSES.forEach(({ dot, path }, i) => {
-      const el = root.querySelector(dot);
-      if (!el) return;
-      const ptl = gsap.timeline({ repeat: -1, repeatDelay: 1.4, delay: i * 0.9 });
-      pulseTls.push(ptl);
-      ptl.set(el, { attr: { cx: path[0][0], cy: path[0][1] }, opacity: 1 });
-      for (let s = 1; s < path.length; s++) {
-        const dist = Math.hypot(path[s][0] - path[s - 1][0], path[s][1] - path[s - 1][1]);
-        ptl.to(el, { attr: { cx: path[s][0], cy: path[s][1] }, duration: dist / 130, ease: 'none' });
-      }
-      ptl.to(el, { opacity: 0, duration: 0.15 });
-    });
-  }, undefined, at + 1.1);
-}
-
 /* ---------------- intro ---------------- */
 
 function buildIntro(): gsap.core.Timeline | null {
@@ -233,9 +174,6 @@ function buildIntro(): gsap.core.Timeline | null {
 
   // phase 3 — headline types in
   typers.forEach((el, i) => typeIn(tl, el, 1.45 + i * 0.32));
-
-  // phase 3.5 — the system schematic wires itself up
-  schematicIntro(tl, 1.2);
 
   // phase 4 — polish: nav assembles, grid recedes to faint
   if (nav) tl.to(nav, { autoAlpha: 1, duration: 0.5 }, 2.4);
@@ -303,6 +241,51 @@ function initScrollFlourishes() {
   }
 }
 
+/* ---------------- page curtain (view transitions) ---------------- */
+
+const panels = () => gsap.utils.toArray<HTMLElement>('#curtain .curtain-panel');
+const curtainEl = () => document.querySelector<HTMLElement>('#curtain');
+
+function curtainCover(): Promise<void> {
+  return new Promise((resolve) => {
+    curtainEl()?.classList.add('active');
+    gsap.to(panels(), {
+      scaleY: 1,
+      duration: 0.42,
+      ease: 'power4.inOut',
+      stagger: 0.055,
+      onComplete: resolve,
+    });
+  });
+}
+
+function curtainReveal() {
+  const c = curtainEl();
+  if (!c || !c.classList.contains('active')) return;
+  gsap.to(panels(), {
+    scaleY: 0,
+    duration: 0.5,
+    ease: 'power4.inOut',
+    stagger: { each: 0.055, from: 'end' },
+    onComplete: () => c.classList.remove('active'),
+  });
+}
+
+/** Curtain wipes on link navigation — except project-card clicks, where the
+ *  image morphs into the next page's hero via a named view transition. */
+function initCurtain() {
+  document.addEventListener('astro:before-preparation', (e) => {
+    if (reduced) return;
+    const ev = e as Event & { sourceElement?: Element | null; loader: () => Promise<void> };
+    if (ev.sourceElement?.closest('[data-morph]')) return;
+    const load = ev.loader;
+    ev.loader = async () => {
+      await curtainCover();
+      await load();
+    };
+  });
+}
+
 /* ---------------- boot ---------------- */
 
 function runBoot(): gsap.core.Timeline {
@@ -314,13 +297,24 @@ function runBoot(): gsap.core.Timeline {
   return boot;
 }
 
-function init() {
+let booted = false;
+
+function pageInit() {
   if (reduced) {
     document.querySelector<HTMLElement>('#loader')?.remove();
     return; // final state already in the HTML — nothing else to do
   }
 
-  gsap.registerPlugin(ScrollTrigger);
+  if (booted) {
+    // client-side navigation — no loader replay, just drop the curtain
+    document.querySelector<HTMLElement>('#loader')?.remove();
+    curtainReveal();
+    initScrollAssembly();
+    initScrollFlourishes();
+    bindRebuild();
+    return;
+  }
+  booted = true;
 
   let boot = runBoot();
 
@@ -331,20 +325,31 @@ function init() {
   // so content is never blocked behind the intro
   initScrollAssembly();
   initScrollFlourishes();
+  bindRebuild(() => {
+    boot.kill();
+    boot = runBoot();
+  });
+}
 
-  // footer easter egg — rebuild the whole page, loader included
+// footer easter egg — rebuild the whole page, loader included
+function bindRebuild(rerun?: () => void) {
   document.querySelectorAll<HTMLElement>('[data-rebuild]').forEach((btn) =>
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: 'instant' });
-      boot.kill();
-      boot = runBoot();
+      if (rerun) rerun();
+      else location.reload();
     }),
   );
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+gsap.registerPlugin(ScrollTrigger);
+initCurtain();
+
+// stale triggers would fire against removed DOM after a swap
+document.addEventListener('astro:before-swap', () => {
+  ScrollTrigger.getAll().forEach((t) => t.kill());
+});
+
+// fires on first load and after every client-side navigation
+document.addEventListener('astro:page-load', pageInit);

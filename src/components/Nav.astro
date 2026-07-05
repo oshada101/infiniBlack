@@ -1,17 +1,14 @@
 ---
-const links = [
-  { href: '#services', label: 'Services', n: '01' },
-  { href: '#work', label: 'Work', n: '02' },
-  { href: '#process', label: 'Process', n: '03' },
-  { href: '#contact', label: 'Contact', n: '04' },
-];
+import { navLinks as links, socials } from '../data/site';
+
+const base = import.meta.env.BASE_URL;
 ---
 
-<header id="site-nav">
+<header id="site-nav" transition:persist="site-nav">
   <!-- mobile top bar -->
   <div class="card card-dark fixed inset-x-4 top-4 z-50 flex h-14 items-center justify-between px-5 lg:hidden">
-    <a href="#top" class="heading text-sm text-paper no-underline" aria-label="Infini Black — home">
-      INFINI<span class="text-acid">/</span>BLACK
+    <a href="/" class="block no-underline" aria-label="Infini Black — home">
+      <img src={`${base}logo-paper.png`} alt="infiniblack" class="h-4 w-auto" />
     </a>
     <button
       id="nav-toggle"
@@ -30,22 +27,26 @@ const links = [
   <div id="nav-menu" class="card card-dark fixed inset-x-4 top-[4.75rem] z-50 hidden p-3 lg:hidden" hidden>
     <ul class="flex flex-col gap-2">
       {
-        links.map(({ href, label, n }) => (
+        links.map(({ href, label, n, section }) => (
           <li>
             <a
               href={href}
               data-nav-close
-              class="card card-dark flex items-center justify-between px-5 py-4 no-underline transition-colors hover:bg-acid hover:text-ink active:bg-acid active:text-ink"
+              data-section={section}
+              class="nav-item card card-dark flex items-center justify-between px-5 py-4 no-underline"
             >
-              <span class="heading text-base">{label}</span>
-              <span class="label-mono text-acid">{n} ↗</span>
+              <span class="flex items-center gap-3">
+                <span class="nav-dot" aria-hidden="true" />
+                <span class="heading text-base">{label}</span>
+              </span>
+              <span class="label-mono text-acid">{n} <span class="nav-arrow inline-block">↗</span></span>
             </a>
           </li>
         ))
       }
       <li>
         <a
-          href="#contact"
+          href="/#contact"
           data-nav-close
           class="card card-acid flex items-center justify-between px-5 py-4 no-underline"
         >
@@ -53,26 +54,46 @@ const links = [
           <span class="font-mono text-xs">↳</span>
         </a>
       </li>
+      <li class="flex gap-2">
+        {
+          socials.map(({ href, label, path }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              class="nav-item card card-dark flex flex-1 items-center justify-center py-3 text-paper no-underline"
+            >
+              <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
+                <path d={path} />
+              </svg>
+            </a>
+          ))
+        }
+      </li>
     </ul>
   </div>
 
   <!-- desktop sidebar -->
   <aside class="fixed bottom-4 left-4 top-4 z-50 hidden w-40 flex-col gap-3 lg:flex">
-    <a href="#top" class="card card-paper block p-4 no-underline" aria-label="Infini Black — home">
-      <span class="heading block text-lg leading-none">INFINI<span class="block">BLACK<span class="text-ink">.</span></span></span>
-      <span class="label-mono mt-2 block">AI studio</span>
+    <a href="/" class="card card-paper block p-4 no-underline" aria-label="Infini Black — home">
+      <img src={`${base}logo-black.png`} alt="infiniblack" class="w-full" />
+      <span class="label-mono mt-3 block">AI studio</span>
     </a>
 
     {
-      links.map(({ href, label, n }) => (
+      links.map(({ href, label, n, section }) => (
         <a
           href={href}
-          data-flicker
-          class="card card-dark group flex flex-1 flex-col justify-between p-4 no-underline transition-colors hover:bg-acid hover:text-ink active:bg-acid active:text-ink"
+          data-section={section}
+          class="nav-item card card-dark group flex flex-1 flex-col justify-between p-4 no-underline"
         >
           <span class="flex items-center justify-between">
-            <span class="label-mono transition-colors group-hover:text-ink/60 group-active:text-ink/60">{n}</span>
-            <span class="font-mono text-[10px] text-acid transition-colors group-hover:text-ink group-active:text-ink">↗</span>
+            <span class="label-mono">{n}</span>
+            <span class="flex items-center gap-2">
+              <span class="nav-dot" aria-hidden="true" />
+              <span class="nav-arrow font-mono text-[10px] text-acid">↗</span>
+            </span>
           </span>
           <span class="heading text-sm">{label}</span>
         </a>
@@ -80,13 +101,31 @@ const links = [
     }
 
     <a
-      href="#contact"
+      href="/#contact"
       data-flicker
       class="card card-acid flex min-h-20 flex-col justify-between p-4 no-underline"
     >
       <span class="font-mono text-[10px]">↳</span>
       <span class="heading text-sm leading-tight">Start a build</span>
     </a>
+
+    <div class="flex gap-2" aria-label="Social links">
+      {
+        socials.map(({ href, label, path }) => (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={label}
+            class="nav-item card card-dark flex flex-1 items-center justify-center py-2.5 text-paper no-underline"
+          >
+            <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+              <path d={path} />
+            </svg>
+          </a>
+        ))
+      }
+    </div>
   </aside>
 </header>
 
@@ -109,4 +148,47 @@ const links = [
   menu.querySelectorAll('[data-nav-close]').forEach((a) =>
     a.addEventListener('click', () => setOpen(false)),
   );
+
+  /* ----- scroll spy: violet active state on the sidebar ----- */
+
+  const navLinks = Array.from(
+    document.querySelectorAll<HTMLElement>('#site-nav [data-section]'),
+  );
+  let spy: IntersectionObserver | null = null;
+
+  function setActive(section: string | null) {
+    navLinks.forEach((a) => {
+      if (a.dataset.section === section) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+  }
+
+  function initSpy() {
+    spy?.disconnect();
+    spy = null;
+    setOpen(false);
+
+    if (location.pathname.startsWith('/work')) {
+      // dedicated page — Work stays lit, no observing needed
+      setActive('work');
+      return;
+    }
+
+    setActive(null);
+    const sections = document.querySelectorAll<HTMLElement>('main section[id]');
+    if (!sections.length) return;
+
+    spy = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActive(e.target.id);
+        }
+      },
+      // section owning the middle band of the viewport wins
+      { rootMargin: '-45% 0px -45% 0px' },
+    );
+    sections.forEach((s) => spy!.observe(s));
+  }
+
+  document.addEventListener('astro:page-load', initSpy);
 </script>

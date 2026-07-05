@@ -1,11 +1,13 @@
 ---
+import { navLinks, socials } from '../data/site';
+
+const base = import.meta.env.BASE_URL;
 const year = new Date().getFullYear();
 // grid cells that "assembled themselves" — aligned to the 72px draft grid
 const cells = [
-  { top: 1, left: 4, acid: true },
-  { top: 3, left: 11, acid: true },
-  { top: 2, left: 8, acid: false },
-  { top: 4, left: 2, acid: false },
+  { top: 1, left: 10, acid: true },
+  { top: 2, left: 15, acid: true },
+  { top: 3, left: 6, acid: false },
 ];
 ---
 
@@ -14,22 +16,80 @@ const cells = [
     {
       cells.map(({ top, left, acid }) => (
         <div
-          class:list={['absolute h-[72px] w-[72px]', acid ? 'bg-acid/70' : 'bg-paper/10']}
+          class:list={[
+            'absolute h-[72px] w-[72px]',
+            acid ? 'border border-acid/50 bg-acid/10' : 'border border-paper/15 bg-paper/5',
+          ]}
           style={`top:${top * 72}px;left:${left * 72}px`}
           aria-hidden="true"
         />
       ))
     }
 
-    <div class="relative z-10 flex flex-wrap items-center justify-between gap-4">
-      <a
-        href="mailto:hello@infiniblack.com"
-        data-flicker
-        class="label-mono rounded-full bg-acid px-6 py-3.5 !text-ink no-underline transition-transform hover:scale-[1.03] active:scale-[0.98]"
-      >
-        hello@infiniblack.com ↳
-      </a>
-      <div class="flex flex-wrap items-center gap-3">
+    <div class="relative z-10 grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+      <!-- brand -->
+      <div>
+        <img src={`${base}logo-lime.png`} alt="infiniblack" class="h-6 w-auto md:h-7" loading="lazy" />
+        <p class="text-dim mt-4 max-w-xs">
+          AI systems, automation, websites and apps — designed, built and shipped.
+        </p>
+        <a
+          href="mailto:hello@infiniblack.com"
+          data-flicker
+          class="label-mono mt-6 inline-block rounded-full bg-acid px-6 py-3.5 !text-ink no-underline transition-transform hover:scale-[1.03] active:scale-[0.98]"
+        >
+          hello@infiniblack.com ↳
+        </a>
+      </div>
+
+      <!-- sitemap -->
+      <nav aria-label="Footer">
+        <p class="label-mono">Index</p>
+        <ul class="mt-4 flex flex-col gap-2">
+          {
+            navLinks.map(({ href, label, n }) => (
+              <li>
+                <a href={href} class="link-acid !text-paper">
+                  <span class="label-mono mr-2">{n}</span>
+                  {label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <!-- socials -->
+      <div>
+        <p class="label-mono">Elsewhere</p>
+        <ul class="mt-4 flex flex-col gap-2">
+          {
+            socials.map(({ href, label, path }) => (
+              <li>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-acid inline-flex items-center gap-2.5 !text-paper"
+                >
+                  <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true">
+                    <path d={path} />
+                  </svg>
+                  {label} ↗
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="draft-rule relative z-10 mt-10"></div>
+
+    <!-- bottom bar -->
+    <div class="relative z-10 mt-6 flex flex-wrap items-center justify-between gap-4">
+      <p class="label-mono">© {year} Infini Black — assembled by its own system</p>
+      <div class="flex items-center gap-3">
         <button
           type="button"
           data-rebuild
@@ -38,15 +98,13 @@ const cells = [
         >
           rebuild ↻
         </button>
-        <p class="label-mono">© {year} — assembled by its own system</p>
+        <a
+          href="#top"
+          class="label-mono rounded-full border border-line px-5 py-3 no-underline transition-colors hover:border-acid hover:text-acid active:border-acid"
+        >
+          top ↑
+        </a>
       </div>
     </div>
-
-    <p
-      class="heading relative z-10 mt-20 select-none whitespace-nowrap text-[13vw] leading-[0.78] lg:text-[10.5vw]"
-      aria-hidden="true"
-    >
-      INFINI<span class="text-acid">/</span>BLACK
-    </p>
   </div>
 </footer>

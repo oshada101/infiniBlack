@@ -1,11 +1,3 @@
----
-const stats = [
-  { n: '24', suf: '+', label: 'systems shipped' },
-  { n: '18k', suf: '+', label: 'hours automated / yr' },
-  { n: '100', suf: '%', label: 'built in-house' },
-];
----
-
 <section id="hero" class="relative" aria-label="Intro">
   <!-- skip control, only visible while the boot plays -->
   <button
@@ -16,10 +8,10 @@ const stats = [
     skip ↳
   </button>
 
-  <div class="grid gap-4 lg:min-h-[calc(100svh-2rem)] lg:grid-cols-3">
+  <div class="flex flex-col gap-4 lg:min-h-[calc(100svh-2rem)]">
     <!-- headline card -->
     <div
-      class="card card-acid draft-grid-dark relative flex flex-col justify-between gap-12 overflow-hidden p-7 md:p-12 lg:col-span-2"
+      class="card card-acid draft-grid-dark relative flex min-h-[58svh] flex-col justify-between gap-12 overflow-hidden p-7 md:p-12"
       data-piece="left"
     >
       <p class="label-mono">00 — Infini Black · AI studio</p>
@@ -45,62 +37,19 @@ const stats = [
       </div>
     </div>
 
-    <!-- side column -->
-    <div class="flex flex-col gap-4">
-      <!-- system schematic card -->
-      <div class="card card-dark relative flex flex-1 flex-col justify-between gap-6 p-6 md:p-7" data-piece="right">
-        <div class="flex items-center justify-between">
-          <p class="label-mono">sys/map</p>
-          <p class="font-mono text-[10px] text-acid">● live</p>
-        </div>
-        <div id="schematic" class="pointer-events-none w-full" aria-hidden="true">
-          <svg viewBox="0 0 420 260" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
-            <polyline id="w1" class="wire" points="112,22 210,22 210,100" />
-            <polyline id="w2" class="wire" points="112,230 210,230 210,156" />
-            <polyline id="w3" class="wire" points="270,120 359,120 359,42" />
-            <polyline id="w4" class="wire" points="270,136 359,136 359,210" />
-
-            <g class="node" id="n-brief">
-              <rect x="2" y="2" width="110" height="40" rx="12" stroke="rgba(244,244,242,0.3)" />
-              <text x="20" y="26" fill="rgba(244,244,242,0.6)" font-size="9" letter-spacing="2" font-family="Martian Mono Variable, monospace">BRIEF</text>
-            </g>
-            <g class="node" id="n-data">
-              <rect x="2" y="210" width="110" height="40" rx="12" stroke="rgba(244,244,242,0.3)" />
-              <text x="20" y="234" fill="rgba(244,244,242,0.6)" font-size="9" letter-spacing="2" font-family="Martian Mono Variable, monospace">DATA</text>
-            </g>
-            <g class="node" id="n-core">
-              <rect x="150" y="100" width="120" height="56" rx="16" fill="#B4FF39" />
-              <text x="168" y="132" fill="#000" font-size="10" letter-spacing="2" font-family="Martian Mono Variable, monospace">∞ CORE</text>
-            </g>
-            <g class="node" id="n-agents">
-              <rect x="300" y="2" width="118" height="40" rx="12" stroke="rgba(244,244,242,0.3)" />
-              <text x="318" y="26" fill="rgba(244,244,242,0.6)" font-size="9" letter-spacing="2" font-family="Martian Mono Variable, monospace">AGENTS</text>
-            </g>
-            <g class="node" id="n-ship">
-              <rect x="300" y="210" width="118" height="40" rx="12" stroke="rgba(244,244,242,0.3)" />
-              <text x="318" y="234" fill="rgba(244,244,242,0.6)" font-size="9" letter-spacing="2" font-family="Martian Mono Variable, monospace">SHIP</text>
-            </g>
-
-            <circle id="pulse1" cx="112" cy="22" r="2.5" fill="#B4FF39" opacity="0" />
-            <circle id="pulse2" cx="270" cy="136" r="2.5" fill="#B4FF39" opacity="0" />
-          </svg>
-        </div>
-        <p class="label-mono">every build runs through the core</p>
-      </div>
-
-      <!-- stats card -->
-      <div class="card card-paper grid grid-cols-3 gap-4 p-6 md:p-7" data-piece="right">
-        {
-          stats.map(({ n, suf, label }) => (
-            <div>
-              <p class="heading text-2xl md:text-3xl">
-                {n}<span class="opacity-40">{suf}</span>
-              </p>
-              <p class="label-mono mt-1.5 leading-relaxed">{label}</p>
-            </div>
-          ))
-        }
-      </div>
+    <!-- ribbon image card -->
+    <div
+      class="card card-dark relative min-h-[26svh] flex-1 overflow-hidden"
+      data-piece="up"
+    >
+      <img
+        src="/hero-ribbon.webp"
+        alt=""
+        class="absolute inset-0 h-full w-full object-cover object-left"
+        loading="eager"
+        decoding="async"
+      />
+      <p class="label-mono absolute bottom-5 right-6 z-10 text-paper/50">∞ / continuous build</p>
     </div>
   </div>
 </section>

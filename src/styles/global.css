@@ -4,6 +4,9 @@
   --color-ink: #000000;
   --color-paper: #f4f4f2;
   --color-acid: #b4ff39;
+  --color-violet: #8b5cf6;
+  --color-crimson: #ff4d6d; /* readable red for text/badges on ink */
+  --color-kartos: #c80f2e; /* Kartos brand red, surfaces */
   --color-line: rgba(244, 244, 242, 0.08);
   --color-dim: rgba(244, 244, 242, 0.55);
   --font-grotesk: "Archivo Variable", system-ui, sans-serif;
@@ -146,6 +149,20 @@ body::before {
   background: var(--color-paper);
   color: var(--color-ink);
 }
+.card-violet {
+  background: var(--color-violet);
+  color: var(--color-paper);
+}
+.card-violet .label-mono {
+  color: rgba(244, 244, 242, 0.75);
+}
+.card-crimson {
+  background: var(--color-kartos);
+  color: var(--color-paper);
+}
+.card-crimson .label-mono {
+  color: rgba(244, 244, 242, 0.75);
+}
 
 /* labels adapt to light cards */
 .card-acid .label-mono,
@@ -268,24 +285,6 @@ body::before {
   transform: scaleX(0);
 }
 
-/* ---------- schematic wires ---------- */
-
-.wire {
-  fill: none;
-  stroke: rgba(244, 244, 242, 0.22);
-  stroke-width: 1;
-}
-@keyframes wiredash {
-  to { stroke-dashoffset: -20; }
-}
-.wire.live {
-  stroke-dasharray: 3 7;
-  animation: wiredash 1.8s linear infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .wire.live { animation: none; }
-}
-
 /* ---------- re-assemble flicker (hover + tap, CSS-only) ---------- */
 
 @keyframes reassemble {
@@ -334,7 +333,183 @@ body::before {
   animation: caret-blink 1.1s steps(1) infinite;
 }
 
+/* ---------- sidebar nav items ---------- */
+
+/* diagonal acid->violet sweep fills the card on hover */
+.nav-item {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.nav-item::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  background: linear-gradient(115deg, var(--color-acid) 0%, var(--color-acid) 55%, var(--color-violet) 130%);
+  transform: translateX(-130%) skewX(-8deg) scaleX(1.2);
+  transform-origin: left center;
+  transition: transform 0.38s cubic-bezier(0.7, 0, 0.2, 1);
+}
+.nav-item:hover::before,
+.nav-item:active::before {
+  transform: translateX(0) skewX(0) scaleX(1.2);
+}
+.nav-item:hover,
+.nav-item:active {
+  color: var(--color-ink);
+}
+.nav-item:hover .label-mono,
+.nav-item:active .label-mono,
+.nav-item:hover .nav-arrow,
+.nav-item:active .nav-arrow {
+  color: rgba(0, 0, 0, 0.6);
+}
+.nav-item .nav-arrow {
+  transition: transform 0.38s cubic-bezier(0.7, 0, 0.2, 1);
+}
+.nav-item:hover .nav-arrow,
+.nav-item:active .nav-arrow {
+  transform: rotate(45deg) scale(1.25);
+}
+
+/* scroll-spy active state — violet takes over the card */
+.nav-item[aria-current] {
+  border-color: rgba(139, 92, 246, 0.65);
+  background:
+    linear-gradient(180deg, rgba(139, 92, 246, 0.16), rgba(139, 92, 246, 0.05)),
+    #121212;
+  box-shadow: inset 3px 0 0 var(--color-violet);
+}
+.nav-item[aria-current] .label-mono {
+  color: var(--color-violet);
+}
+.nav-item[aria-current] .nav-arrow {
+  color: var(--color-violet);
+}
+.nav-item[aria-current] .nav-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-violet);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.9);
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.3s, transform 0.3s;
+  animation: nav-dot-pulse 1.6s ease-in-out infinite;
+}
+@keyframes nav-dot-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(139, 92, 246, 0.5); }
+  50% { box-shadow: 0 0 12px rgba(139, 92, 246, 1); }
+}
+
+/* ---------- page curtain (view transitions) ---------- */
+
+#curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  pointer-events: none;
+  visibility: hidden;
+}
+#curtain.active {
+  visibility: visible;
+  pointer-events: all;
+}
+.curtain-panel {
+  flex: 1;
+  transform: scaleY(0);
+  will-change: transform;
+}
+.curtain-panel:nth-child(odd) { transform-origin: top center; }
+.curtain-panel:nth-child(even) { transform-origin: bottom center; }
+
+/* kill Astro's default crossfade — curtain owns the show */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ---------- project imagery ---------- */
+
+.project-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #0e0e0e;
+}
+.project-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.7s;
+  filter: saturate(0.85) contrast(1.02);
+}
+.project-card:hover .project-media img,
+.project-card:active .project-media img {
+  transform: scale(1.045);
+  filter: saturate(1.1) contrast(1.05);
+}
+/* scanline sweep across the image on hover */
+.project-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(180, 255, 57, 0.14) 50%, rgba(139, 92, 246, 0.14) 56%, transparent 66%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.project-card:hover .project-media::after,
+.project-card:active .project-media::after {
+  transition: transform 0.9s cubic-bezier(0.7, 0, 0.2, 1);
+  transform: translateX(120%);
+}
+
+/* status badges */
+.badge-shipped,
+.badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.badge-shipped {
+  border: 1px solid rgba(180, 255, 57, 0.5);
+  color: var(--color-acid);
+}
+.badge-live {
+  border: 1px solid rgba(255, 77, 109, 0.55);
+  color: var(--color-crimson);
+}
+.badge-live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-crimson);
+  animation: badge-pulse 1.6s ease-in-out infinite;
+}
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(255, 77, 109, 0.5); }
+  50% { box-shadow: 0 0 12px rgba(255, 77, 109, 1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .caret { animation: none; }
+  .nav-item::before { transition: none; }
+  .nav-dot, .badge-live::before { animation: none; }
+  .project-media img { transition: none; }
 }
