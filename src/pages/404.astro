@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="404 — INFINI BLACK" description="Page not found.">
+  <section class="flex min-h-[70vh] flex-col items-start justify-center gap-4 py-24">
+    <p class="font-mono text-sm text-acid">ERROR 404</p>
+    <h1 class="text-5xl font-bold tracking-tight text-paper sm:text-7xl">PAGE NOT FOUND</h1>
+    <p class="max-w-md text-paper/60">
+      Nothing built here yet. The path you followed doesn't exist.
+    </p>
+    <a
+      href={`${import.meta.env.BASE_URL}`}
+      class="mt-4 inline-block rounded-full border border-paper/20 px-6 py-3 font-mono text-sm text-paper transition hover:border-acid hover:text-acid"
+    >
+      BACK TO HOME
+    </a>
+  </section>
+</Layout>
