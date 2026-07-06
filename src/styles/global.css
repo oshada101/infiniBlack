@@ -285,20 +285,22 @@ body::before {
   transform: scaleX(0);
 }
 
-/* ---------- re-assemble flicker (hover + tap, CSS-only) ---------- */
+/* ---------- hover lift + acid glow (smooth, CSS-only) ---------- */
 
-@keyframes reassemble {
-  0%, 100% { transform: translate(0, 0); opacity: 1; box-shadow: none; }
-  15% { transform: translate(-2px, 1px); opacity: 0.45; box-shadow: 0 0 0 1px rgba(180, 255, 57, 0.55); }
-  30% { transform: translate(2px, -1px); opacity: 0.9; }
-  45% { transform: translate(-1px, 1px); opacity: 0.55; box-shadow: 0 0 0 1px rgba(180, 255, 57, 0.35); }
-  60% { transform: translate(0, 0); opacity: 1; }
+[data-flicker] {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    scale 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   [data-flicker]:hover,
   [data-flicker]:active {
-    animation: reassemble 0.3s linear;
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 1px rgba(180, 255, 57, 0.35),
+      0 8px 24px -8px rgba(180, 255, 57, 0.25);
   }
 }
 
