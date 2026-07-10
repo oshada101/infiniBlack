@@ -1,43 +1,30 @@
-# Astro Starter Kit: Minimal
+# Infini Black
 
-```sh
-npm create astro@latest -- --template minimal
-```
+**Infini Black** is an AI studio. We design, build, and ship AI systems, automation, websites, and apps — remote, worldwide.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Pitch: a studio that automates its own work first, then ships that same discipline for clients. Not demos — reasoning built on the client's actual data, pipelines that remove manual work end-to-end, sites and apps shipped production-grade.
 
-## 🚀 Project Structure
+**What we build:**
+- AI Systems — custom LLM products, agents, retrieval, evals
+- Automation — end-to-end pipelines
+- Websites — fast, precise marketing/product sites
+- Apps — web and mobile, production-grade
 
-Inside of your Astro project, you'll see the following folders and files:
+**How we work:** four-step process — Brief → Architecture → Build → Ship. Average brief-to-ship: 6 weeks. Short cycles, weekly demos, automated tests, docs + training on handover.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+**Track record:** Glorious Fitness Center (shipped gym website) and Kartos (in-progress gym management system).
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+**Contact:** hello@infiniblack.com, reply within 48h, no sales call. Currently taking Q3 2026 builds.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Design language
 
-Any static assets, like images, can be placed in the `public/` directory.
+Dark bento-grid layout (inspired by units.gr) skinned for Infini Black:
 
-## 🧞 Commands
+- **Ink black** background, **paper** text
+- **Acid green** (`#b4ff39`) and **violet** (`#8b5cf6`) as project/accent colors
+- Monospace labels, schematic/technical detailing, curtain page transitions
+- Glitch/flicker micro-interactions on hover, smooth lift instead of full glitch
 
-All commands are run from the root of the project, from a terminal:
+## Stack
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Astro 7 + Tailwind CSS v4 + GSAP, deployed static to GitHub Pages.
