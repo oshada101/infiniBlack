@@ -1,8 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Marquee from '../components/Marquee.astro';
+import ImageSlider from '../components/ImageSlider.astro';
 
 const base = import.meta.env.BASE_URL;
+
+const kratosSlides = [
+  { src: 'projects/kratos.png', alt: 'Kratos gym management system' },
+  { src: 'projects/kratos-1.png', alt: 'Kratos dashboard view' },
+  { src: 'projects/kratos-2.png', alt: 'Kratos member management' },
+  { src: 'projects/kratos-3.png', alt: 'Kratos billing and plans' },
+  { src: 'projects/kratos-4.png', alt: 'Kratos attendance tracking' },
+];
 ---
 
 <Layout
@@ -31,7 +40,7 @@ const base = import.meta.env.BASE_URL;
     <article class="card card-dark draft-corners overflow-hidden">
       <div class="project-card group" data-piece="scale">
         <div class="project-media aspect-[16/8] rounded-b-none" transition:name="media-glorious">
-          <img src={`${base}projects/glorious.webp`} alt="Glorious Fitness Center website" />
+          <video src={`${base}projects/glorious.mp4`} autoplay loop muted playsinline class="h-full w-full object-cover" poster={`${base}projects/glorious.webp`} data-autoplay />
         </div>
       </div>
 
@@ -94,12 +103,12 @@ const base = import.meta.env.BASE_URL;
     </article>
   </section>
 
-  <!-- 02 — Kartos -->
-  <section id="kartos" class="relative" data-assemble aria-label="Kartos">
+  <!-- 02 — Kratos -->
+  <section id="kratos" class="relative" data-assemble aria-label="Kratos">
     <article class="card card-dark draft-corners overflow-hidden">
       <div class="project-card group" data-piece="scale">
-        <div class="project-media aspect-[16/8] rounded-b-none" transition:name="media-kartos">
-          <img src={`${base}projects/kartos.webp`} alt="Kartos gym management system" />
+        <div class="project-media aspect-[16/8] rounded-b-none" transition:name="media-kratos">
+          <ImageSlider slides={kratosSlides} />
         </div>
       </div>
 
@@ -109,7 +118,7 @@ const base = import.meta.env.BASE_URL;
             <p class="label-mono text-crimson">W/02</p>
             <span class="badge-live">In progress</span>
           </div>
-          <h2 class="heading mt-4 text-3xl md:text-5xl">Kartos</h2>
+          <h2 class="heading mt-4 text-3xl md:text-5xl">Kratos</h2>
           <p class="text-dim mt-4 max-w-xl text-lg">
             Gym management system in active development — member profiles, plans and
             billing, attendance tracking and staff tools in one dashboard.

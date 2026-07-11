@@ -215,6 +215,20 @@ function initScrollAssembly() {
   });
 }
 
+/* ---------------- video autoplay ---------------- */
+
+function initVideos() {
+  const videos = document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]');
+  videos.forEach((v) => {
+    const p = v.play();
+    if (p && p.catch) p.catch(() => {
+      const start = () => { v.play(); document.removeEventListener('click', start); document.removeEventListener('touchstart', start); };
+      document.addEventListener('click', start);
+      document.addEventListener('touchstart', start);
+    });
+  });
+}
+
 /* ---------------- scroll flourishes ---------------- */
 
 function initScrollFlourishes() {
@@ -309,12 +323,14 @@ function pageInit() {
     // client-side navigation — no loader replay, just drop the curtain
     document.querySelector<HTMLElement>('#loader')?.remove();
     curtainReveal();
+    initVideos();
     initScrollAssembly();
     initScrollFlourishes();
     bindRebuild();
     return;
   }
   booted = true;
+  initVideos();
 
   let boot = runBoot();
 
