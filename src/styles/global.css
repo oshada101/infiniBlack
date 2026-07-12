@@ -6,7 +6,7 @@
   --color-acid: #b4ff39;
   --color-violet: #8b5cf6;
   --color-crimson: #ff4d6d; /* readable red for text/badges on ink */
-  --color-kartos: #c80f2e; /* Kartos brand red, surfaces */
+  --color-kratos: #c80f2e; /* Kratos brand red, surfaces */
   --color-line: rgba(244, 244, 242, 0.08);
   --color-dim: rgba(244, 244, 242, 0.55);
   --font-grotesk: "Archivo Variable", system-ui, sans-serif;
@@ -157,7 +157,7 @@ body::before {
   color: rgba(244, 244, 242, 0.75);
 }
 .card-crimson {
-  background: var(--color-kartos);
+  background: var(--color-kratos);
   color: var(--color-paper);
 }
 .card-crimson .label-mono {
