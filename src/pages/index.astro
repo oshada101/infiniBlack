@@ -1,152 +1,25 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Work from '../components/Work.astro';
+import Loader from '../components/Loader.astro';
 
 const base = import.meta.env.BASE_URL;
 ---
 
 <Layout>
   <!-- ===== PAGE ===== -->
-  <main class="page">
-    <!-- nav -->
-    <nav class="nav">
-      <a class="nav__word" href="#"><img class="nav__logo" src={`${base}logo-black.png`} alt="infiniblack" /></a>
-      <div class="nav__links">
-        <a class="is-active" href="#">Home</a>
-        <a href="#services">Services</a>
-        <a href="#work">Work</a>
-      </div>
-      <div class="nav__right">
-        <a href="#">Contact Us</a>
-      </div>
-    </nav>
-
-    <!-- hero: one viewport tall; video fills whatever space the text doesn't use -->
-    <div class="hero">
-      <div class="hero-media">
-        <video src={`${base}hero.mp4`} autoplay muted loop playsinline preload="auto"></video>
-      </div>
-
-      <div class="hero-copy">
-        <h1 class="hero-copy__title">An engineering powerhouse shipping software that actually works</h1>
-        <p class="hero-copy__body">infiniblack is a product engineering studio. AI systems and complete web, mobile, and desktop products. designed by one team, engineered for the years they'll actually run.</p>
-      </div>
-    </div>
-
-    <!-- work: featured projects -->
-    <section class="work" id="work">
-      <h2 class="section-title">Featured Work</h2>
-
-      <div class="work-list">
-        <article class="work-item">
-          <a class="work-item__media work-item__media--hover-video" href="#">
-            <img class="work-item__media-img" src={`${base}projects/glorious.webp`} alt="Glorious Fitness Center" />
-            <video class="work-item__media-video" src={`${base}projects/glorious.mp4`} muted loop playsinline preload="metadata"></video>
-            <span class="work-item__tooltip">[View Project]</span>
-          </a>
-          <div class="work-item__info">
-            <div class="work-item__info-top">
-              <div class="work-item__info-lead">
-                <p class="work-item__desc">Full marketing site for a fitness center — programs, trainers, memberships.</p>
-                <span class="work-item__status is-live"><span class="work-item__status-dot"></span>Shipped</span>
-              </div>
-              <h3 class="work-item__title"><a href="#">Glorious Fitness Center</a></h3>
-            </div>
-            <ul class="work-item__tags">
-              <li>Marketing Site</li>
-              <li>Fitness</li>
-              <li>2025</li>
-            </ul>
-          </div>
-        </article>
-
-        <article class="work-item">
-          <a class="work-item__media" href="#">
-            <img src={`${base}projects/kratos.png`} alt="Kratos gym management system" style="width:100%;height:100%;object-fit:cover;" />
-            <span class="work-item__tooltip">[View Project]</span>
-          </a>
-          <div class="work-item__info">
-            <div class="work-item__info-top">
-              <div class="work-item__info-lead">
-                <p class="work-item__desc">Gym management system — members, billing, attendance, one dashboard.</p>
-                <span class="work-item__status is-production"><span class="work-item__status-dot"></span>In Progress</span>
-              </div>
-              <h3 class="work-item__title"><a href="#">Kratos</a></h3>
-            </div>
-            <ul class="work-item__tags">
-              <li>Dashboard</li>
-              <li>Gym Management</li>
-              <li>Ongoing</li>
-            </ul>
-          </div>
-        </article>
-      </div>
-    </section>
+  <main class="page relative min-h-screen flex flex-col text-white bg-ink">
+    <Nav base={base} />
+    <Hero base={base} />
+    <Work base={base} />
   </main>
 
-  <!-- ===== CURTAIN / LOADER OVERLAY ===== -->
-  <div class="curtain" id="curtain">
-    <div class="curtain__half curtain__half--left"></div>
-    <div class="curtain__half curtain__half--right"></div>
-    <div class="seam seam--top"></div>
-    <div class="seam seam--bottom"></div>
-
-    <div class="loader-wrap">
-      <div class="loader" role="status" aria-label="Loading">
-        <svg viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <clipPath id="diamond" clipPathUnits="userSpaceOnUse">
-              <path id="clipShape"
-                    d="M 54 81 L 54 81 Q 58 85 54 89 L 54 89 Q 50 93 46 89 L 46 89 Q 42 85 46 81 L 46 81 Q 50 77 54 81 Z">
-                <animate attributeName="d" begin="0.16s" dur="0.9s" fill="freeze"
-                         calcMode="spline" keyTimes="0;1" keySplines="0.16 1 0.3 1"
-                         values="M 54 81 L 54 81 Q 58 85 54 89 L 54 89 Q 50 93 46 89 L 46 89 Q 42 85 46 81 L 46 81 Q 50 77 54 81 Z;
-                                 M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z"/>
-              </path>
-            </clipPath>
-
-            <filter id="goo" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="11"/>
-            </filter>
-
-            <radialGradient id="gCoral"   cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff6a37" stop-opacity="1"/><stop offset="55%" stop-color="#ff6a37" stop-opacity=".85"/><stop offset="100%" stop-color="#ff6a37" stop-opacity="0"/></radialGradient>
-            <radialGradient id="gOrange"  cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff9a2e" stop-opacity="1"/><stop offset="55%" stop-color="#ff9a2e" stop-opacity=".85"/><stop offset="100%" stop-color="#ff9a2e" stop-opacity="0"/></radialGradient>
-            <radialGradient id="gPurple"  cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#9a5cff" stop-opacity="1"/><stop offset="55%" stop-color="#9a5cff" stop-opacity=".85"/><stop offset="100%" stop-color="#9a5cff" stop-opacity="0"/></radialGradient>
-            <radialGradient id="gBlue"    cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3f6bff" stop-opacity="1"/><stop offset="55%" stop-color="#3f6bff" stop-opacity=".85"/><stop offset="100%" stop-color="#3f6bff" stop-opacity="0"/></radialGradient>
-            <radialGradient id="gMagenta" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff3f9a" stop-opacity="1"/><stop offset="55%" stop-color="#ff3f9a" stop-opacity=".85"/><stop offset="100%" stop-color="#ff3f9a" stop-opacity="0"/></radialGradient>
-          </defs>
-
-          <g clip-path="url(#diamond)" opacity="0">
-            <animate attributeName="opacity" from="0" to="1" begin="0s" dur="0.2s" fill="freeze"/>
-            <rect x="0" y="0" width="100" height="170" fill="#fff"/>
-            <g filter="url(#goo)" opacity="0">
-              <animate attributeName="opacity" from="0" to="1" begin="0.8s" dur="0.5s" fill="freeze"/>
-              <circle class="blob b1" cx="50" cy="66"  r="38" fill="url(#gCoral)"/>
-              <circle class="blob b2" cx="50" cy="104" r="38" fill="url(#gPurple)"/>
-              <circle class="blob b3" cx="50" cy="58"  r="34" fill="url(#gBlue)"/>
-              <circle class="blob b4" cx="50" cy="112" r="32" fill="url(#gMagenta)"/>
-              <circle class="blob b5" cx="50" cy="85"  r="34" fill="url(#gOrange)"/>
-            </g>
-          </g>
-        </svg>
-      </div>
-    </div>
-  </div>
+  <Loader />
 </Layout>
 
 <script>
-  // How long the diamond shows before the cut + curtain open (from load).
-  const REVEAL_AT = 2600; // ms
-
-  const curtain = document.getElementById('curtain');
-
-  // .reveal drives the CSS sequence via transition-delays:
-  //   cut (fluid dissolves, hole opens) 0s -> seam draws .28s -> curtains part .95s
-  window.addEventListener('load', () => {
-    if (!curtain) return;
-    setTimeout(() => curtain.classList.add('reveal'), REVEAL_AT);
-    setTimeout(() => curtain.remove(), REVEAL_AT + 1900);
-  });
-
   // nav is solid over the hero video, transparent once scrolled past it
   const nav = document.querySelector('.nav');
   const heroMedia = document.querySelector('.hero-media');
@@ -184,34 +57,4 @@ const base = import.meta.env.BASE_URL;
     window.addEventListener('scroll', syncSpy, { passive: true });
     window.addEventListener('resize', syncSpy);
   }
-
-  // keep the stacking cards pinned right below the sticky "Featured Work"
-  // title — measure its height (fluid font, so it changes on resize).
-  const workTitle = document.querySelector('.work .section-title');
-  if (workTitle) {
-    const syncTitleHeight = () =>
-      document.documentElement.style.setProperty('--work-title-h', (workTitle as HTMLElement).offsetHeight + 'px');
-    syncTitleHeight();
-    window.addEventListener('resize', syncTitleHeight);
-  }
-
-  // hover-to-play: pauses in place on mouseleave, no rewind
-  document.querySelectorAll('.work-item__media--hover-video').forEach((el) => {
-    const video = el.querySelector('video');
-    if (!video) return;
-    el.addEventListener('mouseenter', () => video.play());
-    el.addEventListener('mouseleave', () => video.pause());
-  });
-
-  // tooltip follows the cursor while hovering a project's media
-  document.querySelectorAll('.work-item__media').forEach((el) => {
-    const tooltip = el.querySelector('.work-item__tooltip') as HTMLElement | null;
-    if (!tooltip) return;
-    el.addEventListener('mousemove', (e) => {
-      const rect = (el as HTMLElement).getBoundingClientRect();
-      const x = (e as MouseEvent).clientX - rect.left + 14;
-      const y = (e as MouseEvent).clientY - rect.top + 14;
-      tooltip.style.transform = `translate(${x}px, ${y}px)`;
-    });
-  });
 </script>

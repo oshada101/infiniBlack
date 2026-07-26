@@ -1,0 +1,20 @@
+---
+interface Props {
+  base: string;
+}
+
+const { base } = Astro.props;
+---
+
+<!-- nav -->
+<nav class="nav fixed inset-x-0 top-0 z-[3] flex items-center justify-between h-9 px-[clamp(8px,1.2vw,18px)] shadow-[0_1px_0_rgba(255,255,255,.08)]">
+  <a class="nav__word flex items-center" href="#"><img class="nav__logo h-4 w-auto block invert" src={`${base}logo-black.png`} alt="infiniblack" /></a>
+  <div class="nav__links flex items-center gap-[clamp(18px,2.4vw,34px)] max-[860px]:hidden">
+    <a class="is-active text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white" href="#">Home</a>
+    <a class="text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white" href="#services">Services</a>
+    <a class="text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white" href="#work">Work</a>
+  </div>
+  <div class="nav__right flex items-center gap-4">
+    <a class="text-white no-underline text-[.78rem] font-medium" href="#">Contact Us</a>
+  </div>
+</nav>

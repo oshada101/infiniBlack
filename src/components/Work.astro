@@ -1,0 +1,94 @@
+---
+import { workItems } from '../data/site';
+
+interface Props {
+  base: string;
+}
+
+const { base } = Astro.props;
+---
+
+<!-- work: featured projects -->
+<section class="work pt-[clamp(80px,12vh,140px)] px-[clamp(16px,4vw,48px)] pb-[clamp(40px,6vh,80px)] border-t border-[rgba(255,255,255,.08)]" id="work">
+  <h2 class="section-title text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Featured Work</h2>
+
+  <div class="work-list relative mt-[clamp(24px,4vh,40px)]">
+    {workItems.map((item) => (
+      <article class="work-item flex flex-wrap gap-[clamp(24px,3vw,48px)] py-[clamp(28px,4vh,48px)] shadow-[0_-1px_0_rgba(255,255,255,.12)]">
+        {item.media.kind === 'hover-video' ? (
+          <a
+            class="work-item__media work-item__media--hover-video group relative flex-[1_1_55%] min-w-[280px] aspect-video border border-[rgba(255,255,255,.1)] flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
+            href={item.href}
+          >
+            <img
+              class="work-item__media-img absolute inset-0 w-full h-full object-cover [transition:opacity_.2s_ease] group-hover:opacity-0"
+              src={`${base}${item.media.img.src}`}
+              alt={item.media.img.alt}
+            />
+            <video
+              class="work-item__media-video absolute inset-0 w-full h-full object-cover opacity-0 [transition:opacity_.2s_ease] group-hover:opacity-100"
+              src={`${base}${item.media.video.src}`}
+              muted
+              loop
+              playsinline
+              preload="metadata"
+            ></video>
+            <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
+          </a>
+        ) : (
+          <a
+            class="work-item__media group relative flex-[1_1_55%] min-w-[280px] aspect-video border border-[rgba(255,255,255,.1)] flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
+            href={item.href}
+          >
+            <img src={`${base}${item.media.img.src}`} alt={item.media.img.alt} style={item.media.img.style} />
+            <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
+          </a>
+        )}
+        <div class="work-item__info flex-[1_1_35%] min-w-[240px] flex flex-col justify-between gap-[clamp(24px,4vh,48px)] bg-ink">
+          <div class="work-item__info-top flex justify-between items-start gap-[clamp(12px,1.6vw,32px)]">
+            <div class="work-item__info-lead flex flex-col min-w-0">
+              <p class="work-item__desc text-[1.2rem] font-semibold leading-[1.3] text-grey-100 tracking-[-.01em] max-w-[34ch] text-pretty">{item.desc}</p>
+              <span class={`work-item__status ${item.statusClass} inline-flex items-center gap-[7px] w-fit mt-[clamp(10px,1.6vh,16px)] px-[10px] py-1 border border-[rgba(255,255,255,.25)] text-[.72rem] font-semibold uppercase tracking-[.06em] text-white`}><span class="work-item__status-dot w-1.5 h-1.5 bg-white"></span>{item.statusLabel}</span>
+            </div>
+            <h3 class="work-item__title flex-initial text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-white tracking-[-.015em] leading-[1.05] text-right text-balance"><a class="text-inherit no-underline hover:underline hover:[text-underline-offset:.12em]" href={item.href}>{item.title}</a></h3>
+          </div>
+          <ul class="work-item__tags list-none">
+            {item.tags.map((tag) => <li class="text-[.82rem] font-semibold uppercase tracking-[.08em] text-grey-300 leading-[1.9]">{tag}</li>)}
+          </ul>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  // keep the stacking cards pinned right below the sticky "Featured Work"
+  // title — measure its height (fluid font, so it changes on resize).
+  const workTitle = document.querySelector('.work .section-title');
+  if (workTitle) {
+    const syncTitleHeight = () =>
+      document.documentElement.style.setProperty('--work-title-h', (workTitle as HTMLElement).offsetHeight + 'px');
+    syncTitleHeight();
+    window.addEventListener('resize', syncTitleHeight);
+  }
+
+  // hover-to-play: pauses in place on mouseleave, no rewind
+  document.querySelectorAll('.work-item__media--hover-video').forEach((el) => {
+    const video = el.querySelector('video');
+    if (!video) return;
+    el.addEventListener('mouseenter', () => video.play());
+    el.addEventListener('mouseleave', () => video.pause());
+  });
+
+  // tooltip follows the cursor while hovering a project's media
+  document.querySelectorAll('.work-item__media').forEach((el) => {
+    const tooltip = el.querySelector('.work-item__tooltip') as HTMLElement | null;
+    if (!tooltip) return;
+    el.addEventListener('mousemove', (e) => {
+      const rect = (el as HTMLElement).getBoundingClientRect();
+      const x = (e as MouseEvent).clientX - rect.left + 14;
+      const y = (e as MouseEvent).clientY - rect.top + 14;
+      tooltip.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  });
+</script>
