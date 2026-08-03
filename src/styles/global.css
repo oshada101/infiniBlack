@@ -158,10 +158,80 @@ html {
   backdrop-filter: blur(2px);
 }
 
-.work-item__status.is-production .work-item__status-dot {
-  background: transparent;
-  border: 1px solid #fff;
+/* --- the masthead ------------------------------------------------------ *
+ *  Standfirst and project name sit on one baseline and share a bottom edge.
+ *  Without that closing rule the two blocks float, and their opposed ragged
+ *  edges read as interference down the middle of the column; with it, the
+ *  gutter is a gutter. Quiet on purpose — the phase track below is where
+ *  this section spends itself.
+ * ------------------------------------------------------------------------ */
+.work-item__masthead {
+  padding-bottom: clamp(14px, 2vh, 22px);
+  border-bottom: 1px solid rgba(255, 255, 255, .14);
 }
+
+/* --- the phase track --------------------------------------------------- *
+ *  The status was a bordered pill: a component that says "shipped" and
+ *  nothing more. As a segmented rule it says how far, in a shape you can
+ *  compare between two cards without reading either label. Same 2px/6px
+ *  metrics as the contact ticks — one device, two sections.
+ * ------------------------------------------------------------------------ */
+.work-item__foot {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.6vh, 30px);
+}
+
+.work-item__phase-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.work-item__phase-seg {
+  position: relative;
+  height: 2px;
+  background: rgba(255, 255, 255, .16);
+}
+
+/* the fill is a child so the unfilled track stays visible under it — the
+   remaining phases are as much of the message as the completed ones */
+.work-item__phase-seg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #ff5a2a;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* runs once, when the card first reaches the viewport: the segments land
+   left to right, so the rule draws itself in the order the work happened */
+.work-item__phase.is-in-view .work-item__phase-seg.is-done::after {
+  animation: work-phase-fill .45s cubic-bezier(.2, 0, .2, 1) forwards;
+  animation-delay: calc(var(--i) * 90ms);
+}
+
+@keyframes work-phase-fill {
+  to { transform: scaleX(1); }
+}
+
+.work-item__phase-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.work-item__phase-now { color: #fff; }
+.work-item__phase-count { color: #8a8a92; font-variant-numeric: tabular-nums; }
 
 /* --- contact ----------------------------------------------------------- *
  *  The closing screen: one statement, two full-bleed action rows, a
@@ -768,4 +838,10 @@ html {
     margin-bottom: 0;
   }
   .work-list__hold { height: clamp(40px, 6vh, 80px); }
+
+  /* the track carries real data, so it arrives filled rather than not at all */
+  .work-item__phase-seg.is-done::after {
+    transform: scaleX(1);
+    animation: none;
+  }
 }

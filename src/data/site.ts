@@ -69,10 +69,18 @@ export interface WorkItemMediaImage {
   img: { src: string; alt: string; style: string };
 }
 
+/* The studio's pipeline, in order. The track under each work card fills to
+   the project's current phase, so "how far along is this" is legible from
+   the length of one rule instead of from the wording of a label. Adding a
+   phase here re-segments every track; nothing else needs to change. */
+export const workPhases = ['Scope', 'Design', 'Build', 'Ship'] as const;
+
 export interface WorkItem {
   href: string;
   desc: string;
-  statusClass: 'is-live' | 'is-production';
+  /** phases completed, 1..workPhases.length. Full length = shipped. */
+  phase: number;
+  /** names the phase the project is *in*, shown beside the track */
   statusLabel: string;
   title: string;
   tags: string[];
@@ -83,7 +91,7 @@ export const workItems: WorkItem[] = [
   {
     href: '#',
     desc: 'Full marketing site for a fitness center — programs, trainers, memberships.',
-    statusClass: 'is-live',
+    phase: 4,
     statusLabel: 'Shipped',
     title: 'Glorious Fitness Center',
     tags: ['Marketing Site', 'Fitness', '2025'],
@@ -96,8 +104,8 @@ export const workItems: WorkItem[] = [
   {
     href: '#',
     desc: 'Gym management system — members, billing, attendance, one dashboard.',
-    statusClass: 'is-production',
-    statusLabel: 'In Progress',
+    phase: 3,
+    statusLabel: 'In Build',
     title: 'Kratos',
     tags: ['Dashboard', 'Gym Management', 'Ongoing'],
     media: {

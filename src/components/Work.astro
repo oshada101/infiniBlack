@@ -1,5 +1,7 @@
 ---
-import { workItems } from '../data/site';
+import { workItems, workPhases } from '../data/site';
+
+const pad = (n: number) => String(n).padStart(2, '0');
 
 interface Props {
   base: string;
@@ -45,16 +47,33 @@ const { base } = Astro.props;
           </a>
         )}
         <div class="work-item__info flex-[1_1_35%] min-w-[240px] flex flex-col justify-between gap-[clamp(24px,4vh,48px)] bg-ink">
-          <div class="work-item__info-top flex justify-between items-start gap-[clamp(12px,1.6vw,32px)]">
-            <div class="work-item__info-lead flex flex-col min-w-0">
-              <p class="work-item__desc text-[1.2rem] font-semibold leading-[1.3] text-grey-100 tracking-[-.01em] max-w-[34ch] text-pretty">{item.desc}</p>
-              <span class={`work-item__status ${item.statusClass} inline-flex items-center gap-[7px] w-fit mt-[clamp(10px,1.6vh,16px)] px-[10px] py-1 border border-[rgba(255,255,255,.25)] text-[.72rem] font-semibold uppercase tracking-[.06em] text-white`}><span class="work-item__status-dot w-1.5 h-1.5 bg-white"></span>{item.statusLabel}</span>
-            </div>
+          {/* masthead: standfirst left, name right, closed by a hairline. The
+              shared bottom edge is what stops the two ragged edges reading as
+              a jagged channel — same trick a newspaper nameplate uses. */}
+          <div class="work-item__masthead flex justify-between items-start gap-[clamp(20px,2.6vw,52px)]">
+            <p class="work-item__desc min-w-0 text-[1.15rem] font-normal leading-[1.4] text-grey-200 max-w-[30ch] text-pretty">{item.desc}</p>
             <h3 class="work-item__title flex-initial text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-white tracking-[-.015em] leading-[1.05] text-right text-balance"><a class="text-inherit no-underline hover:underline hover:[text-underline-offset:.12em]" href={item.href}>{item.title}</a></h3>
           </div>
-          <ul class="work-item__tags list-none">
-            {item.tags.map((tag) => <li class="text-[.82rem] font-semibold uppercase tracking-[.08em] text-grey-300 leading-[1.9]">{tag}</li>)}
-          </ul>
+
+          <div class="work-item__foot">
+            <ul class="work-item__tags list-none">
+              {item.tags.map((tag) => <li class="text-[.82rem] font-semibold uppercase tracking-[.08em] text-grey-300 leading-[1.9]">{tag}</li>)}
+            </ul>
+
+            {/* the section's one bold stroke, and its only colour: how far the
+                project got, at the length of a rule. */}
+            <div class="work-item__phase" aria-label={`${item.statusLabel} — phase ${item.phase} of ${workPhases.length}`}>
+              <ol class="work-item__phase-track list-none">
+                {workPhases.map((phase, i) => (
+                  <li class={`work-item__phase-seg${i < item.phase ? ' is-done' : ''}`} style={`--i:${i}`} title={phase}></li>
+                ))}
+              </ol>
+              <p class="work-item__phase-meta">
+                <span class="work-item__phase-now">{item.statusLabel}</span>
+                <span class="work-item__phase-count">{pad(item.phase)} / {pad(workPhases.length)}</span>
+              </p>
+            </div>
+          </div>
         </div>
       </article>
     ))}
@@ -117,6 +136,25 @@ const { base } = Astro.props;
       syncRelease();
     });
     window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  /* draw each phase track once, when its card arrives. Unobserved after it
+     fires: the cards are sticky and cross the viewport edge repeatedly, and
+     a rule that redraws every time you scroll past is a fidget, not a
+     reveal. */
+  const phaseTracks = document.querySelectorAll('.work-item__phase');
+  if (phaseTracks.length) {
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in-view');
+          obs.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.6 },
+    );
+    phaseTracks.forEach((el) => io.observe(el));
   }
 
   // hover-to-play: pauses in place on mouseleave, no rewind
