@@ -24,6 +24,12 @@ const marks: Record<string, { d: string; fill?: boolean }[]> = {
     { d: 'M28 12 32.7 20 28 28 23.3 20Z' },
     { d: 'M20 22 24.7 30 20 38 15.3 30Z' },
   ],
+  // the diamond's own right edge, repeated outwards — a signal leaving it
+  marketing: [
+    { d: 'M14 5 22.8 20 14 35 5.2 20Z' },
+    { d: 'M26.5 9 33 20 26.5 31' },
+    { d: 'M35 13 38.5 20 35 27' },
+  ],
 };
 ---
 
@@ -89,7 +95,7 @@ const marks: Record<string, { d: string; fill?: boolean }[]> = {
     </article>
   )}
 
-  <div class="grid grid-cols-3 gap-[clamp(12px,1.4vw,18px)] mt-[clamp(12px,1.4vw,18px)] max-[860px]:grid-cols-1">
+  <div class="grid grid-cols-4 gap-[clamp(12px,1.4vw,18px)] mt-[clamp(12px,1.4vw,18px)] max-[1200px]:grid-cols-2 max-[860px]:grid-cols-1">
     {rest.map((service) => (
       <article class="services-card flex flex-col p-[clamp(22px,2.4vw,36px)]">
         <svg
@@ -99,6 +105,7 @@ const marks: Record<string, { d: string; fill?: boolean }[]> = {
           stroke="#f2f2f2"
           stroke-width="1.4"
           stroke-linejoin="round"
+          stroke-linecap="round"
           aria-hidden="true"
         >
           {marks[service.icon].map((m) => <path d={m.d} fill={m.fill ? '#f2f2f2' : 'none'} />)}

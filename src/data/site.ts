@@ -6,7 +6,7 @@ export interface Service {
   title: string;
   desc: string;
   /** selects one of the inline marks drawn in Services.astro */
-  icon: 'ai' | 'websites' | 'apps' | 'business';
+  icon: 'ai' | 'websites' | 'apps' | 'business' | 'marketing';
   /** short examples, shown as pills on the grid cards */
   tags?: string[];
   /** worked examples for the featured banner, which is too wide for pills */
@@ -47,6 +47,12 @@ export const services: Service[] = [
     desc: 'Members, billing, staff, stock — run it all in one place instead of ten spreadsheets.',
     tags: ['Dashboards', 'Billing', 'Reports'],
     icon: 'business',
+  },
+  {
+    title: 'Marketing',
+    desc: 'Built is only half of it. Search, ads, and content that put you in front of people already looking for what you do.',
+    tags: ['Google ranking', 'Paid ads', 'Social content'],
+    icon: 'marketing',
   },
 ];
 
