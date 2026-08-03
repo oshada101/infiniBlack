@@ -259,15 +259,25 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
 
   if (reasonList && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const items = [...reasonList.querySelectorAll('.contact-why__item')];
+    const tickRow = document.querySelector('.contact-why__ticks');
     const ticks = [...document.querySelectorAll('.contact-why__tick')];
+
+    // the fill animation's duration is the interval — read it back out of
+    // the stylesheet so there is one number, not two that can drift apart
+    const raw = tickRow ? getComputedStyle(tickRow).getPropertyValue('--cycle').trim() : '';
+    const cycle = raw.endsWith('ms') ? parseFloat(raw) : raw.endsWith('s') ? parseFloat(raw) * 1000 : 4200;
+
     let current = 0;
 
     if (items.length > 1) {
       setInterval(() => {
         current = (current + 1) % items.length;
         items.forEach((el, i) => el.classList.toggle('is-current', i === current));
-        ticks.forEach((el, i) => el.classList.toggle('is-current', i === current));
-      }, 4200);
+        ticks.forEach((el, i) => {
+          el.classList.toggle('is-current', i === current);
+          el.classList.toggle('is-done', i < current);
+        });
+      }, cycle);
     }
   }
 

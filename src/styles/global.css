@@ -162,19 +162,51 @@ html {
   width: clamp(260px, 30vw, 400px);
 }
 
+/* --- the ticks --- *
+ *  Each one is a track that fills over exactly one cycle, so the row is a
+ *  countdown to the next line as well as a position in the list. --cycle
+ *  is the single source of truth for the timing: the script reads it back
+ *  out rather than holding its own copy, so the bar can't drift out of
+ *  step with the rotation. Written in ms, but the minifier ships it as
+ *  "4.2s" — which is why the script parses the unit instead of trusting
+ *  parseFloat. */
 .contact-why__ticks {
+  --cycle: 4200ms;
   display: flex;
   gap: 6px;
   margin-bottom: clamp(16px, 2.4vh, 24px);
 }
+
 .contact-why__tick {
-  width: 22px;
+  position: relative;
+  width: 30px;
   height: 2px;
-  background: rgba(255, 255, 255, .18);
-  transition: background .35s ease, width .35s cubic-bezier(.6, 0, .2, 1);
+  background: rgba(255, 255, 255, .16);
 }
-/* the section's only colour, spent on two pixels */
-.contact-why__tick.is-current { width: 34px; background: #ff5a2a; }
+.contact-why__tick::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #ff5a2a;      /* the section's only colour, spent on 2px */
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* lines already shown stay filled but drop to grey — without this the row
+   shows how long is left without showing how far in you are */
+.contact-why__tick.is-done::after {
+  transform: scaleX(1);
+  background: rgba(255, 255, 255, .3);
+}
+
+.contact-why__tick.is-current::after {
+  animation: contact-tick var(--cycle) linear forwards;
+}
+
+@keyframes contact-tick {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
 
 .contact-why__list {
   display: grid;
