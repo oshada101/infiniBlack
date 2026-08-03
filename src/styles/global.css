@@ -121,7 +121,9 @@ html {
 
 /* the last card would otherwise sit flush with the bottom of .work-list and so
    never stick at all. This trailing spacer is the room it sticks into — i.e.
-   how long the final card holds its pinned beat before the section lets go. */
+   how long the final card holds its pinned beat before the section lets go.
+   It doubles as .work's bottom spacing, which is why the section itself
+   carries no padding-bottom: otherwise the two would stack up. */
 .work-list__hold {
   height: clamp(100px, 20vh, 220px);
 }
@@ -135,8 +137,9 @@ html {
     border-top: 1px solid rgba(255, 255, 255, .12);
   }
   .work-item:first-child { border-top: none; }
-  /* nothing pins, so the hold would just read as stray padding */
-  .work-list__hold { height: 0; }
+  /* nothing pins here, so the hold has no beat to keep — drop it to the
+     standard section bottom padding the other sections use */
+  .work-list__hold { height: clamp(40px, 6vh, 80px); }
 }
 
 /* decorative corner dots + diagonal hatch behind the project media */
@@ -746,5 +749,5 @@ html {
     transform: none;
     margin-bottom: 0;
   }
-  .work-list__hold { height: 0; }
+  .work-list__hold { height: clamp(40px, 6vh, 80px); }
 }
