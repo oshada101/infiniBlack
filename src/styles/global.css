@@ -171,7 +171,7 @@ html {
  *  "4.2s" — which is why the script parses the unit instead of trusting
  *  parseFloat. */
 .contact-why__ticks {
-  --cycle: 4200ms;
+  --cycle: 3200ms;
   display: flex;
   gap: 6px;
   margin-bottom: clamp(16px, 2.4vh, 24px);
@@ -396,7 +396,21 @@ html {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-.contact-dialog::backdrop { background: rgba(0, 0, 0, .72); }
+/* the page behind goes soft rather than just dark — with the panel's
+   border gone, sharp-against-blurred is what separates the two surfaces.
+   Dimmed less than before for the same reason: at .72 over a blur there
+   was nothing left back there to read as a page. */
+.contact-dialog::backdrop {
+  background: rgba(0, 0, 0, .58);
+  backdrop-filter: blur(14px);
+}
+/* the -webkit- alias is for Safari < 18, and it has to live in its own
+   block: declared next to the standard property, the minifier treats the
+   two as duplicates and keeps only the prefixed one — which silently drops
+   the blur in Firefox. (.nav.is-transparent has this bug today.) */
+@supports (-webkit-backdrop-filter: blur(1px)) {
+  .contact-dialog::backdrop { -webkit-backdrop-filter: blur(14px); }
+}
 
 /* entry/exit. @starting-style + allow-discrete so the element can animate
    in from display:none; browsers without it simply get the end state. */
@@ -430,7 +444,6 @@ html {
   width: 60vw;
   /* no max-height and no height: the rectangle is as tall as its content */
   margin: clamp(48px, 10vh, 112px) auto;
-  border: 1px solid rgba(255, 255, 255, .14);
   background: #0a0a0d;
   padding: clamp(28px, 4vh, 56px) clamp(16px, 3vw, 48px) clamp(40px, 6vh, 72px);
 }
