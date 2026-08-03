@@ -57,7 +57,8 @@
      forever if it stalled. Wait on the fonts and the video's FIRST FRAME
      instead, floored so the diamond gets to finish forming and capped so a
      slow network can't hold the page hostage. */
-  const MIN_HOLD  = 1600; // ms from navigation; the diamond finishes at ~1.3s
+  const MIN_HOLD  = 2600; // ms from navigation; the diamond finishes at ~1.3s
+  const PAD       = 1000; // deliberate extra beat after everything is ready
   const MAX_HOLD  = 6000; // ms from navigation; open regardless past this
   const REVEAL_MS = 1900; // length of the CSS cut -> seam -> part sequence
 
@@ -104,7 +105,12 @@
       );
     }
 
-    Promise.all(ready).then(() => holdFor(MIN_HOLD));
+    // even on a warm cache the curtain sits for a beat past ready: the floor
+    // covers the instant case, PAD covers everything after it. MAX_HOLD still
+    // wins — past six seconds nobody wants another second of ceremony.
+    Promise.all(ready).then(() =>
+      holdFor(Math.min(MAX_HOLD, Math.max(MIN_HOLD, performance.now() + PAD))),
+    );
     holdFor(MAX_HOLD);
   }
 </script>
