@@ -578,6 +578,26 @@ html {
 .contact-input:focus { outline: none; border-bottom-color: #ff5a2a; }
 .contact-textarea { resize: vertical; min-height: 5.5em; line-height: 1.45; }
 
+/* The date field is native, so the browser draws the calendar popup and the
+   picker button itself. color-scheme is the switch that tells it to draw
+   them dark — without it you get a white sheet dropping out of a black
+   modal, and a near-invisible black-on-black picker icon in Chrome. The
+   empty "yyyy-mm-dd" text is dimmed to sit at placeholder weight beside the
+   other fields; it lifts to full white once a date is actually picked.
+   :valid can't do that lifting — the field is optional, so an empty one is
+   valid too, which is why the script toggles .has-value instead. */
+.contact-date { color-scheme: dark; }
+.contact-date::-webkit-datetime-edit { color: #57575e; }
+.contact-date:focus::-webkit-datetime-edit,
+.contact-date.has-value::-webkit-datetime-edit { color: #f2f2f2; }
+.contact-date::-webkit-calendar-picker-indicator {
+  opacity: .45;
+  cursor: pointer;
+  transition: opacity .2s ease;
+}
+.contact-date::-webkit-calendar-picker-indicator:hover,
+.contact-date:focus::-webkit-calendar-picker-indicator { opacity: 1; }
+
 .contact-form__footer {
   display: flex;
   flex-wrap: wrap;

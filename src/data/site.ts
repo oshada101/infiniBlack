@@ -161,18 +161,26 @@ export const reasons = [
 ];
 
 /**
- * Budget brackets, in USD. Deliberately floored lower than the agency-deck
- * default of "$10k minimum" — the buyer this site is written for (see the
- * Services copy) is a small-business owner, and a ladder that starts above
- * their number reads as "not for you" and closes the tab.
- *
- * "Not sure yet" is not padding. A required budget question with no escape
- * hatch is where forms like this lose people who would have been good leads.
+ * How urgent the work is. This is the question a budget bracket was really
+ * standing in for: it tells us whether to answer with a slot or a proposal,
+ * and unlike a price it costs the visitor nothing to answer honestly.
  */
-export const budgetOptions = [
-  'Under $5k',
-  '$5k – $15k',
-  '$15k – $50k',
-  '$50k+',
-  'Not sure yet',
+export const deadlineOptions = [
+  'Yes',
+  'No, I’m in no rush',
+  'No deadline, but asap please',
+];
+
+/**
+ * Where the request came from. Swap these for whichever channels are
+ * actually running — a list naming places you don't appear collects noise,
+ * and the only reason to ask is to learn which spend is working.
+ */
+export const sourceOptions = [
+  'Google',
+  'LinkedIn',
+  'Instagram',
+  'Facebook',
+  'A referral',
+  'Other',
 ];

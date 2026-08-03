@@ -1,5 +1,5 @@
 ---
-import { contact, budgetOptions, services, reasons } from '../data/site';
+import { contact, deadlineOptions, sourceOptions, services, reasons } from '../data/site';
 
 // Row 01's options are derived from the services array rather than typed out
 // again, so the form can never offer something the Services section doesn't
@@ -87,8 +87,11 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       structurally instead of leaving small controls floating in it. */}
   <div class="contact-actions">
     <button class="contact-action" type="button" data-contact-open>
-      <span class="contact-action__label">Start a project</span>
-      <span class="contact-action__meta">Five questions, two minutes</span>
+      {/* "Make a request", not "Start a project": nobody arriving cold is
+          ready to start one, and the button has to name what they're
+          actually about to do — ask us something. */}
+      <span class="contact-action__label">Make a request</span>
+      <span class="contact-action__meta">Seven questions, two minutes</span>
       <span class="contact-action__mark" aria-hidden="true">
         <svg viewBox="0 0 100 170" fill="currentColor" aria-hidden="true">
           <path d="M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z" />
@@ -151,8 +154,8 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
   <div class="contact-dialog__inner">
     <header class="flex items-start justify-between gap-6 pb-[clamp(24px,4vh,44px)]">
       <div>
-        <h2 class="text-[clamp(2rem,5vw,3.4rem)] font-normal tracking-[-.025em] leading-[1] text-[#f2f2f2]" id="contact-dialog-title">Start a project.</h2>
-        <p class="mt-[clamp(8px,1.2vh,12px)] text-[.95rem] text-grey-300">Five questions, about two minutes.</p>
+        <h2 class="text-[clamp(2rem,5vw,3.4rem)] font-normal tracking-[-.025em] leading-[1] text-[#f2f2f2]" id="contact-dialog-title">Make a request.</h2>
+        <p class="mt-[clamp(8px,1.2vh,12px)] text-[.95rem] text-grey-300">Seven questions, about two minutes.</p>
       </div>
       <button class="contact-dialog__close shrink-0 grid place-items-center w-10 h-10 rounded-full" type="button" aria-label="Close" data-contact-close>
         <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
@@ -186,29 +189,8 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
         </div>
       </div>
 
-      {/* 02 — one answer, so circles. The shape difference from 01 is the
-          whole point of drawing them by hand. */}
-      <div class="contact-row" role="radiogroup" aria-labelledby="contact-budget-label">
-        <span class="contact-row__num" aria-hidden="true">02</span>
-        <span class="contact-row__q" id="contact-budget-label">Budget in USD</span>
-        <div class="contact-row__control">
-          <ul class="contact-options list-none">
-            {budgetOptions.map((option) => (
-              <li>
-                <label class="contact-option">
-                  <input type="radio" name="budget" value={option} required />
-                  <span class="contact-mark contact-mark--circle" aria-hidden="true"></span>
-                  <span class="contact-option__text">{option}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-          <p class="contact-row__error" data-error-for="budget" hidden>Choose a range — “Not sure yet” is a real answer.</p>
-        </div>
-      </div>
-
       <div class="contact-row">
-        <span class="contact-row__num" aria-hidden="true">03</span>
+        <span class="contact-row__num" aria-hidden="true">02</span>
         <label class="contact-row__q" for="contact-name">Your name</label>
         <div class="contact-row__control">
           <input class="contact-input" id="contact-name" name="name" type="text" autocomplete="name" placeholder="Enter name" required />
@@ -217,7 +199,7 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       </div>
 
       <div class="contact-row">
-        <span class="contact-row__num" aria-hidden="true">04</span>
+        <span class="contact-row__num" aria-hidden="true">03</span>
         <label class="contact-row__q" for="contact-email">Your email</label>
         <div class="contact-row__control">
           <input class="contact-input" id="contact-email" name="email" type="email" autocomplete="email" placeholder="Enter email" required />
@@ -226,7 +208,7 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       </div>
 
       <div class="contact-row">
-        <span class="contact-row__num" aria-hidden="true">05</span>
+        <span class="contact-row__num" aria-hidden="true">04</span>
         <label class="contact-row__q" for="contact-details">
           Project details
           <span class="contact-row__hint">Your project, goals, success criteria</span>
@@ -234,6 +216,64 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
         <div class="contact-row__control">
           <textarea class="contact-input contact-textarea" id="contact-details" name="details" rows="4" placeholder="Enter details" required></textarea>
           <p class="contact-row__error" data-error-for="details" hidden>Tell us a little about the project.</p>
+        </div>
+      </div>
+
+      {/* 05 — a native date input rather than a custom picker: it gets the
+          platform calendar, the phone keyboard and the locale format for
+          free. color-scheme:dark (see global.css) is what stops the picker
+          rendering as a white sheet inside a black modal. Optional — an
+          exact date is rarely known this early, and demanding one here
+          would cost more answers than it's worth. */}
+      <div class="contact-row">
+        <span class="contact-row__num" aria-hidden="true">05</span>
+        <label class="contact-row__q" for="contact-start">
+          When would you like to start?
+          <span class="contact-row__hint">Roughly is fine</span>
+        </label>
+        <div class="contact-row__control">
+          <input class="contact-input contact-date" id="contact-start" name="start" type="date" />
+        </div>
+      </div>
+
+      {/* 06 — the question the budget row was really asking. Urgency tells
+          us whether to reply with a slot or a proposal, and costs the
+          visitor nothing to answer honestly. */}
+      <div class="contact-row" role="radiogroup" aria-labelledby="contact-deadline-label">
+        <span class="contact-row__num" aria-hidden="true">06</span>
+        <span class="contact-row__q" id="contact-deadline-label">Do you have a deadline?</span>
+        <div class="contact-row__control">
+          <ul class="contact-options list-none">
+            {deadlineOptions.map((option) => (
+              <li>
+                <label class="contact-option">
+                  <input type="radio" name="deadline" value={option} required />
+                  <span class="contact-mark contact-mark--circle" aria-hidden="true"></span>
+                  <span class="contact-option__text">{option}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+          <p class="contact-row__error" data-error-for="deadline" hidden>Pick one — “no rush” is a real answer.</p>
+        </div>
+      </div>
+
+      {/* 07 — for us, not for them, so it's optional and it goes last. */}
+      <div class="contact-row" role="radiogroup" aria-labelledby="contact-source-label">
+        <span class="contact-row__num" aria-hidden="true">07</span>
+        <span class="contact-row__q" id="contact-source-label">Where did you hear about us?</span>
+        <div class="contact-row__control">
+          <ul class="contact-options list-none">
+            {sourceOptions.map((option) => (
+              <li>
+                <label class="contact-option">
+                  <input type="radio" name="source" value={option} />
+                  <span class="contact-mark contact-mark--circle" aria-hidden="true"></span>
+                  <span class="contact-option__text">{option}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
@@ -331,12 +371,12 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       const name = (form.elements.namedItem('name') as HTMLInputElement).value.trim();
       const email = (form.elements.namedItem('email') as HTMLInputElement);
       const details = (form.elements.namedItem('details') as HTMLTextAreaElement).value.trim();
-      const budget = form.querySelector('input[name="budget"]:checked');
+      const deadline = form.querySelector('input[name="deadline"]:checked');
 
       // evaluate every field, so all the errors surface in one pass
       const errors = [
         showError('help', !helpChecked()),
-        showError('budget', !budget),
+        showError('deadline', !deadline),
         showError('name', !name),
         showError('email', !email.value.trim() || !email.validity.valid),
         showError('details', !details),
@@ -351,6 +391,10 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       const target = e.target as HTMLInputElement;
       if (target.name === 'help') showError('help', !helpChecked());
       else if (target.name) showError(target.name, false);
+
+      // the date field dims its own empty "yyyy-mm-dd" like a placeholder,
+      // so it has to say when it stops being empty (see .contact-date)
+      if (target.type === 'date') target.classList.toggle('has-value', !!target.value);
     });
 
     // --- submit ---------------------------------------------------------
@@ -359,10 +403,12 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       const data = new FormData(form);
       return {
         help: data.getAll('help').join(', '),
-        budget: String(data.get('budget') ?? ''),
         name: String(data.get('name') ?? ''),
         email: String(data.get('email') ?? ''),
         details: String(data.get('details') ?? ''),
+        start: String(data.get('start') ?? ''),
+        deadline: String(data.get('deadline') ?? ''),
+        source: String(data.get('source') ?? ''),
       };
     };
 
@@ -370,10 +416,14 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
     // ours to POST to) — hand the answers to the visitor's mail client so
     // the form is never a dead end.
     const mailtoFallback = (body: ReturnType<typeof payload>) => {
+      // the optional answers are spread in rather than printed empty — a
+      // mail body with "Start:" and nothing after it reads as a bug
       const lines = [
         `Looking for: ${body.help}`,
-        `Budget: ${body.budget}`,
         `Name: ${body.name}`,
+        ...(body.start ? [`Wants to start: ${body.start}`] : []),
+        `Deadline: ${body.deadline}`,
+        ...(body.source ? [`Heard about us via: ${body.source}`] : []),
         '',
         body.details,
       ].join('\n');
