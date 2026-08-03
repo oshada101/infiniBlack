@@ -12,14 +12,14 @@
     <div class="loader" role="status" aria-label="Loading">
       <svg viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <defs>
+          <!-- the diamond is drawn full size and grown into view from CSS.
+               SMIL is deliberately not used here: every engine holds the SVG
+               animation clock at zero until the window `load` event, so on a
+               real connection the shape would still be a dot — or nothing at
+               all — by the time the curtain lifts. See .loader in global.css. -->
           <clipPath id="diamond" clipPathUnits="userSpaceOnUse">
             <path id="clipShape"
-                  d="M 54 81 L 54 81 Q 58 85 54 89 L 54 89 Q 50 93 46 89 L 46 89 Q 42 85 46 81 L 46 81 Q 50 77 54 81 Z">
-              <animate attributeName="d" begin="0.16s" dur="0.9s" fill="freeze"
-                       calcMode="spline" keyTimes="0;1" keySplines="0.16 1 0.3 1"
-                       values="M 54 81 L 54 81 Q 58 85 54 89 L 54 89 Q 50 93 46 89 L 46 89 Q 42 85 46 81 L 46 81 Q 50 77 54 81 Z;
-                               M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z"/>
-            </path>
+                  d="M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z"/>
           </clipPath>
 
           <filter id="goo" x="-40%" y="-40%" width="180%" height="180%">
@@ -33,11 +33,9 @@
           <radialGradient id="gMagenta" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff3f9a" stop-opacity="1"/><stop offset="55%" stop-color="#ff3f9a" stop-opacity=".85"/><stop offset="100%" stop-color="#ff3f9a" stop-opacity="0"/></radialGradient>
         </defs>
 
-        <g clip-path="url(#diamond)" opacity="0">
-          <animate attributeName="opacity" from="0" to="1" begin="0s" dur="0.2s" fill="freeze"/>
+        <g class="diamond" clip-path="url(#diamond)">
           <rect x="0" y="0" width="100" height="170" fill="#fff"/>
-          <g filter="url(#goo)" opacity="0">
-            <animate attributeName="opacity" from="0" to="1" begin="0.8s" dur="0.5s" fill="freeze"/>
+          <g class="fluid" filter="url(#goo)">
             <circle class="blob b1" cx="50" cy="66"  r="38" fill="url(#gCoral)"/>
             <circle class="blob b2" cx="50" cy="104" r="38" fill="url(#gPurple)"/>
             <circle class="blob b3" cx="50" cy="58"  r="34" fill="url(#gBlue)"/>
@@ -54,13 +52,13 @@
   /* The curtain has to answer to what has actually loaded. `load` is the wrong
      signal: browsers hold it back until the hero video has buffered, so the
      diamond would sit there fully formed for as long as hero.mp4 took, and
-     forever if it stalled. Wait on the fonts and the video's FIRST FRAME
-     instead, floored so the diamond gets to finish forming and capped so a
-     slow network can't hold the page hostage.
+     forever if it stalled. Wait on the fonts, the video's FIRST FRAME and the
+     diamond's own animations instead, floored so a warm cache still gets a
+     beat of it and capped so a slow network can't hold the page hostage.
 
-     Which element that is depends on the page — the home hero's video, a
-     project page's full-screen still — so the page marks its own with
-     [data-curtain-media] rather than the curtain hunting for a hero. */
+     Which element is the one to wait on depends on the page — the home hero's
+     video, a project page's full-screen still — so the page marks its own
+     with [data-curtain-media] rather than the curtain hunting for a hero. */
   const MIN_HOLD  = 2600; // ms from navigation; the diamond finishes at ~1.3s
   const PAD       = 1000; // deliberate extra beat after everything is ready
   const MAX_HOLD  = 6000; // ms from navigation; open regardless past this
@@ -88,11 +86,27 @@
       setTimeout(() => curtain.remove(), REVEAL_MS);
     };
 
-    // performance.now() counts from navigation, which is also when the SVG's
-    // own animations started — so the floor is measured on the same clock.
+    // performance.now() counts from navigation. The loader's own animations do
+    // NOT — they start when it first renders, which on a slow connection is a
+    // second or more later. So the floor below is a floor, not a promise that
+    // the diamond has formed; that promise comes from the animations themselves.
     const holdFor = (ms: number) => setTimeout(reveal, Math.max(0, ms - performance.now()));
 
     const ready: Promise<unknown>[] = [];
+
+    // don't lift on a half-drawn diamond: ask the loader's animations when they
+    // are actually done. The blob drift runs forever, so it is excluded — only
+    // the one-shot forming and fade-in animations are worth waiting for.
+    if (curtain.getAnimations) {
+      ready.push(
+        Promise.all(
+          curtain
+            .getAnimations({ subtree: true })
+            .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+            .map((a) => a.finished.catch(() => {})),
+        ),
+      );
+    }
 
     // let the display font swap in behind the curtain, not under the reader
     if (document.fonts) ready.push(document.fonts.ready);
