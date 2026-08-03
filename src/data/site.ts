@@ -144,6 +144,23 @@ export const contact = {
 };
 
 /**
+ * The line that cycles beside the closing statement.
+ *
+ * These are deliberately claims about how the studio works, not figures.
+ * A number ("6 weeks average", "48h median reply") reads as measurement and
+ * has to survive someone checking it; a statement about your own process is
+ * a promise you control. Cut any line here you wouldn't repeat on a call —
+ * this is the last thing a visitor reads, so it has to be true.
+ */
+export const reasons = [
+  'One team designs it, builds it, and ships it.',
+  'We automate our own work first, then yours.',
+  'Weekly demos, so you see it long before it’s done.',
+  'You get the code, the docs, and the training.',
+  'Short cycles. Weeks, not quarters.',
+];
+
+/**
  * Budget brackets, in USD. Deliberately floored lower than the agency-deck
  * default of "$10k minimum" — the buyer this site is written for (see the
  * Services copy) is a small-business owner, and a ladder that starts above

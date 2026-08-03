@@ -1,10 +1,15 @@
 ---
-import { contact, budgetOptions, services } from '../data/site';
+import { contact, budgetOptions, services, reasons } from '../data/site';
 
 // Row 01's options are derived from the services array rather than typed out
 // again, so the form can never offer something the Services section doesn't
 // sell. "Something else" catches the rest without inviting a wishlist.
 const helpOptions = [...services.map((s) => s.title), 'Something else'];
+
+// Split for the staggered swap. Done here rather than in the browser so the
+// words ship in the markup — the animation is presentation, and the text has
+// to be complete with no JS.
+const reasonWords = reasons.map((reason) => reason.split(' '));
 
 // Social glyphs, drawn as strokes in a 24-unit box to match the line-mark
 // language the service cards already use. Brand marks rendered as outlines
@@ -41,13 +46,40 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
 >
   {/* the statement. Larger than the hero h1 on purpose: the hero opens the
       argument, this closes it, and it is the last thing anyone reads. */}
-  <div class="flex-1 flex flex-col justify-center py-[clamp(40px,7vh,90px)]">
-    <h2 class="contact-statement text-[clamp(2.6rem,8vw,6.5rem)] font-normal tracking-[-.035em] leading-[.94] text-[#f2f2f2] max-w-[15ch] text-balance">
-      Tell us what you’re building.
-    </h2>
-    <p class="mt-[clamp(18px,3vh,32px)] max-w-[42ch] text-[clamp(1rem,1.45vw,1.2rem)] leading-[1.4] text-grey-300 text-pretty">
-      We reply within 48 hours, and we don’t do sales calls. If it isn’t a fit, we’ll say so and point you somewhere better.
-    </p>
+  <div class="flex-1 flex flex-wrap items-center justify-between gap-x-[clamp(32px,6vw,88px)] gap-y-[clamp(36px,5vh,56px)] py-[clamp(40px,7vh,90px)]">
+    <div class="flex-1 min-w-[300px]">
+      <h2 class="contact-statement text-[clamp(2.6rem,8vw,6.5rem)] font-normal tracking-[-.035em] leading-[.94] text-[#f2f2f2] max-w-[15ch] text-balance">
+        Tell us what you’re building.
+      </h2>
+      <p class="mt-[clamp(18px,3vh,32px)] max-w-[42ch] text-[clamp(1rem,1.45vw,1.2rem)] leading-[1.4] text-grey-300 text-pretty">
+        We reply within 48 hours, and there’s no sales call.
+      </p>
+    </div>
+
+    {/* The column that used to be dead space, now carrying the argument.
+        Every line is in the DOM — the rotation is visual only, so a screen
+        reader gets the whole list rather than whichever line happened to be
+        showing. The ticks say "this is a list being stepped through", which
+        is what stops it reading as text that wanders on its own. */}
+    <div class="contact-why">
+      <div class="contact-why__ticks" aria-hidden="true">
+        {reasons.map((_, i) => <span class:list={['contact-why__tick', i === 0 && 'is-current']}></span>)}
+      </div>
+
+      <ul class="contact-why__list" data-reasons>
+        {reasonWords.map((words, i) => (
+          <li class:list={['contact-why__item', i === 0 && 'is-current']}>
+            {/* the space between words is a real text node, not a margin —
+                so the line still reads and copies as a sentence */}
+            {words.map((word, w) => (
+              <Fragment>
+                <span class="contact-why__word" style={`--i:${w}`}>{word}</span>{' '}
+              </Fragment>
+            ))}
+          </li>
+        ))}
+      </ul>
+    </div>
   </div>
 
   {/* the two doors. Full-bleed rows rather than buttons: the hairline rule
@@ -222,6 +254,23 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
 </dialog>
 
 <script>
+  // --- the rotating line --------------------------------------------------
+  const reasonList = document.querySelector('[data-reasons]');
+
+  if (reasonList && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const items = [...reasonList.querySelectorAll('.contact-why__item')];
+    const ticks = [...document.querySelectorAll('.contact-why__tick')];
+    let current = 0;
+
+    if (items.length > 1) {
+      setInterval(() => {
+        current = (current + 1) % items.length;
+        items.forEach((el, i) => el.classList.toggle('is-current', i === current));
+        ticks.forEach((el, i) => el.classList.toggle('is-current', i === current));
+      }, 4200);
+    }
+  }
+
   const dialog = document.getElementById('contact-dialog') as HTMLDialogElement | null;
 
   if (dialog) {
