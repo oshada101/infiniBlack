@@ -10,7 +10,7 @@ const { base } = Astro.props;
 
 <!-- work: featured projects -->
 <section class="work pt-[clamp(80px,12vh,140px)] px-[clamp(8px,1.2vw,18px)] pb-[clamp(40px,6vh,80px)] border-t border-[rgba(255,255,255,.08)]" id="work">
-  <h2 class="section-title text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Featured Work</h2>
+  <h2 class="section-title text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pt-[clamp(20px,3vh,34px)] pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Featured Work</h2>
 
   <div class="work-list relative ">
     {workItems.map((item) => (
@@ -58,18 +58,65 @@ const { base } = Astro.props;
         </div>
       </article>
     ))}
+    <div class="work-list__hold" aria-hidden="true"></div>
   </div>
 </section>
 
 <script>
+  const workSection = document.querySelector('.work') as HTMLElement | null;
+  const workTitle = workSection?.querySelector('.section-title') as HTMLElement | null;
+  const workHold = workSection?.querySelector('.work-list__hold') as HTMLElement | null;
+  const workCards = [...(workSection?.querySelectorAll('.work-item') ?? [])] as HTMLElement[];
+  const lastCard = workCards[workCards.length - 1];
+
+  let pin = 0;
+  let titleH = 0;
+  let cardH = 0;
+
   // keep the stacking cards pinned right below the sticky "Featured Work"
   // title — measure its height (fluid font, so it changes on resize).
-  const workTitle = document.querySelector('.work .section-title');
-  if (workTitle) {
-    const syncTitleHeight = () =>
-      document.documentElement.style.setProperty('--work-title-h', (workTitle as HTMLElement).offsetHeight + 'px');
-    syncTitleHeight();
-    window.addEventListener('resize', syncTitleHeight);
+  const measure = () => {
+    if (!workSection || !workTitle) return;
+    pin = parseFloat(getComputedStyle(workSection).getPropertyValue('--work-pin')) || 0;
+    titleH = workTitle.offsetHeight;
+    cardH = lastCard ? lastCard.offsetHeight : 0;
+    document.documentElement.style.setProperty('--work-title-h', titleH + 'px');
+  };
+
+  /* Both the title and the cards are clamped by the bottom of their sticky
+     containing block, and a taller box hits that clamp sooner — so the last
+     card (a whole card tall) unpins one card-height of scroll BEFORE the
+     title does, stranding "Featured Work" over dead space.
+
+     Rather than fight the clamp, close that gap by hand: the .work-list__hold
+     spacer is static, so its bottom edge is a reliable read on how far the
+     stack has left to travel. Once that edge climbs past where the pinned
+     title + last card end, drag the title up by the difference and the two
+     exit as one. Cheaper than it looks — one rect read per frame. */
+  const syncRelease = () => {
+    if (!workTitle || !workHold) return;
+    const overshoot = pin + titleH + cardH - workHold.getBoundingClientRect().bottom;
+    workTitle.style.transform = overshoot > 0 ? `translateY(${-overshoot}px)` : '';
+  };
+
+  if (workSection && workTitle) {
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        syncRelease();
+      });
+    };
+
+    measure();
+    syncRelease();
+    window.addEventListener('resize', () => {
+      measure();
+      syncRelease();
+    });
+    window.addEventListener('scroll', onScroll, { passive: true });
   }
 
   // hover-to-play: pauses in place on mouseleave, no rewind

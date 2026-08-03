@@ -88,12 +88,19 @@ html {
 
 /* --- work: featured projects list --- */
 
-/* the "Featured Work" heading stays pinned at the top for the whole
-   .work section (its containing block), then releases when the section
-   ends. Opaque bg + z-index keep it above the stacking cards. */
+.work {
+  /* clearance under the fixed nav. kept in px, not rem: the release script
+     reads this value straight off the custom property. */
+  --work-pin: 36px;
+}
+
+/* the "Featured Work" heading stays pinned at the top while the cards stack.
+   Its own sticky range runs to the end of .work, which outlasts the final
+   card — the script translates it up early so the two leave together.
+   Opaque bg + z-index keep it above the stacking cards. */
 .work .section-title {
   position: sticky;
-  top: 2.25rem;                    /* just under the fixed nav */
+  top: var(--work-pin);
   z-index: 2;
   background: #0a0a0d;
 }
@@ -108,8 +115,15 @@ html {
   position: sticky;
   /* pin below the sticky title: nav height + measured title height (JS sets
      --work-title-h; fallback keeps it sane before the script runs) */
-  top: calc(2.25rem + var(--work-title-h, 6rem));
+  top: calc(var(--work-pin) + var(--work-title-h, 6rem));
   background: #0a0a0d;             /* opaque: fully hides the card stacked underneath */
+}
+
+/* the last card would otherwise sit flush with the bottom of .work-list and so
+   never stick at all. This trailing spacer is the room it sticks into — i.e.
+   how long the final card holds its pinned beat before the section lets go. */
+.work-list__hold {
+  height: clamp(100px, 20vh, 220px);
 }
 
 /* below the nav breakpoint, drop the effect: plain stacked rows */
@@ -121,6 +135,8 @@ html {
     border-top: 1px solid rgba(255, 255, 255, .12);
   }
   .work-item:first-child { border-top: none; }
+  /* nothing pins, so the hold would just read as stray padding */
+  .work-list__hold { height: 0; }
 }
 
 /* decorative corner dots + diagonal hatch behind the project media */
@@ -730,4 +746,5 @@ html {
     transform: none;
     margin-bottom: 0;
   }
+  .work-list__hold { height: 0; }
 }
