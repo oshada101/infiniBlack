@@ -806,6 +806,25 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 .loader { width: var(--w); height: var(--h); }
 .loader svg { display: block; width: 100%; height: 100%; overflow: visible; }
 
+/* The diamond forms in CSS, not SMIL. Every engine keeps an inline SVG's
+   animation clock at zero until the window `load` event fires — and on a real
+   connection that lands seconds after the curtain is already on screen, so a
+   SMIL diamond sits at its first frame (or never draws at all) for the whole
+   load. CSS animations start when the element first renders, which is the
+   moment the visitor actually starts waiting. The curtain script waits on
+   these finishing, so their timings are what it holds for. */
+#clipShape {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: diamond-form .9s cubic-bezier(.16, 1, .3, 1) .16s both;
+}
+.diamond { animation: diamond-in .2s linear both; }
+.fluid   { animation: fluid-in .5s linear .8s both; }
+
+@keyframes diamond-form { from { transform: scale(.07); } to { transform: scale(1); } }
+@keyframes diamond-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fluid-in     { from { opacity: 0; } to { opacity: 1; } }
+
 .blob { transform-box: fill-box; transform-origin: center; will-change: transform; mix-blend-mode: screen; }
 .b1 { animation: drift1 3.2s ease-in-out infinite; }
 .b2 { animation: drift2 3.9s ease-in-out infinite; }
@@ -837,6 +856,9 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .blob { animation: none; }
   .curtain__half, .seam, .loader-wrap { transition-duration: .01s; }
+  /* the diamond arrives formed rather than growing */
+  #clipShape { animation: none; }
+  .diamond, .fluid { animation-duration: .01s; animation-delay: 0s; }
   /* no scroll-driven pinning/covering for reduced-motion users */
   .work-item {
     position: static;
