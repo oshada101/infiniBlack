@@ -1,60 +1,179 @@
 ---
-const base = import.meta.env.BASE_URL;
+import { workItems, workPhases } from '../data/site';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+interface Props {
+  base: string;
+}
+
+const { base } = Astro.props;
 ---
 
-<section id="work" class="relative" data-assemble aria-label="Selected work">
-  <p class="label-mono" data-piece="left">02 — Selected work</p>
+<!-- work: featured projects -->
+<section class="work pt-[clamp(80px,12vh,140px)] px-[clamp(8px,1.2vw,18px)] border-t border-[rgba(255,255,255,.08)]" id="work">
+  <h2 class="section-title text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pt-[clamp(20px,3vh,34px)] pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Featured Work</h2>
 
-  <h2 class="heading mt-4 text-4xl md:text-6xl mb-8 md:mb-10">
-    <span data-typein>Built and shipped.</span>
-  </h2>
+  <div class="work-list relative ">
+    {workItems.map((item) => (
+      <article class="work-item flex flex-wrap gap-[clamp(24px,3vw,48px)] py-[clamp(16px,2vh,22px)] shadow-[0_-1px_0_rgba(255,255,255,.12)]">
+        {item.media.kind === 'hover-video' ? (
+          <a
+            class="work-item__media work-item__media--hover-video group relative flex-[1_1_55%] min-w-[280px] aspect-video border border-[rgba(255,255,255,.1)] flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
+            href={item.href}
+          >
+            <img
+              class="work-item__media-img absolute inset-0 w-full h-full object-cover [transition:opacity_.2s_ease] group-hover:opacity-0"
+              src={`${base}${item.media.img.src}`}
+              alt={item.media.img.alt}
+            />
+            <video
+              class="work-item__media-video absolute inset-0 w-full h-full object-cover opacity-0 [transition:opacity_.2s_ease] group-hover:opacity-100"
+              src={`${base}${item.media.video.src}`}
+              muted
+              loop
+              playsinline
+              preload="metadata"
+            ></video>
+            <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
+          </a>
+        ) : (
+          <a
+            class="work-item__media group relative flex-[1_1_55%] min-w-[280px] aspect-video border border-[rgba(255,255,255,.1)] flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
+            href={item.href}
+          >
+            <img src={`${base}${item.media.img.src}`} alt={item.media.img.alt} style={item.media.img.style} />
+            <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
+          </a>
+        )}
+        <div class="work-item__info flex-[1_1_35%] min-w-[240px] flex flex-col justify-between gap-[clamp(24px,4vh,48px)] bg-ink">
+          {/* masthead: standfirst left, name right, closed by a hairline. The
+              shared bottom edge is what stops the two ragged edges reading as
+              a jagged channel — same trick a newspaper nameplate uses. */}
+          <div class="work-item__masthead flex justify-between items-start gap-[clamp(20px,2.6vw,52px)]">
+            <p class="work-item__desc min-w-0 text-[1.15rem] font-normal leading-[1.4] text-grey-200 max-w-[30ch] text-pretty">{item.desc}</p>
+            <h3 class="work-item__title flex-initial text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-white tracking-[-.015em] leading-[1.05] text-right text-balance"><a class="text-inherit no-underline hover:underline hover:[text-underline-offset:.12em]" href={item.href}>{item.title}</a></h3>
+          </div>
 
-  <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-    <a
-      href="/work#glorious"
-      data-morph
-      data-piece="left"
-      class="project-card card card-dark group flex flex-col gap-6 p-5 no-underline md:p-7"
-    >
-      <div class="project-media aspect-[16/10]" transition:name="media-glorious">
-        <video src={`${base}projects/glorious.mp4`} autoplay loop muted playsinline class="h-full w-full object-cover" poster={`${base}projects/glorious.webp`} data-autoplay />
-      </div>
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <p class="label-mono text-acid">W/01 — 2025</p>
-          <h3 class="heading mt-3 text-2xl md:text-3xl">Glorious Fitness Center</h3>
-          <p class="text-dim mt-2">Full marketing site for a fitness center — programs, trainers, memberships.</p>
+          <div class="work-item__foot">
+            <ul class="work-item__tags list-none">
+              {item.tags.map((tag) => <li class="text-[.82rem] font-semibold uppercase tracking-[.08em] text-grey-300 leading-[1.9]">{tag}</li>)}
+            </ul>
+
+            {/* the section's one bold stroke, and its only colour: how far the
+                project got, at the length of a rule. */}
+            <div class="work-item__phase" aria-label={`${item.statusLabel} — phase ${item.phase} of ${workPhases.length}`}>
+              <ol class="work-item__phase-track list-none">
+                {workPhases.map((phase, i) => (
+                  <li class={`work-item__phase-seg${i < item.phase ? ' is-done' : ''}`} style={`--i:${i}`} title={phase}></li>
+                ))}
+              </ol>
+              <p class="work-item__phase-meta">
+                <span class="work-item__phase-now">{item.statusLabel}</span>
+                <span class="work-item__phase-count">{pad(item.phase)} / {pad(workPhases.length)}</span>
+              </p>
+            </div>
+          </div>
         </div>
-        <span class="badge-shipped shrink-0">Shipped</span>
-      </div>
-    </a>
-
-    <a
-      href="/work#kratos"
-      data-morph
-      data-piece="right"
-      class="project-card card card-dark group flex flex-col gap-6 p-5 no-underline md:p-7"
-    >
-      <div class="project-media aspect-[16/10]" transition:name="media-kratos">
-        <img src={`${base}projects/kratos.png`} alt="Kratos gym management system" loading="lazy" />
-      </div>
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <p class="label-mono text-crimson">W/02 — ongoing</p>
-          <h3 class="heading mt-3 text-2xl md:text-3xl">Kratos</h3>
-          <p class="text-dim mt-2">Gym management system — members, billing, attendance, one dashboard.</p>
-        </div>
-        <span class="badge-live shrink-0">In progress</span>
-      </div>
-    </a>
+      </article>
+    ))}
+    <div class="work-list__hold" aria-hidden="true"></div>
   </div>
-
-  <a
-    href="/work"
-    data-piece="up"
-    class="nav-item card card-dark mt-4 flex items-center justify-between p-6 no-underline md:p-7"
-  >
-    <span class="heading text-xl md:text-2xl">All projects</span>
-    <span class="label-mono text-acid">↳ /work <span class="nav-arrow inline-block">↗</span></span>
-  </a>
 </section>
+
+<script>
+  const workSection = document.querySelector('.work') as HTMLElement | null;
+  const workTitle = workSection?.querySelector('.section-title') as HTMLElement | null;
+  const workHold = workSection?.querySelector('.work-list__hold') as HTMLElement | null;
+  const workCards = [...(workSection?.querySelectorAll('.work-item') ?? [])] as HTMLElement[];
+  const lastCard = workCards[workCards.length - 1];
+
+  let pin = 0;
+  let titleH = 0;
+  let cardH = 0;
+
+  // keep the stacking cards pinned right below the sticky "Featured Work"
+  // title — measure its height (fluid font, so it changes on resize).
+  const measure = () => {
+    if (!workSection || !workTitle) return;
+    pin = parseFloat(getComputedStyle(workSection).getPropertyValue('--work-pin')) || 0;
+    titleH = workTitle.offsetHeight;
+    cardH = lastCard ? lastCard.offsetHeight : 0;
+    document.documentElement.style.setProperty('--work-title-h', titleH + 'px');
+  };
+
+  /* Both the title and the cards are clamped by the bottom of their sticky
+     containing block, and a taller box hits that clamp sooner — so the last
+     card (a whole card tall) unpins one card-height of scroll BEFORE the
+     title does, stranding "Featured Work" over dead space.
+
+     Rather than fight the clamp, close that gap by hand: the .work-list__hold
+     spacer is static, so its bottom edge is a reliable read on how far the
+     stack has left to travel. Once that edge climbs past where the pinned
+     title + last card end, drag the title up by the difference and the two
+     exit as one. Cheaper than it looks — one rect read per frame. */
+  const syncRelease = () => {
+    if (!workTitle || !workHold) return;
+    const overshoot = pin + titleH + cardH - workHold.getBoundingClientRect().bottom;
+    workTitle.style.transform = overshoot > 0 ? `translateY(${-overshoot}px)` : '';
+  };
+
+  if (workSection && workTitle) {
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        syncRelease();
+      });
+    };
+
+    measure();
+    syncRelease();
+    window.addEventListener('resize', () => {
+      measure();
+      syncRelease();
+    });
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  /* draw each phase track once, when its card arrives. Unobserved after it
+     fires: the cards are sticky and cross the viewport edge repeatedly, and
+     a rule that redraws every time you scroll past is a fidget, not a
+     reveal. */
+  const phaseTracks = document.querySelectorAll('.work-item__phase');
+  if (phaseTracks.length) {
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in-view');
+          obs.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.6 },
+    );
+    phaseTracks.forEach((el) => io.observe(el));
+  }
+
+  // hover-to-play: pauses in place on mouseleave, no rewind
+  document.querySelectorAll('.work-item__media--hover-video').forEach((el) => {
+    const video = el.querySelector('video');
+    if (!video) return;
+    el.addEventListener('mouseenter', () => video.play());
+    el.addEventListener('mouseleave', () => video.pause());
+  });
+
+  // tooltip follows the cursor while hovering a project's media
+  document.querySelectorAll('.work-item__media').forEach((el) => {
+    const tooltip = el.querySelector('.work-item__tooltip') as HTMLElement | null;
+    if (!tooltip) return;
+    el.addEventListener('mousemove', (e) => {
+      const rect = (el as HTMLElement).getBoundingClientRect();
+      const x = (e as MouseEvent).clientX - rect.left + 14;
+      const y = (e as MouseEvent).clientY - rect.top + 14;
+      tooltip.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  });
+</script>

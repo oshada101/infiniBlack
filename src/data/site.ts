@@ -1,24 +1,194 @@
-export const navLinks = [
-  { href: '/#services', section: 'services', label: 'Services', n: '01' },
-  { href: '/work', section: 'work', label: 'Work', n: '02' },
-  { href: '/#process', section: 'process', label: 'Process', n: '03' },
-  { href: '/#contact', section: 'contact', label: 'Contact', n: '04' },
+// Content for the homepage "Services", "Work" and "Contact" sections.
+
+// --- services -------------------------------------------------------------
+
+export interface Service {
+  title: string;
+  desc: string;
+  /** selects one of the inline marks drawn in Services.astro */
+  icon: 'ai' | 'websites' | 'apps' | 'business' | 'marketing';
+  /** short examples, shown as pills on the grid cards */
+  tags?: string[];
+  /** worked examples for the featured banner, which is too wide for pills */
+  details?: { label: string; body: string }[];
+  /** the one service that gets the full-width banner treatment */
+  featured?: boolean;
+}
+
+// Copy is written for a non-technical buyer: no stack names, no acronyms.
+// "AI" is the deliberate exception — it's the one technical word this
+// audience already searches for.
+export const services: Service[] = [
+  {
+    title: 'AI',
+    desc: 'Software that reads, writes, and answers on its own, so your team stops doing it by hand.',
+    icon: 'ai',
+    featured: true,
+    details: [
+      { label: 'Chatbots', body: 'Answers your customers at 2am, in your words, without a person on shift.' },
+      { label: 'Document handling', body: 'Reads invoices, forms and IDs, and files what it finds where it belongs.' },
+      { label: 'Automatic replies', body: 'Drafts the response. Your team reads it, changes what they want, sends.' },
+    ],
+  },
+  {
+    title: 'Websites & online stores',
+    desc: 'The first thing your customers find. Built to load fast, look right on a phone, and turn visitors into enquiries.',
+    tags: ['Marketing sites', 'Online stores', 'Landing pages'],
+    icon: 'websites',
+  },
+  {
+    title: 'Apps',
+    desc: 'Your product on a phone, or on the computers in your office. Same team builds both.',
+    tags: ['iPhone', 'Android', 'Windows & Mac'],
+    icon: 'apps',
+  },
+  {
+    title: 'Business software',
+    desc: 'Members, billing, staff, stock — run it all in one place instead of ten spreadsheets.',
+    tags: ['Dashboards', 'Billing', 'Reports'],
+    icon: 'business',
+  },
+  {
+    title: 'Marketing',
+    desc: 'Built is only half of it. Search, ads, and content that put you in front of people already looking for what you do.',
+    tags: ['Google ranking', 'Paid ads', 'Social content'],
+    icon: 'marketing',
+  },
 ];
 
-export const socials = [
+// --- featured work / projects ---------------------------------------------
+
+export interface WorkItemMediaHoverVideo {
+  kind: 'hover-video';
+  img: { src: string; alt: string };
+  video: { src: string };
+}
+
+export interface WorkItemMediaImage {
+  kind: 'image';
+  img: { src: string; alt: string; style: string };
+}
+
+/* The studio's pipeline, in order. The track under each work card fills to
+   the project's current phase, so "how far along is this" is legible from
+   the length of one rule instead of from the wording of a label. Adding a
+   phase here re-segments every track; nothing else needs to change. */
+export const workPhases = ['Scope', 'Design', 'Build', 'Ship'] as const;
+
+export interface WorkItem {
+  href: string;
+  desc: string;
+  /** phases completed, 1..workPhases.length. Full length = shipped. */
+  phase: number;
+  /** names the phase the project is *in*, shown beside the track */
+  statusLabel: string;
+  title: string;
+  tags: string[];
+  media: WorkItemMediaHoverVideo | WorkItemMediaImage;
+}
+
+export const workItems: WorkItem[] = [
   {
-    href: 'https://web.facebook.com/profile.php?id=61591838997362',
-    label: 'Facebook',
-    path: 'M13.5 9H15V6.5h-2c-1.93 0-3 1.29-3 3.25V11H8v2.5h2V21h2.5v-7.5h2.1l.4-2.5h-2.5V9.9c0-.62.28-.9 1-.9Z',
+    href: '#',
+    desc: 'Full marketing site for a fitness center — programs, trainers, memberships.',
+    phase: 4,
+    statusLabel: 'Shipped',
+    title: 'Glorious Fitness Center',
+    tags: ['Marketing Site', 'Fitness', '2025'],
+    media: {
+      kind: 'hover-video',
+      img: { src: 'projects/glorious.webp', alt: 'Glorious Fitness Center' },
+      video: { src: 'projects/glorious.mp4' },
+    },
   },
   {
-    href: 'https://www.instagram.com/infiniblack2026/',
-    label: 'Instagram',
-    path: 'M12 8.75A3.25 3.25 0 1 0 12 15.25 3.25 3.25 0 0 0 12 8.75Zm0 1.5a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5ZM15.6 7.4a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8ZM7.75 4.5h8.5a3.25 3.25 0 0 1 3.25 3.25v8.5a3.25 3.25 0 0 1-3.25 3.25h-8.5a3.25 3.25 0 0 1-3.25-3.25v-8.5A3.25 3.25 0 0 1 7.75 4.5Zm0 1.5A1.75 1.75 0 0 0 6 7.75v8.5c0 .97.78 1.75 1.75 1.75h8.5A1.75 1.75 0 0 0 18 16.25v-8.5A1.75 1.75 0 0 0 16.25 6h-8.5Z',
+    href: '#',
+    desc: 'Gym management system — members, billing, attendance, one dashboard.',
+    phase: 3,
+    statusLabel: 'In Build',
+    title: 'Kratos',
+    tags: ['Dashboard', 'Gym Management', 'Ongoing'],
+    media: {
+      kind: 'image',
+      img: {
+        src: 'projects/kratos.png',
+        alt: 'Kratos gym management system',
+        style: 'width:100%;height:100%;object-fit:cover;',
+      },
+    },
   },
-  {
-    href: 'https://www.linkedin.com/company/infiniblack/about/?viewAsMember=true',
-    label: 'LinkedIn',
-    path: 'M6.94 8.5A1.44 1.44 0 1 0 6.94 5.6a1.44 1.44 0 0 0 0 2.9ZM5.7 9.9h2.5V18.4H5.7V9.9Zm4.3 0h2.4v1.16h.03c.33-.63 1.15-1.3 2.37-1.3 2.53 0 3 1.67 3 3.84v4.8h-2.5v-4.26c0-1.02-.02-2.32-1.41-2.32-1.42 0-1.64 1.1-1.64 2.25v4.33H10V9.9Z',
-  },
+];
+
+// --- contact --------------------------------------------------------------
+
+export interface SocialLink {
+  label: string;
+  href: string;
+  /** selects one of the inline glyphs drawn in Contact.astro */
+  icon: 'instagram' | 'linkedin' | 'facebook';
+}
+
+export const contact = {
+  email: 'hello@infiniblack.com',
+
+  // TODO: replace with the real profile URLs before this ships. Order is
+  // deliberate — LinkedIn is where a B2B buyer actually checks you out.
+  socials: [
+    { label: 'LinkedIn', href: '#', icon: 'linkedin' },
+    { label: 'Instagram', href: '#', icon: 'instagram' },
+    { label: 'Facebook', href: '#', icon: 'facebook' },
+  ] as SocialLink[],
+
+  /**
+   * Where the request form POSTs (Formspree, Web3Forms, or any endpoint
+   * that accepts JSON). The site is static on GitHub Pages, so there is no
+   * server of our own to receive it.
+   *
+   * Left empty on purpose: while it is empty the form falls back to opening
+   * the visitor's mail client with every answer pre-filled, so the modal is
+   * never a dead end. Set it and the fallback stops being used.
+   */
+  formEndpoint: '',
+};
+
+/**
+ * The line that cycles beside the closing statement.
+ *
+ * These are deliberately claims about how the studio works, not figures.
+ * A number ("6 weeks average", "48h median reply") reads as measurement and
+ * has to survive someone checking it; a statement about your own process is
+ * a promise you control. Cut any line here you wouldn't repeat on a call —
+ * this is the last thing a visitor reads, so it has to be true.
+ */
+export const reasons = [
+  'One team designs it, builds it, and ships it.',
+  'We automate our own work first, then yours.',
+  'Weekly demos, so you see it long before it’s done.',
+  'You get the code, the docs, and the training.',
+  'Short cycles. Weeks, not quarters.',
+];
+
+/**
+ * How urgent the work is. This is the question a budget bracket was really
+ * standing in for: it tells us whether to answer with a slot or a proposal,
+ * and unlike a price it costs the visitor nothing to answer honestly.
+ */
+export const deadlineOptions = [
+  'Yes',
+  'No, I’m in no rush',
+  'No deadline, but asap please',
+];
+
+/**
+ * Where the request came from. Swap these for whichever channels are
+ * actually running — a list naming places you don't appear collects noise,
+ * and the only reason to ask is to learn which spend is working.
+ */
+export const sourceOptions = [
+  'Google',
+  'LinkedIn',
+  'Instagram',
+  'Facebook',
+  'A referral',
+  'Other',
 ];

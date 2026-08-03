@@ -1,39 +1,483 @@
-<section id="contact" class="relative" data-assemble aria-label="Contact">
-  <div
-    class="card card-paper draft-grid-dark relative flex min-h-[70svh] flex-col justify-between gap-12 overflow-hidden p-7 md:p-14"
-    data-piece="scale"
-  >
-    <p class="label-mono">04 — Contact</p>
+---
+import { contact, deadlineOptions, sourceOptions, services, reasons } from '../data/site';
 
-    <div>
-      <h2 class="heading max-w-4xl text-5xl sm:text-6xl md:text-8xl">
-        <span data-typein>Have something to build?</span><span class="caret" aria-hidden="true"></span>
+// Row 01's options are derived from the services array rather than typed out
+// again, so the form can never offer something the Services section doesn't
+// sell. "Something else" catches the rest without inviting a wishlist.
+const helpOptions = [...services.map((s) => s.title), 'Something else'];
+
+// Split for the staggered swap. Done here rather than in the browser so the
+// words ship in the markup — the animation is presentation, and the text has
+// to be complete with no JS.
+const reasonWords = reasons.map((reason) => reason.split(' '));
+
+// Social glyphs, drawn as strokes in a 24-unit box to match the line-mark
+// language the service cards already use. Brand marks rendered as outlines
+// stay recognisable and stop the row from turning into three logo stickers.
+const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
+  linkedin: [
+    { d: 'M4 4h16v16H4z' },
+    { d: 'M8 11v6' },
+    { d: 'M8 8.2v.1' },
+    { d: 'M12 17v-6' },
+    { d: 'M12 13.4c0-1.5 1-2.5 2.3-2.5s2.3 1 2.3 2.5V17' },
+  ],
+  instagram: [
+    { d: 'M7.5 4h9A3.5 3.5 0 0 1 20 7.5v9a3.5 3.5 0 0 1-3.5 3.5h-9A3.5 3.5 0 0 1 4 16.5v-9A3.5 3.5 0 0 1 7.5 4Z' },
+    { d: 'M15.5 12a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z' },
+    { d: 'M16.9 7.3v.01' },
+  ],
+  facebook: [
+    { d: 'M4 4h16v16H4z' },
+    { d: 'M15.4 8.2h-1.1c-1 0-1.6.6-1.6 1.6V17' },
+    { d: 'M10.9 12.5h4.2' },
+  ],
+};
+---
+
+<!-- contact: the last block on the page. Left states the invitation, right
+     holds the three ways to act on it, loudest last. -->
+{/* full viewport height, so the page closes on a held beat rather than
+    trailing off. The statement takes the leftover height and the two
+    action rows sit at the bottom — nothing is centred in a void. */}
+<section
+  class="contact min-h-screen flex flex-col scroll-mt-9 pt-[clamp(72px,11vh,130px)] px-[clamp(8px,1.2vw,18px)] pb-[clamp(18px,2.6vh,28px)] border-t border-[rgba(255,255,255,.08)]"
+  id="contact"
+>
+  {/* the statement. Larger than the hero h1 on purpose: the hero opens the
+      argument, this closes it, and it is the last thing anyone reads. */}
+  <div class="flex-1 flex flex-wrap items-center justify-between gap-x-[clamp(32px,6vw,88px)] gap-y-[clamp(36px,5vh,56px)] py-[clamp(40px,7vh,90px)]">
+    <div class="flex-1 min-w-[300px]">
+      <h2 class="contact-statement text-[clamp(2.6rem,8vw,6.5rem)] font-normal tracking-[-.035em] leading-[.94] text-[#f2f2f2] max-w-[15ch] text-balance">
+        Tell us what you’re building.
       </h2>
-      <p class="mt-6 max-w-md text-base text-ink/70 md:text-lg">
-        Tell us what you want to automate, ship or replace — reply within 48h, no sales call.
+      <p class="mt-[clamp(18px,3vh,32px)] max-w-[42ch] text-[clamp(1rem,1.45vw,1.2rem)] leading-[1.4] text-grey-300 text-pretty">
+        We reply within 48 hours, and there’s no sales call.
       </p>
     </div>
 
-    <div>
-      <a
-        href="mailto:infiniblackteam@gmail.com"
-        data-flicker
-        class="heading break-all text-2xl text-ink no-underline underline-offset-8 hover:underline active:underline sm:text-4xl md:text-6xl"
-      >
-        infiniblackteam@gmail.com
-      </a>
-
-      <div class="mt-8 flex flex-wrap gap-3" data-piece="up">
-        <span class="rounded-full border border-ink/15 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-ink/60">
-          Remote — worldwide
-        </span>
-        <span class="rounded-full border border-ink/15 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-ink/60">
-          Response &lt; 48h
-        </span>
-        <span class="rounded-full border border-ink/15 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-ink/60">
-          Taking Q3 2026 builds
-        </span>
+    {/* The column that used to be dead space, now carrying the argument.
+        Every line is in the DOM — the rotation is visual only, so a screen
+        reader gets the whole list rather than whichever line happened to be
+        showing. The ticks say "this is a list being stepped through", which
+        is what stops it reading as text that wanders on its own. */}
+    <div class="contact-why">
+      <div class="contact-why__ticks" aria-hidden="true">
+        {reasons.map((_, i) => <span class:list={['contact-why__tick', i === 0 && 'is-current']}></span>)}
       </div>
+
+      <ul class="contact-why__list" data-reasons>
+        {reasonWords.map((words, i) => (
+          <li class:list={['contact-why__item', i === 0 && 'is-current']}>
+            {/* the space between words is a real text node, not a margin —
+                so the line still reads and copies as a sentence */}
+            {words.map((word, w) => (
+              <Fragment>
+                <span class="contact-why__word" style={`--i:${w}`}>{word}</span>{' '}
+              </Fragment>
+            ))}
+          </li>
+        ))}
+      </ul>
     </div>
   </div>
+
+  {/* the two doors. Full-bleed rows rather than buttons: the hairline rule
+      is this site's unit everywhere else, and stacked rules fill the height
+      structurally instead of leaving small controls floating in it. */}
+  <div class="contact-actions">
+    <button class="contact-action" type="button" data-contact-open>
+      {/* "Make a request", not "Start a project": nobody arriving cold is
+          ready to start one, and the button has to name what they're
+          actually about to do — ask us something. */}
+      <span class="contact-action__label">Make a request</span>
+      <span class="contact-action__meta">Seven questions, two minutes</span>
+      <span class="contact-action__mark" aria-hidden="true">
+        <svg viewBox="0 0 100 170" fill="currentColor" aria-hidden="true">
+          <path d="M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z" />
+        </svg>
+      </span>
+    </button>
+
+    <a class="contact-action" href={`mailto:${contact.email}`}>
+      <span class="contact-action__label">{contact.email}</span>
+      <span class="contact-action__meta">Or just write to us</span>
+      <span class="contact-action__mark contact-action__mark--arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 18 18 6M8.5 6H18v9.5" />
+        </svg>
+      </span>
+    </a>
+  </div>
+
+  {/* standing line: the footer the page never had. Socials live here rather
+      than in a row of their own — three 22px glyphs can't carry a row. */}
+  <div class="contact-foot">
+    <p>© {new Date().getFullYear()} infiniblack</p>
+
+    <ul class="flex items-center gap-4 list-none">
+      {contact.socials.map((social) => (
+        <li>
+          <a
+            class="contact-social block text-grey-300 no-underline"
+            href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={social.label}
+          >
+            <svg
+              class="w-[18px] h-[18px] block"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+              stroke-linejoin="round"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              {glyphs[social.icon].map((g) => <path d={g.d} fill={g.fill ? 'currentColor' : 'none'} />)}
+            </svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <p>Currently taking Q3 2026 builds</p>
+  </div>
 </section>
+
+<!-- request modal -->
+{/* A native <dialog>: Esc-to-close, focus trapping and inerting the page
+    behind it are the browser's job, not ours. The only thing showModal()
+    doesn't do is lock body scroll, which the script below handles. */}
+<dialog class="contact-dialog" id="contact-dialog" aria-labelledby="contact-dialog-title" data-endpoint={contact.formEndpoint} data-email={contact.email}>
+  <div class="contact-dialog__inner">
+    <header class="flex items-start justify-between gap-6 pb-[clamp(24px,4vh,44px)]">
+      <div>
+        <h2 class="text-[clamp(2rem,5vw,3.4rem)] font-normal tracking-[-.025em] leading-[1] text-[#f2f2f2]" id="contact-dialog-title">Make a request.</h2>
+        <p class="mt-[clamp(8px,1.2vh,12px)] text-[.95rem] text-grey-300">Seven questions, about two minutes.</p>
+      </div>
+      <button class="contact-dialog__close shrink-0 grid place-items-center w-10 h-10" type="button" aria-label="Close" data-contact-close>
+        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M3 3l10 10M13 3L3 13" />
+        </svg>
+      </button>
+    </header>
+
+    <form class="contact-form" novalidate>
+      {/* 01 — checkboxes, not radios: this is genuinely multi-select. Every
+          mark on the form is a diamond now, so pick-many is signalled by the
+          mark filling solid where the single-choice rows take an inner dot.
+          role="group" + aria-labelledby rather than fieldset/legend: a
+          legend is taken out of flow and can't be placed as a grid item
+          reliably across browsers. */}
+      <div class="contact-row" role="group" aria-labelledby="contact-help-label">
+        <span class="contact-row__num" aria-hidden="true">01</span>
+        <span class="contact-row__q" id="contact-help-label">What can we help with?</span>
+        <div class="contact-row__control">
+          <ul class="contact-options list-none" data-help-group>
+            {helpOptions.map((option) => (
+              <li>
+                <label class="contact-option">
+                  <input type="checkbox" name="help" value={option} />
+                  <span class="contact-mark contact-mark--multi" aria-hidden="true"></span>
+                  <span class="contact-option__text">{option}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+          <p class="contact-row__error" data-error-for="help" hidden>Pick at least one.</p>
+        </div>
+      </div>
+
+      <div class="contact-row">
+        <span class="contact-row__num" aria-hidden="true">02</span>
+        <label class="contact-row__q" for="contact-name">Your name</label>
+        <div class="contact-row__control">
+          <input class="contact-input" id="contact-name" name="name" type="text" autocomplete="name" placeholder="Enter name" required />
+          <p class="contact-row__error" data-error-for="name" hidden>We need a name to reply to.</p>
+        </div>
+      </div>
+
+      <div class="contact-row">
+        <span class="contact-row__num" aria-hidden="true">03</span>
+        <label class="contact-row__q" for="contact-email">Your email</label>
+        <div class="contact-row__control">
+          <input class="contact-input" id="contact-email" name="email" type="email" autocomplete="email" placeholder="Enter email" required />
+          <p class="contact-row__error" data-error-for="email" hidden>That address doesn’t look right.</p>
+        </div>
+      </div>
+
+      <div class="contact-row">
+        <span class="contact-row__num" aria-hidden="true">04</span>
+        <label class="contact-row__q" for="contact-details">
+          Project details
+          <span class="contact-row__hint">Your project, goals, success criteria</span>
+        </label>
+        <div class="contact-row__control">
+          <textarea class="contact-input contact-textarea" id="contact-details" name="details" rows="4" placeholder="Enter details" required></textarea>
+          <p class="contact-row__error" data-error-for="details" hidden>Tell us a little about the project.</p>
+        </div>
+      </div>
+
+      {/* 05 — a native date input rather than a custom picker: it gets the
+          platform calendar, the phone keyboard and the locale format for
+          free. color-scheme:dark (see global.css) is what stops the picker
+          rendering as a white sheet inside a black modal. Optional — an
+          exact date is rarely known this early, and demanding one here
+          would cost more answers than it's worth. */}
+      <div class="contact-row">
+        <span class="contact-row__num" aria-hidden="true">05</span>
+        <label class="contact-row__q" for="contact-start">
+          When would you like to start?
+          <span class="contact-row__hint">Roughly is fine</span>
+        </label>
+        <div class="contact-row__control">
+          <input class="contact-input contact-date" id="contact-start" name="start" type="date" />
+        </div>
+      </div>
+
+      {/* 06 — the question the budget row was really asking. Urgency tells
+          us whether to reply with a slot or a proposal, and costs the
+          visitor nothing to answer honestly. */}
+      <div class="contact-row" role="radiogroup" aria-labelledby="contact-deadline-label">
+        <span class="contact-row__num" aria-hidden="true">06</span>
+        <span class="contact-row__q" id="contact-deadline-label">Do you have a deadline?</span>
+        <div class="contact-row__control">
+          <ul class="contact-options list-none">
+            {deadlineOptions.map((option) => (
+              <li>
+                <label class="contact-option">
+                  <input type="radio" name="deadline" value={option} required />
+                  <span class="contact-mark contact-mark--single" aria-hidden="true"></span>
+                  <span class="contact-option__text">{option}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+          <p class="contact-row__error" data-error-for="deadline" hidden>Pick one — “no rush” is a real answer.</p>
+        </div>
+      </div>
+
+      {/* 07 — for us, not for them, so it's optional and it goes last. */}
+      <div class="contact-row" role="radiogroup" aria-labelledby="contact-source-label">
+        <span class="contact-row__num" aria-hidden="true">07</span>
+        <span class="contact-row__q" id="contact-source-label">Where did you hear about us?</span>
+        <div class="contact-row__control">
+          <ul class="contact-options list-none">
+            {sourceOptions.map((option) => (
+              <li>
+                <label class="contact-option">
+                  <input type="radio" name="source" value={option} />
+                  <span class="contact-mark contact-mark--single" aria-hidden="true"></span>
+                  <span class="contact-option__text">{option}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <footer class="contact-form__footer">
+        <p class="text-[.82rem] text-grey-300">We reply within 48 hours. No sales call.</p>
+        <button class="contact-submit px-[clamp(20px,2.4vw,32px)] py-[clamp(13px,1.7vh,17px)] text-[.95rem] font-medium tracking-[-.005em]" type="submit">Send request</button>
+      </footer>
+    </form>
+
+    <div class="contact-sent" hidden>
+      <p class="text-[clamp(1.4rem,2.6vw,2rem)] font-normal tracking-[-.02em] text-[#f2f2f2]" data-sent-headline>Request sent.</p>
+      <p class="mt-[clamp(10px,1.4vh,14px)] max-w-[44ch] text-[1rem] leading-[1.45] text-grey-300" data-sent-body>
+        We’ll come back to you within 48 hours.
+      </p>
+      <button class="contact-submit mt-[clamp(24px,3vh,32px)] px-[clamp(20px,2.4vw,32px)] py-[clamp(13px,1.7vh,17px)] text-[.95rem] font-medium" type="button" data-contact-close>Close</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  // --- the rotating line --------------------------------------------------
+  const reasonList = document.querySelector('[data-reasons]');
+
+  if (reasonList && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const items = [...reasonList.querySelectorAll('.contact-why__item')];
+    const tickRow = document.querySelector('.contact-why__ticks');
+    const ticks = [...document.querySelectorAll('.contact-why__tick')];
+
+    // the fill animation's duration is the interval — read it back out of
+    // the stylesheet so there is one number, not two that can drift apart
+    const raw = tickRow ? getComputedStyle(tickRow).getPropertyValue('--cycle').trim() : '';
+    const cycle = raw.endsWith('ms') ? parseFloat(raw) : raw.endsWith('s') ? parseFloat(raw) * 1000 : 4200;
+
+    let current = 0;
+
+    if (items.length > 1) {
+      setInterval(() => {
+        current = (current + 1) % items.length;
+        items.forEach((el, i) => el.classList.toggle('is-current', i === current));
+        ticks.forEach((el, i) => {
+          el.classList.toggle('is-current', i === current);
+          el.classList.toggle('is-done', i < current);
+        });
+      }, cycle);
+    }
+  }
+
+  const dialog = document.getElementById('contact-dialog') as HTMLDialogElement | null;
+
+  if (dialog) {
+    const form = dialog.querySelector('.contact-form') as HTMLFormElement;
+    const sent = dialog.querySelector('.contact-sent') as HTMLElement;
+    const sentBody = dialog.querySelector('[data-sent-body]') as HTMLElement;
+    const submit = dialog.querySelector('.contact-submit') as HTMLButtonElement;
+
+    // --- open / close ---------------------------------------------------
+
+    const open = () => {
+      dialog.showModal();
+      // showModal() inerts the page but leaves it scrollable behind the
+      // backdrop; lock it and restore on close.
+      document.body.style.overflow = 'hidden';
+    };
+
+    const close = () => dialog.close();
+
+    document.querySelectorAll('[data-contact-open]').forEach((el) => el.addEventListener('click', open));
+    dialog.querySelectorAll('[data-contact-close]').forEach((el) => el.addEventListener('click', close));
+
+    dialog.addEventListener('close', () => {
+      document.body.style.overflow = '';
+    });
+
+    // click the backdrop to dismiss: the dialog element itself fills the
+    // viewport, so a click landing on it (not on .contact-dialog__inner)
+    // is a backdrop click.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) close();
+    });
+
+    // --- validation -----------------------------------------------------
+    // Written by hand rather than left to the browser: the native bubble is
+    // a light OS popover that would look pasted onto a dark full-screen
+    // modal, and it only ever shows one error at a time.
+
+    const showError = (name: string, show: boolean) => {
+      const el = dialog.querySelector(`[data-error-for="${name}"]`) as HTMLElement | null;
+      if (el) el.hidden = !show;
+      return show;
+    };
+
+    const helpChecked = () => form.querySelectorAll<HTMLInputElement>('input[name="help"]:checked').length > 0;
+
+    const validate = () => {
+      const name = (form.elements.namedItem('name') as HTMLInputElement).value.trim();
+      const email = (form.elements.namedItem('email') as HTMLInputElement);
+      const details = (form.elements.namedItem('details') as HTMLTextAreaElement).value.trim();
+      const deadline = form.querySelector('input[name="deadline"]:checked');
+
+      // evaluate every field, so all the errors surface in one pass
+      const errors = [
+        showError('help', !helpChecked()),
+        showError('deadline', !deadline),
+        showError('name', !name),
+        showError('email', !email.value.trim() || !email.validity.valid),
+        showError('details', !details),
+      ];
+
+      return !errors.some(Boolean);
+    };
+
+    // clear a field's error as soon as it is answered — errors that linger
+    // after the fix make the form feel broken
+    form.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.name === 'help') showError('help', !helpChecked());
+      else if (target.name) showError(target.name, false);
+
+      // the date field dims its own empty "yyyy-mm-dd" like a placeholder,
+      // so it has to say when it stops being empty (see .contact-date)
+      if (target.type === 'date') target.classList.toggle('has-value', !!target.value);
+    });
+
+    // --- submit ---------------------------------------------------------
+
+    const payload = () => {
+      const data = new FormData(form);
+      return {
+        help: data.getAll('help').join(', '),
+        name: String(data.get('name') ?? ''),
+        email: String(data.get('email') ?? ''),
+        details: String(data.get('details') ?? ''),
+        start: String(data.get('start') ?? ''),
+        deadline: String(data.get('deadline') ?? ''),
+        source: String(data.get('source') ?? ''),
+      };
+    };
+
+    // No endpoint configured yet (the site is static, there is no server of
+    // ours to POST to) — hand the answers to the visitor's mail client so
+    // the form is never a dead end.
+    const mailtoFallback = (body: ReturnType<typeof payload>) => {
+      // the optional answers are spread in rather than printed empty — a
+      // mail body with "Start:" and nothing after it reads as a bug
+      const lines = [
+        `Looking for: ${body.help}`,
+        `Name: ${body.name}`,
+        ...(body.start ? [`Wants to start: ${body.start}`] : []),
+        `Deadline: ${body.deadline}`,
+        ...(body.source ? [`Heard about us via: ${body.source}`] : []),
+        '',
+        body.details,
+      ].join('\n');
+      const href =
+        `mailto:${dialog.dataset.email}` +
+        `?subject=${encodeURIComponent(`Project request — ${body.name}`)}` +
+        `&body=${encodeURIComponent(lines)}`;
+      window.location.href = href;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate()) {
+        (dialog.querySelector('.contact-row__error:not([hidden])') as HTMLElement | null)
+          ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+
+      const body = payload();
+      const endpoint = dialog.dataset.endpoint;
+
+      if (!endpoint) {
+        mailtoFallback(body);
+        sentBody.textContent =
+          'Your mail app should be opening with the details filled in — send it and we’ll take it from there.';
+      } else {
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify(body),
+          });
+          if (!res.ok) throw new Error(String(res.status));
+        } catch {
+          // never strand a real lead on a failed request
+          mailtoFallback(body);
+          sentBody.textContent =
+            'We couldn’t send that from here, so your mail app is opening with the details filled in instead.';
+          submit.disabled = false;
+          submit.textContent = 'Send request';
+          form.hidden = true;
+          sent.hidden = false;
+          return;
+        }
+        submit.disabled = false;
+        submit.textContent = 'Send request';
+      }
+
+      form.hidden = true;
+      sent.hidden = false;
+      (sent.querySelector('[data-contact-close]') as HTMLElement | null)?.focus();
+    });
+  }
+</script>

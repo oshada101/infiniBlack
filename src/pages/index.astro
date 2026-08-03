@@ -1,20 +1,69 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
-import Marquee from '../components/Marquee.astro';
 import Services from '../components/Services.astro';
 import Work from '../components/Work.astro';
-import Process from '../components/Process.astro';
 import Contact from '../components/Contact.astro';
+import Loader from '../components/Loader.astro';
+
+const base = import.meta.env.BASE_URL;
 ---
 
 <Layout>
-  <div id="top"></div>
-  <Hero />
-  <Marquee />
-  <Services />
-  <Work />
-  <Process />
-  <Marquee />
-  <Contact />
+  <!-- ===== PAGE ===== -->
+  <main class="page relative min-h-screen flex flex-col text-white bg-ink">
+    <Nav base={base} />
+    <Hero base={base} />
+    <Services />
+    <Work base={base} />
+    <Contact />
+  </main>
+
+  <Loader />
 </Layout>
+
+<script>
+  // nav is solid over the hero video, transparent once scrolled past it
+  const nav = document.querySelector('.nav');
+  const heroMedia = document.querySelector('.hero-media');
+  if (nav && heroMedia) {
+    const syncNav = () => {
+      // switch when the video is nearly scrolled out (leave the nav's own height)
+      const threshold = (heroMedia as HTMLElement).offsetHeight - (nav as HTMLElement).offsetHeight;
+      nav.classList.toggle('is-transparent', window.scrollY > threshold);
+    };
+    syncNav();
+    window.addEventListener('scroll', syncNav, { passive: true });
+    window.addEventListener('resize', syncNav);
+  }
+
+  // scrollspy: highlight the nav link for the section currently in view
+  // must stay in document order — the loop below takes the last section
+  // whose top has crossed the line
+  const spySections = [
+    { el: document.querySelector('.hero'), link: document.querySelector('.nav__links a[href="#"]') },
+    { el: document.querySelector('#services'), link: document.querySelector('.nav__links a[href="#services"]') },
+    { el: document.querySelector('#work'), link: document.querySelector('.nav__links a[href="#work"]') },
+    // "Contact Us" sits in .nav__right, not with the other links
+    { el: document.querySelector('#contact'), link: document.querySelector('.nav__right a[href="#contact"]') },
+  ].filter((s) => s.el && s.link) as { el: Element; link: Element }[];
+
+  if (spySections.length) {
+    const setActive = (link: Element) => {
+      spySections.forEach((s) => s.link.classList.toggle('is-active', s.link === link));
+    };
+    const syncSpy = () => {
+      // the section crossing just below the nav is the active one
+      const line = (nav ? (nav as HTMLElement).offsetHeight : 36) + 1;
+      let current = spySections[0];
+      for (const s of spySections) {
+        if (s.el.getBoundingClientRect().top <= line) current = s;
+      }
+      setActive(current.link);
+    };
+    syncSpy();
+    window.addEventListener('scroll', syncSpy, { passive: true });
+    window.addEventListener('resize', syncSpy);
+  }
+</script>

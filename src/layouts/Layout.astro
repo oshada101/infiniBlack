@@ -1,11 +1,5 @@
 ---
-import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
-import '@fontsource-variable/archivo';
-import '@fontsource-variable/martian-mono';
-import Nav from '../components/Nav.astro';
-import Footer from '../components/Footer.astro';
-import Loader from '../components/Loader.astro';
 
 interface Props {
   title?: string;
@@ -13,45 +7,33 @@ interface Props {
 }
 
 const {
-  title = 'INFINI BLACK — AI systems, automation, websites & apps',
+  title = 'Infiniblack — a product engineering studio',
   description =
-    'Infini Black designs and ships AI systems, automation pipelines, websites and apps. The site builds itself — so does your product.',
+    'infiniblack is a product engineering studio. AI systems and complete web, mobile, and desktop products, designed by one team and engineered for the years they will actually run.',
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#0a0a0d" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/png" href={`${import.meta.env.BASE_URL}favicon.png`} />
     <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap"
+      rel="stylesheet"
+    />
     <title>{title}</title>
-    <script is:inline>document.documentElement.classList.add('js');</script>
-    <ClientRouter />
   </head>
-  <body class="bg-ink text-paper antialiased">
-    <Loader />
-    <Nav />
-    <main class="flex flex-col gap-4 px-4 pb-4 pt-[4.5rem] lg:pl-[12rem] lg:pt-0 ">
-      <slot />
-    </main>
-    <Footer />
-
-    <!-- page-transition curtain, driven from assembly.ts -->
-    <div id="curtain" aria-hidden="true" transition:persist="curtain">
-      <div class="curtain-panel bg-violet"></div>
-      <div class="curtain-panel bg-[#161616]"></div>
-      <div class="curtain-panel bg-acid"></div>
-      <div class="curtain-panel bg-[#161616]"></div>
-      <div class="curtain-panel bg-violet"></div>
-    </div>
-
-    <script src="../scripts/assembly.ts"></script>
+  <body class="h-full font-display bg-ink overflow-x-clip">
+    <slot />
   </body>
 </html>
