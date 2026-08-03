@@ -14,7 +14,7 @@ const { base } = Astro.props;
 
   <div class="work-list relative ">
     {workItems.map((item) => (
-      <article class="work-item flex flex-wrap gap-[clamp(24px,3vw,48px)] py-[clamp(30px,3.5vh,38px)] shadow-[0_-1px_0_rgba(255,255,255,.12)]">
+      <article class="work-item flex flex-wrap gap-[clamp(24px,3vw,48px)] py-[clamp(16px,2vh,22px)] shadow-[0_-1px_0_rgba(255,255,255,.12)]">
         {item.media.kind === 'hover-video' ? (
           <a
             class="work-item__media work-item__media--hover-video group relative flex-[1_1_55%] min-w-[280px] aspect-video border border-[rgba(255,255,255,.1)] flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
