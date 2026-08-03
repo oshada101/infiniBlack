@@ -1,4 +1,4 @@
-// Content for the homepage "Services" and "Work" sections.
+// Content for the homepage "Services", "Work" and "Contact" sections.
 
 // --- services -------------------------------------------------------------
 
@@ -109,4 +109,53 @@ export const workItems: WorkItem[] = [
       },
     },
   },
+];
+
+// --- contact --------------------------------------------------------------
+
+export interface SocialLink {
+  label: string;
+  href: string;
+  /** selects one of the inline glyphs drawn in Contact.astro */
+  icon: 'instagram' | 'linkedin' | 'facebook';
+}
+
+export const contact = {
+  email: 'hello@infiniblack.com',
+
+  // TODO: replace with the real profile URLs before this ships. Order is
+  // deliberate — LinkedIn is where a B2B buyer actually checks you out.
+  socials: [
+    { label: 'LinkedIn', href: '#', icon: 'linkedin' },
+    { label: 'Instagram', href: '#', icon: 'instagram' },
+    { label: 'Facebook', href: '#', icon: 'facebook' },
+  ] as SocialLink[],
+
+  /**
+   * Where the request form POSTs (Formspree, Web3Forms, or any endpoint
+   * that accepts JSON). The site is static on GitHub Pages, so there is no
+   * server of our own to receive it.
+   *
+   * Left empty on purpose: while it is empty the form falls back to opening
+   * the visitor's mail client with every answer pre-filled, so the modal is
+   * never a dead end. Set it and the fallback stops being used.
+   */
+  formEndpoint: '',
+};
+
+/**
+ * Budget brackets, in USD. Deliberately floored lower than the agency-deck
+ * default of "$10k minimum" — the buyer this site is written for (see the
+ * Services copy) is a small-business owner, and a ladder that starts above
+ * their number reads as "not for you" and closes the tab.
+ *
+ * "Not sure yet" is not padding. A required budget question with no escape
+ * hatch is where forms like this lose people who would have been good leads.
+ */
+export const budgetOptions = [
+  'Under $5k',
+  '$5k – $15k',
+  '$15k – $50k',
+  '$50k+',
+  'Not sure yet',
 ];

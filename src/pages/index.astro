@@ -4,6 +4,7 @@ import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
 import Services from '../components/Services.astro';
 import Work from '../components/Work.astro';
+import Contact from '../components/Contact.astro';
 import Loader from '../components/Loader.astro';
 
 const base = import.meta.env.BASE_URL;
@@ -16,6 +17,7 @@ const base = import.meta.env.BASE_URL;
     <Hero base={base} />
     <Services />
     <Work base={base} />
+    <Contact />
   </main>
 
   <Loader />
@@ -43,6 +45,8 @@ const base = import.meta.env.BASE_URL;
     { el: document.querySelector('.hero'), link: document.querySelector('.nav__links a[href="#"]') },
     { el: document.querySelector('#services'), link: document.querySelector('.nav__links a[href="#services"]') },
     { el: document.querySelector('#work'), link: document.querySelector('.nav__links a[href="#work"]') },
+    // "Contact Us" sits in .nav__right, not with the other links
+    { el: document.querySelector('#contact'), link: document.querySelector('.nav__right a[href="#contact"]') },
   ].filter((s) => s.el && s.link) as { el: Element; link: Element }[];
 
   if (spySections.length) {
