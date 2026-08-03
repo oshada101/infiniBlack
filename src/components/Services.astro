@@ -1,0 +1,114 @@
+---
+import { services } from '../data/site';
+
+const featured = services.find((s) => s.featured);
+const rest = services.filter((s) => !s.featured);
+
+// Card marks, drawn in a 40-unit box at the brand diamond's proportion.
+// One shape, three silhouettes that stay distinct at a glance: a diamond
+// with a solid header band (a page), two diamonds at different sizes
+// (a phone and a desktop), and four diamonds clustered into one (many
+// things in one place).
+const marks: Record<string, { d: string; fill?: boolean }[]> = {
+  websites: [
+    { d: 'M20 1 31 20 20 39 9 20Z' },
+    { d: 'M20 1 27 13 13 13Z', fill: true },
+  ],
+  apps: [
+    { d: 'M11 10 16.9 20 11 30 5.1 20Z' },
+    { d: 'M27 4 36.4 20 27 36 17.6 20Z' },
+  ],
+  business: [
+    { d: 'M20 2 24.7 10 20 18 15.3 10Z' },
+    { d: 'M12 12 16.7 20 12 28 7.3 20Z' },
+    { d: 'M28 12 32.7 20 28 28 23.3 20Z' },
+    { d: 'M20 22 24.7 30 20 38 15.3 30Z' },
+  ],
+};
+---
+
+<!-- services: what we sell, in the buyer's words -->
+<section
+  class="services scroll-mt-9 pt-[clamp(80px,12vh,140px)] px-[clamp(8px,1.2vw,18px)] pb-[clamp(40px,6vh,80px)] border-t border-[rgba(255,255,255,.08)]"
+  id="services"
+>
+  <h2 class="text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Services.</h2>
+
+  {featured && (
+    <article class="services-card flex flex-wrap items-center gap-[clamp(24px,3.5vw,56px)] mt-[clamp(12px,1.4vw,18px)] p-[clamp(24px,2.8vw,44px)]">
+      {/* the loader's fluid diamond, returning to the page it opened.
+          static shape — the dot-to-diamond reveal belongs to the entrance.
+          ids are svc-prefixed: the loader's originals live in the DOM for
+          the first few seconds and url(#…) refs would collide. */}
+      <div class="services-diamond">
+        <svg viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <clipPath id="svc-diamond" clipPathUnits="userSpaceOnUse">
+              <path d="M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z" />
+            </clipPath>
+            <filter id="svc-goo" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="11" />
+            </filter>
+            <radialGradient id="svc-gCoral" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff6a37" stop-opacity="1" /><stop offset="55%" stop-color="#ff6a37" stop-opacity=".85" /><stop offset="100%" stop-color="#ff6a37" stop-opacity="0" /></radialGradient>
+            <radialGradient id="svc-gOrange" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff9a2e" stop-opacity="1" /><stop offset="55%" stop-color="#ff9a2e" stop-opacity=".85" /><stop offset="100%" stop-color="#ff9a2e" stop-opacity="0" /></radialGradient>
+            <radialGradient id="svc-gPurple" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#9a5cff" stop-opacity="1" /><stop offset="55%" stop-color="#9a5cff" stop-opacity=".85" /><stop offset="100%" stop-color="#9a5cff" stop-opacity="0" /></radialGradient>
+            <radialGradient id="svc-gBlue" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3f6bff" stop-opacity="1" /><stop offset="55%" stop-color="#3f6bff" stop-opacity=".85" /><stop offset="100%" stop-color="#3f6bff" stop-opacity="0" /></radialGradient>
+            <radialGradient id="svc-gMagenta" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff3f9a" stop-opacity="1" /><stop offset="55%" stop-color="#ff3f9a" stop-opacity=".85" /><stop offset="100%" stop-color="#ff3f9a" stop-opacity="0" /></radialGradient>
+          </defs>
+
+          <g clip-path="url(#svc-diamond)">
+            <rect x="0" y="0" width="100" height="170" fill="#fff" />
+            <g filter="url(#svc-goo)">
+              <circle class="blob b1" cx="50" cy="66" r="38" fill="url(#svc-gCoral)" />
+              <circle class="blob b2" cx="50" cy="104" r="38" fill="url(#svc-gPurple)" />
+              <circle class="blob b3" cx="50" cy="58" r="34" fill="url(#svc-gBlue)" />
+              <circle class="blob b4" cx="50" cy="112" r="32" fill="url(#svc-gMagenta)" />
+              <circle class="blob b5" cx="50" cy="85" r="34" fill="url(#svc-gOrange)" />
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="flex-1 min-w-[260px]">
+        <h3 class="text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-[#f2f2f2] tracking-[-.015em] leading-[1.05]">{featured.title}</h3>
+        <p class="mt-[clamp(8px,1.2vh,12px)] text-[clamp(1.05rem,1.6vw,1.35rem)] leading-[1.35] text-grey-100 max-w-[34ch] text-pretty">{featured.desc}</p>
+      </div>
+
+      {/* pills can't fill a banner this wide — the examples get room to
+          say what they actually do instead */}
+      {featured.details && (
+        <dl class="services-detail flex-1 min-w-[280px] max-w-[520px]">
+          {featured.details.map((detail) => (
+            <div class="services-detail__row py-[clamp(10px,1.4vh,15px)]">
+              <dt class="text-[.95rem] font-medium text-[#f2f2f2] tracking-[-.005em]">{detail.label}</dt>
+              <dd class="mt-1 text-[.88rem] leading-[1.4] text-grey-300 text-pretty">{detail.body}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </article>
+  )}
+
+  <div class="grid grid-cols-3 gap-[clamp(12px,1.4vw,18px)] mt-[clamp(12px,1.4vw,18px)] max-[860px]:grid-cols-1">
+    {rest.map((service) => (
+      <article class="services-card flex flex-col p-[clamp(22px,2.4vw,36px)]">
+        <svg
+          class="w-10 h-10 mb-[clamp(18px,2.2vh,26px)] shrink-0"
+          viewBox="0 0 40 40"
+          fill="none"
+          stroke="#f2f2f2"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          {marks[service.icon].map((m) => <path d={m.d} fill={m.fill ? '#f2f2f2' : 'none'} />)}
+        </svg>
+        <h3 class="text-[clamp(1.15rem,1.8vw,1.4rem)] font-normal text-[#f2f2f2] tracking-[-.015em] leading-[1.2] text-balance">{service.title}</h3>
+        <p class="mt-[clamp(8px,1.2vh,12px)] flex-1 text-[.95rem] leading-[1.45] text-grey-300 text-pretty">{service.desc}</p>
+        <ul class="mt-[clamp(18px,2.2vh,26px)] flex flex-wrap gap-2 list-none">
+          {(service.tags ?? []).map((tag) => <li class="services-tag px-[10px] py-1 text-[.72rem] font-medium tracking-[.02em] text-grey-300">{tag}</li>)}
+        </ul>
+      </article>
+    ))}
+  </div>
+</section>

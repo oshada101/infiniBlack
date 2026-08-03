@@ -53,6 +53,38 @@ html {
 }
 .nav__links a.is-active sup { color: rgba(255, 90, 42, .8); }
 
+/* --- services ---------------------------------------------------------- *
+ *  Card surfaces sit one step off the page ground; the hairline is the
+ *  only thing that moves on hover. All the section's boldness is spent on
+ *  the fluid diamond in the AI card.
+ * ------------------------------------------------------------------------ */
+/* no fill — the page ground shows through and the hairline does all the
+   work. the top edge catches more light than the sides. */
+.services-card {
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-top-color: rgba(255, 255, 255, .14);
+  transition: border-color .2s ease;
+}
+.services-card:hover {
+  border-color: rgba(255, 255, 255, .12);
+  border-top-color: rgba(255, 255, 255, .26);
+}
+
+.services-tag { border: 1px solid rgba(255, 255, 255, .1); }
+
+/* hairline-separated rows, no box around them — the card is the box */
+.services-detail__row { border-top: 1px solid rgba(255, 255, 255, .08); }
+.services-detail__row:first-child { border-top: none; padding-top: 0; }
+.services-detail__row:last-child { padding-bottom: 0; }
+
+/* the diamond stays whole — its points are the shape. it sits beside the
+   copy and is never cropped. */
+.services-diamond {
+  flex: none;
+  width: clamp(88px, 9.5vw, 128px);
+}
+.services-diamond svg { display: block; width: 100%; height: auto; }
+
 /* --- work: featured projects list --- */
 
 /* the "Featured Work" heading stays pinned at the top for the whole
