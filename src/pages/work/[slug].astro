@@ -1,0 +1,83 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Loader from '../../components/Loader.astro';
+import { workItems, workPhases } from '../../data/site';
+
+export function getStaticPaths() {
+  return workItems.map((item) => ({ params: { slug: item.slug }, props: { item } }));
+}
+
+const { item } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<Layout title={`${item.title} — infiniblack`} description={item.desc}>
+  <main class="page relative min-h-screen flex flex-col text-white bg-ink">
+    <Nav base={base} home={base} active="work" />
+
+    {/* The nav, then the work — the same frame you clicked, at the size the
+        card was only ever standing in for. Full screen minus the nav's own
+        height, so the two read as one stack rather than the image sliding
+        under a bar. */}
+    <section class="project-media relative w-full mt-9 h-[calc(100dvh-2.25rem)] overflow-hidden bg-black">
+      <img
+        class="w-full h-full object-cover object-top"
+        src={`${base}${item.media.img.src}`}
+        alt={item.media.img.alt}
+        data-curtain-media
+      />
+    </section>
+
+    {/* the card's own caption, restated under the full-size frame so the
+        page isn't a picture with no name on it */}
+    <section class="project-info px-[clamp(8px,1.2vw,18px)] py-[clamp(28px,5vh,64px)]">
+      <div class="flex flex-wrap justify-between items-start gap-[clamp(20px,2.6vw,52px)] pb-[clamp(20px,3vh,34px)] border-b border-[rgba(255,255,255,.15)]">
+        <h1 class="text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] leading-[1.05] text-white text-balance">{item.title}</h1>
+        <p class="min-w-0 max-w-[38ch] text-[1.15rem] font-normal leading-[1.4] text-grey-200 text-pretty">{item.desc}</p>
+      </div>
+
+      <div class="flex flex-wrap justify-between items-start gap-[clamp(20px,2.6vw,52px)] pt-[clamp(16px,2.5vh,28px)]">
+        <ul class="list-none">
+          {item.tags.map((tag) => <li class="text-[.82rem] font-semibold uppercase tracking-[.08em] text-grey-300 leading-[1.9]">{tag}</li>)}
+        </ul>
+
+        <div class="work-item__phase min-w-[240px]" aria-label={`${item.statusLabel} — phase ${item.phase} of ${workPhases.length}`}>
+          <ol class="work-item__phase-track list-none">
+            {workPhases.map((phase, i) => (
+              <li class={`work-item__phase-seg${i < item.phase ? ' is-done' : ''}`} style={`--i:${i}`} title={phase}></li>
+            ))}
+          </ol>
+          <p class="work-item__phase-meta">
+            <span class="work-item__phase-now">{item.statusLabel}</span>
+            <span class="work-item__phase-count">{pad(item.phase)} / {pad(workPhases.length)}</span>
+          </p>
+        </div>
+      </div>
+
+      <a class="inline-block mt-[clamp(28px,5vh,56px)] text-[.82rem] font-semibold uppercase tracking-[.08em] text-grey-300 no-underline hover:text-white" href={`${base}#work`}>&larr; All work</a>
+    </section>
+  </main>
+
+  <Loader />
+</Layout>
+
+<script>
+  // same as the cards on the homepage: the track draws itself once, when the
+  // caption block arrives — it sits a screen below the fold here.
+  const phase = document.querySelector('.work-item__phase');
+  if (phase) {
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in-view');
+          obs.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(phase);
+  }
+</script>

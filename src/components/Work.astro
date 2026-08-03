@@ -1,5 +1,5 @@
 ---
-import { workItems, workPhases } from '../data/site';
+import { workItems, workPhases, workHref } from '../data/site';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -20,7 +20,7 @@ const { base } = Astro.props;
         {item.media.kind === 'hover-video' ? (
           <a
             class="work-item__media work-item__media--hover-video group relative flex-[1_1_55%] min-w-[280px] aspect-video border border-[rgba(255,255,255,.1)] flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
-            href={item.href}
+            href={workHref(base, item)}
           >
             <img
               class="work-item__media-img absolute inset-0 w-full h-full object-cover [transition:opacity_.2s_ease] group-hover:opacity-0"
@@ -40,7 +40,7 @@ const { base } = Astro.props;
         ) : (
           <a
             class="work-item__media group relative flex-[1_1_55%] min-w-[280px] aspect-video border border-[rgba(255,255,255,.1)] flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
-            href={item.href}
+            href={workHref(base, item)}
           >
             <img src={`${base}${item.media.img.src}`} alt={item.media.img.alt} style={item.media.img.style} />
             <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
@@ -52,7 +52,7 @@ const { base } = Astro.props;
               a jagged channel — same trick a newspaper nameplate uses. */}
           <div class="work-item__masthead flex justify-between items-start gap-[clamp(20px,2.6vw,52px)]">
             <p class="work-item__desc min-w-0 text-[1.15rem] font-normal leading-[1.4] text-grey-200 max-w-[30ch] text-pretty">{item.desc}</p>
-            <h3 class="work-item__title flex-initial text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-white tracking-[-.015em] leading-[1.05] text-right text-balance"><a class="text-inherit no-underline hover:underline hover:[text-underline-offset:.12em]" href={item.href}>{item.title}</a></h3>
+            <h3 class="work-item__title flex-initial text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-white tracking-[-.015em] leading-[1.05] text-right text-balance"><a class="text-inherit no-underline hover:underline hover:[text-underline-offset:.12em]" href={workHref(base, item)}>{item.title}</a></h3>
           </div>
 
           <div class="work-item__foot">

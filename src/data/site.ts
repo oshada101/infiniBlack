@@ -76,7 +76,8 @@ export interface WorkItemMediaImage {
 export const workPhases = ['Scope', 'Design', 'Build', 'Ship'] as const;
 
 export interface WorkItem {
-  href: string;
+  /** url segment for the project's own page, /work/<slug>/ */
+  slug: string;
   desc: string;
   /** phases completed, 1..workPhases.length. Full length = shipped. */
   phase: number;
@@ -89,7 +90,7 @@ export interface WorkItem {
 
 export const workItems: WorkItem[] = [
   {
-    href: '#',
+    slug: 'glorious-fitness-center',
     desc: 'Full marketing site for a fitness center — programs, trainers, memberships.',
     phase: 4,
     statusLabel: 'Shipped',
@@ -102,7 +103,7 @@ export const workItems: WorkItem[] = [
     },
   },
   {
-    href: '#',
+    slug: 'kratos',
     desc: 'Gym management system — members, billing, attendance, one dashboard.',
     phase: 3,
     statusLabel: 'In Build',
@@ -118,6 +119,10 @@ export const workItems: WorkItem[] = [
     },
   },
 ];
+
+/** Where a work card points. One place, so the cards and the routes that
+    back them can't drift apart. `base` is import.meta.env.BASE_URL. */
+export const workHref = (base: string, item: WorkItem) => `${base}work/${item.slug}/`;
 
 // --- contact --------------------------------------------------------------
 
