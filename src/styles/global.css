@@ -542,20 +542,38 @@ html {
 .contact-option:hover { color: #f2f2f2; }
 .contact-option input { position: absolute; opacity: 0; width: 0; height: 0; }
 
+/* every mark is the brand diamond. Shape can no longer carry pick-one vs
+   pick-many, so the checked state does it instead: multi fills solid, single
+   takes the radio's inner dot. That distinction has to live somewhere, or
+   the first answer silently replacing the last is the only way to find out
+   a row was single-choice. */
 .contact-mark {
+  position: relative;
   flex: none;
   width: 14px;
   height: 14px;
   border: 1px solid rgba(255, 255, 255, .35);
-  transition: background .15s ease, border-color .15s ease, transform .15s ease;
+  transform: rotate(45deg);
+  transition: background .15s ease, border-color .15s ease;
 }
-.contact-mark--circle { border-radius: 50%; }
-.contact-mark--diamond { transform: rotate(45deg); }
 
-.contact-option input:checked ~ .contact-mark {
+/* pick many — the whole diamond fills */
+.contact-option input:checked ~ .contact-mark--multi {
   background: #ff5a2a;
   border-color: #ff5a2a;
 }
+
+/* pick one — an inner diamond, which the 45° parent gives us for free */
+.contact-mark--single::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: #ff5a2a;
+  transform: scale(0);
+  transition: transform .15s cubic-bezier(.4, 1.6, .6, 1);
+}
+.contact-option input:checked ~ .contact-mark--single { border-color: #ff5a2a; }
+.contact-option input:checked ~ .contact-mark--single::after { transform: scale(1); }
 .contact-option input:checked ~ .contact-option__text { color: #fff; }
 .contact-option input:focus-visible ~ .contact-mark {
   outline: 2px solid #fff;
