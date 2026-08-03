@@ -54,7 +54,11 @@
      diamond would sit there fully formed for as long as hero.mp4 took, and
      forever if it stalled. Wait on the fonts, the video's FIRST FRAME and the
      diamond's own animations instead, floored so a warm cache still gets a
-     beat of it and capped so a slow network can't hold the page hostage. */
+     beat of it and capped so a slow network can't hold the page hostage.
+
+     Which element is the one to wait on depends on the page — the home hero's
+     video, a project page's full-screen still — so the page marks its own
+     with [data-curtain-media] rather than the curtain hunting for a hero. */
   const MIN_HOLD  = 2600; // ms from navigation; the diamond finishes at ~1.3s
   const PAD       = 1000; // deliberate extra beat after everything is ready
   const MAX_HOLD  = 6000; // ms from navigation; open regardless past this
@@ -107,14 +111,22 @@
     // let the display font swap in behind the curtain, not under the reader
     if (document.fonts) ready.push(document.fonts.ready);
 
-    // the hero only needs one frame to paint; waiting on the whole file is what
+    // a video only needs one frame to paint; waiting on the whole file is what
     // made this feel stuck. A dead src settles too — it must not trap anyone.
-    const video = document.querySelector<HTMLVideoElement>('.hero-media video');
-    if (video && video.readyState < 2 /* HAVE_CURRENT_DATA */) {
+    const media = document.querySelector<HTMLElement>('[data-curtain-media]');
+    const painted =
+      media instanceof HTMLVideoElement
+        ? media.readyState >= 2 /* HAVE_CURRENT_DATA */
+        : media instanceof HTMLImageElement
+          ? media.complete
+          : true;
+
+    if (media && !painted) {
       ready.push(
         new Promise<void>((settle) => {
-          video.addEventListener('loadeddata', () => settle(), { once: true });
-          video.addEventListener('error', () => settle(), { once: true });
+          const done = () => settle();
+          media.addEventListener(media instanceof HTMLVideoElement ? 'loadeddata' : 'load', done, { once: true });
+          media.addEventListener('error', done, { once: true });
         }),
       );
     }

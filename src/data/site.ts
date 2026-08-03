@@ -69,30 +69,39 @@ export interface WorkItemMediaImage {
   img: { src: string; alt: string; style: string };
 }
 
-/* The studio's pipeline, in order. The track under each work card fills to
-   the project's current phase, so "how far along is this" is legible from
-   the length of one rule instead of from the wording of a label. Adding a
-   phase here re-segments every track; nothing else needs to change. */
-export const workPhases = ['Scope', 'Design', 'Build', 'Ship'] as const;
-
 export interface WorkItem {
-  href: string;
+  /** url segment for the project's own page, /work/<slug>/ */
+  slug: string;
   desc: string;
-  /** phases completed, 1..workPhases.length. Full length = shipped. */
-  phase: number;
-  /** names the phase the project is *in*, shown beside the track */
-  statusLabel: string;
   title: string;
   tags: string[];
   media: WorkItemMediaHoverVideo | WorkItemMediaImage;
+
+  /* --- the project's own page ------------------------------------------ *
+   *  PLACEHOLDER COPY. Written to hold the shape of the layout; replace it
+   *  with what actually happened on each job before this goes out. Nothing
+   *  below invents a figure, a date or a name for that reason.
+   * --------------------------------------------------------------------- */
+
+  /** the write-up, one string per paragraph */
+  body: string[];
+  /** the column beside it: label above value, no rules, everything one size */
+  meta: { label: string; value: string }[];
+  /** what was actually handed over, under its own heading */
+  delivered: { heading: string; items: string[] };
+  /** the work itself, stacked under the write-up. Videos come first — the
+      page enforces that, so the order here is only a convenience. */
+  gallery: WorkGalleryItem[];
 }
+
+export type WorkGalleryItem =
+  | { kind: 'video'; src: string; poster?: string }
+  | { kind: 'image'; src: string; alt: string };
 
 export const workItems: WorkItem[] = [
   {
-    href: '#',
+    slug: 'glorious-fitness-center',
     desc: 'Full marketing site for a fitness center — programs, trainers, memberships.',
-    phase: 4,
-    statusLabel: 'Shipped',
     title: 'Glorious Fitness Center',
     tags: ['Marketing Site', 'Fitness', '2025'],
     media: {
@@ -100,12 +109,34 @@ export const workItems: WorkItem[] = [
       img: { src: 'projects/glorious.webp', alt: 'Glorious Fitness Center' },
       video: { src: 'projects/glorious.mp4' },
     },
+    body: [
+      'Glorious Fitness Center runs a full timetable, a room of trainers and a membership desk. What it did not have was anywhere to send someone who had heard about the place and wanted to know what it costs, who teaches, and when the doors open.',
+      'So the site does the work the front desk was doing twice a day. Programs are laid out the way a person asks about them — what it is, who it suits, when it runs — and every trainer gets a face and a name rather than a job title. The enquiry sits one tap away on every screen, because on a phone, in a car park, that is where the decision actually gets made.',
+    ],
+    meta: [
+      { label: 'Client', value: 'Glorious Fitness Center' },
+      { label: 'Role', value: 'Marketing site — design, build and launch' },
+    ],
+    delivered: {
+      heading: 'infiniblack for Glorious Fitness Center',
+      items: [
+        'Site design',
+        'Program and timetable pages',
+        'Trainer profiles',
+        'Membership enquiry flow',
+        'Photography and video direction',
+        'Copywriting',
+        'Launch and handover',
+      ],
+    },
+    gallery: [
+      { kind: 'video', src: 'projects/glorious.mp4', poster: 'projects/glorious.webp' },
+      { kind: 'image', src: 'projects/glorious.webp', alt: 'Glorious Fitness Center — home page' },
+    ],
   },
   {
-    href: '#',
+    slug: 'kratos',
     desc: 'Gym management system — members, billing, attendance, one dashboard.',
-    phase: 3,
-    statusLabel: 'In Build',
     title: 'Kratos',
     tags: ['Dashboard', 'Gym Management', 'Ongoing'],
     media: {
@@ -116,8 +147,39 @@ export const workItems: WorkItem[] = [
         style: 'width:100%;height:100%;object-fit:cover;',
       },
     },
+    body: [
+      'A gym knows things about itself that live in six different places: who is a member, who has paid, who actually turned up, who is on the floor this morning. Kratos is the one place to keep them, built so the person on the desk can answer any of those questions without opening anything else.',
+      'The work is ongoing. We build it in short cycles against a real gym running real days, which is the only way to find out that renewals matter more than reports and that attendance has to be one tap, not a form.',
+    ],
+    meta: [
+      { label: 'Client', value: 'Kratos' },
+      { label: 'Role', value: 'Product design and engineering, ongoing' },
+    ],
+    delivered: {
+      heading: 'infiniblack for Kratos',
+      items: [
+        'Member records',
+        'Billing and renewals',
+        'Attendance',
+        'Staff accounts and permissions',
+        'Reporting dashboard',
+        'Weekly build cycles',
+      ],
+    },
+    // alt text is honest but generic — replace it with what each screen
+    // actually shows, which only someone who has used the thing can write
+    gallery: [
+      { kind: 'image', src: 'projects/kratos-1.png', alt: 'Kratos gym management system — screen one' },
+      { kind: 'image', src: 'projects/kratos-2.png', alt: 'Kratos gym management system — screen two' },
+      { kind: 'image', src: 'projects/kratos-3.png', alt: 'Kratos gym management system — screen three' },
+      { kind: 'image', src: 'projects/kratos-4.png', alt: 'Kratos gym management system — screen four' },
+    ],
   },
 ];
+
+/** Where a work card points. One place, so the cards and the routes that
+    back them can't drift apart. `base` is import.meta.env.BASE_URL. */
+export const workHref = (base: string, item: WorkItem) => `${base}work/${item.slug}/`;
 
 // --- contact --------------------------------------------------------------
 

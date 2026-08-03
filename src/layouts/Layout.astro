@@ -4,13 +4,22 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  /** the page's ground. Ink everywhere the site has chrome on it; true
+      black where the work itself is the page and anything lighter than the
+      image's own black would show as a seam around it. */
+  ground?: 'ink' | 'black';
 }
 
 const {
   title = 'Infiniblack — a product engineering studio',
   description =
     'infiniblack is a product engineering studio. AI systems and complete web, mobile, and desktop products, designed by one team and engineered for the years they will actually run.',
+  ground = 'ink',
 } = Astro.props;
+
+// set on the body so it propagates to the canvas — overscroll past either
+// end of the page has to be the same colour as the page
+const groundClass = ground === 'black' ? 'bg-black' : 'bg-ink';
 ---
 
 <!doctype html>
@@ -19,7 +28,7 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#0a0a0d" />
+    <meta name="theme-color" content={ground === 'black' ? '#000000' : '#0a0a0d'} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -33,7 +42,7 @@ const {
     />
     <title>{title}</title>
   </head>
-  <body class="h-full font-display bg-ink overflow-x-clip">
+  <body class:list={['h-full font-display overflow-x-clip', groundClass]}>
     <slot />
   </body>
 </html>

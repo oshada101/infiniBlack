@@ -1,20 +1,28 @@
 ---
 interface Props {
   base: string;
+  /** where the section anchors live. Empty on the homepage, where they are
+      plain in-page anchors; the homepage URL on any other page. */
+  home?: string;
+  /** which link reads as current. The homepage hands this to its scrollspy
+      instead; a standalone page has no scroll to spy on. */
+  active?: 'home' | 'services' | 'work';
 }
 
-const { base } = Astro.props;
+const { base, home = '', active = 'home' } = Astro.props;
+const link = (hash = '') => (home ? `${home}${hash}` : hash || '#');
+const on = (name: string) => (active === name ? ' is-active' : '');
 ---
 
 <!-- nav -->
 <nav class="nav fixed inset-x-0 top-0 z-[3] flex items-center justify-between h-9 px-[clamp(8px,1.2vw,18px)] shadow-[0_1px_0_rgba(255,255,255,.08)]">
-  <a class="nav__word flex items-center" href="#"><img class="nav__logo h-4 w-auto block invert" src={`${base}logo-black.png`} alt="infiniblack" /></a>
+  <a class="nav__word flex items-center" href={link()}><img class="nav__logo h-4 w-auto block invert" src={`${base}logo-black.png`} alt="infiniblack" /></a>
   <div class="nav__links flex items-center gap-[clamp(18px,2.4vw,34px)] max-[860px]:hidden">
-    <a class="is-active text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white" href="#">Home</a>
-    <a class="text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white" href="#services">Services</a>
-    <a class="text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white" href="#work">Work</a>
+    <a class={`text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white${on('home')}`} href={link()}>Home</a>
+    <a class={`text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white${on('services')}`} href={link('#services')}>Services</a>
+    <a class={`text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white${on('work')}`} href={link('#work')}>Work</a>
   </div>
   <div class="nav__right flex items-center gap-4">
-    <a class="text-white no-underline text-[.78rem] font-medium" href="#contact">Contact Us</a>
+    <a class="text-white no-underline text-[.78rem] font-medium" href={link('#contact')}>Contact Us</a>
   </div>
 </nav>
