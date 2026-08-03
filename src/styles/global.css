@@ -233,6 +233,64 @@ html {
 .work-item__phase-now { color: #fff; }
 .work-item__phase-count { color: #8a8a92; font-variant-numeric: tabular-nums; }
 
+/* --- project page: the stage ------------------------------------------- *
+ *  The work arrives at full screen, and scroll takes it down in two beats —
+ *  100% -> 70% -> 40% — each one holding long enough to read as a stop
+ *  rather than a smear. The frame is pinned for the length of the sequence;
+ *  once the last beat is served the pin releases and the image leaves the
+ *  way any other section would, with the write-up behind it.
+ *
+ *  The beats themselves live in the page's script: they are scroll RANGES
+ *  mapped to sizes, which is not a thing CSS can state. Everything here
+ *  just consumes the --project-scale that script writes.
+ * ------------------------------------------------------------------------ */
+.project-stage {
+  /* nav height, and the scroll the sequence has to play in: one screen of
+     frame plus the rest as travel. In px, like --work-pin, because the
+     script reads the value straight off the property. */
+  --project-pin: 36px;
+  height: 260dvh;
+}
+
+.project-stage__frame {
+  position: sticky;
+  top: var(--project-pin);
+  height: calc(100dvh - var(--project-pin));
+  overflow: hidden;
+  background: #000;
+}
+
+/* transform, not width/height: the crop is fixed at the full-screen framing
+   and the whole picture shrinks with it, so nothing reflows mid-scroll and
+   the image never re-crops itself on the way down. */
+.project-stage__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transform: scale(var(--project-scale, 1));
+  will-change: transform;
+}
+
+/* the write-up is the payoff for the sequence, so it doesn't sit there
+   through it — it arrives once the image has finished coming down */
+.project-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity .55s ease calc(var(--i, 0) * 90ms),
+    transform .55s cubic-bezier(.2, 0, .2, 1) calc(var(--i, 0) * 90ms);
+}
+.project-info.is-in .project-reveal { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* no pin, no sequence: one screen of the work, then the write-up */
+  .project-stage { height: auto; }
+  .project-stage__frame { position: static; height: calc(100dvh - var(--project-pin)); }
+  .project-stage__img { transform: none; }
+  .project-reveal { opacity: 1; transform: none; transition: none; }
+}
+
 /* --- contact ----------------------------------------------------------- *
  *  The closing screen: one statement, two full-bleed action rows, a
  *  standing line. The section's own left/right inset, so the hover wipe
