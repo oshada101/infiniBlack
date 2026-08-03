@@ -738,6 +738,12 @@ html {
  * ---------------------------------------------------------------- */
 .curtain { position: fixed; inset: 0; z-index: 10; }
 
+/* hold the page still while the curtain is up, so the reveal lands on the top
+   of the page and not wherever a stray scroll took it. The gutter stays
+   reserved either side of the lock, so nothing shifts when it lifts. */
+html { scrollbar-gutter: stable; }
+html.is-loading, html.is-loading body { overflow: hidden; }
+
 .curtain__half {
   position: absolute;
   top: 0;

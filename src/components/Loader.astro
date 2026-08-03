@@ -51,16 +51,60 @@
 </div>
 
 <script>
-  // How long the diamond shows before the cut + curtain open (from load).
-  const REVEAL_AT = 2600; // ms
+  /* The curtain has to answer to what has actually loaded. `load` is the wrong
+     signal: browsers hold it back until the hero video has buffered, so the
+     diamond would sit there fully formed for as long as hero.mp4 took, and
+     forever if it stalled. Wait on the fonts and the video's FIRST FRAME
+     instead, floored so the diamond gets to finish forming and capped so a
+     slow network can't hold the page hostage. */
+  const MIN_HOLD  = 1600; // ms from navigation; the diamond finishes at ~1.3s
+  const MAX_HOLD  = 6000; // ms from navigation; open regardless past this
+  const REVEAL_MS = 1900; // length of the CSS cut -> seam -> part sequence
 
   const curtain = document.getElementById('curtain');
 
-  // .reveal drives the CSS sequence via transition-delays:
-  //   cut (fluid dissolves, hole opens) 0s -> seam draws .28s -> curtains part .95s
-  window.addEventListener('load', () => {
-    if (!curtain) return;
-    setTimeout(() => curtain.classList.add('reveal'), REVEAL_AT);
-    setTimeout(() => curtain.remove(), REVEAL_AT + 1900);
-  });
+  if (curtain) {
+    const root = document.documentElement;
+
+    // there is nothing to scroll toward behind the curtain — but don't fight a
+    // deep link, whose hash the browser has already scrolled to.
+    const locks = !window.location.hash;
+    if (locks) root.classList.add('is-loading');
+
+    let revealed = false;
+
+    // .reveal drives the CSS sequence via transition-delays:
+    //   cut (fluid dissolves, hole opens) 0s -> seam draws .28s -> curtains part .95s
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      curtain.classList.add('reveal');
+      root.classList.remove('is-loading');
+      setTimeout(() => curtain.remove(), REVEAL_MS);
+    };
+
+    // performance.now() counts from navigation, which is also when the SVG's
+    // own animations started — so the floor is measured on the same clock.
+    const holdFor = (ms: number) => setTimeout(reveal, Math.max(0, ms - performance.now()));
+
+    const ready: Promise<unknown>[] = [];
+
+    // let the display font swap in behind the curtain, not under the reader
+    if (document.fonts) ready.push(document.fonts.ready);
+
+    // the hero only needs one frame to paint; waiting on the whole file is what
+    // made this feel stuck. A dead src settles too — it must not trap anyone.
+    const video = document.querySelector<HTMLVideoElement>('.hero-media video');
+    if (video && video.readyState < 2 /* HAVE_CURRENT_DATA */) {
+      ready.push(
+        new Promise<void>((settle) => {
+          video.addEventListener('loadeddata', () => settle(), { once: true });
+          video.addEventListener('error', () => settle(), { once: true });
+        }),
+      );
+    }
+
+    Promise.all(ready).then(() => holdFor(MIN_HOLD));
+    holdFor(MAX_HOLD);
+  }
 </script>
