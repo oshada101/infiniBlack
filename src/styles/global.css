@@ -381,6 +381,90 @@ html {
  * ------------------------------------------------------------------------ */
 .contact { --bleed: clamp(8px, 1.2vw, 18px); }
 
+/* --- the closing light --- *
+ *  The page opens on the hero video and closes on two lit forms. Not a wash
+ *  behind the type: bodies with edges, dark everywhere except where the rim
+ *  catches. The light burns the site's own #ff5a2a rather than a new colour,
+ *  so the tick bar and the nav's active link sit inside it.
+ *
+ *  isolation + z-index:-1 puts the whole thing above the page ground but
+ *  under every child, so the action rows' white wipe still covers it. */
+.contact {
+  position: relative;
+  isolation: isolate;
+}
+
+/* The frame that keeps the light inside the section. The layers below are
+   scaled past their own box so they have room to drift, and 6% of each one
+   hangs over the edge — without this it paints up into the Work items.
+   inset:0, no --bleed offset: an absolutely positioned child resolves
+   against .contact's PADDING box, and with no left border that edge is
+   already the section's outer edge. */
+.contact-light-frame {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Each form is its own promoted layer, painted once. The circles inside are
+   enormous but the SVG viewport clips them, so a layer never exceeds the
+   frame. */
+.contact-light {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* transform ONLY. That is the whole performance story: the compositor moves
+     an already-rasterised bitmap and the renderer is never asked for a new
+     pixel. The version that made this page crawl rotated the geometry inside
+     the SVG, which invalidates the raster and re-runs every gradient and mask
+     in the drawing, every frame. Same visual family, ~40x the cost. */
+  will-change: transform;
+}
+
+/* The base scale is what buys room to move. At 1.12 there is 6% of overscan
+   on every side, so a drift of up to 3% plus ~1.5deg of roll never pulls an
+   edge into frame — no wrapper and no overflow clipping needed.
+   13s and 17s: close enough to feel like one atmosphere, coprime enough that
+   the pair doesn't visibly repeat. */
+.contact-light--warm {
+  animation: contact-warm 13s ease-in-out infinite alternate;
+}
+.contact-light--cool {
+  animation: contact-cool 17s ease-in-out infinite alternate;
+}
+
+/* The two run opposite on x, which is what turns a slide into parallax —
+   the gap between the two rims opens and closes as they pass. */
+@keyframes contact-warm {
+  from { transform: scale(1.12) translate(-2.6%, 1.4%) rotate(-.9deg); }
+  to   { transform: scale(1.12) translate(2.6%, -1.4%) rotate(.9deg); }
+}
+
+@keyframes contact-cool {
+  from { transform: scale(1.12) translate(2.2%, 1.8%) rotate(.7deg); }
+  to   { transform: scale(1.12) translate(-2.2%, -1%) rotate(-.7deg); }
+}
+
+/* THE GRAIN is not decoration. Gradients this dark and this wide ramp one
+   8-bit level per ~40px, which shows as concentric rings on a good display
+   in a dark room. Noise breaks the step up, and hero.mp4 is grainy film, so
+   the fix and the reference are the same thing. Alpha is deliberately tiny —
+   it lifts the section's black by about one level, which is the size of the
+   artifact it's cancelling. Painted last, above the light, or it would have
+   nothing to dither. */
+.contact::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .14 0 0 0 -.06'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
 .contact-statement { font-variation-settings: 'opsz' 96; }
 
 /* --- the rotating line --- *
@@ -603,6 +687,9 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .contact-action::before { transition-duration: .01s; }
   .contact-action__mark, .contact-social { transition-property: color; }
+  /* the light stays, the drift stops — it's atmosphere, not information.
+     The scale has to survive or the composition reframes when it settles. */
+  .contact-light { animation: none; transform: scale(1.12); }
 }
 
 /* --- contact modal ------------------------------------------------------ *

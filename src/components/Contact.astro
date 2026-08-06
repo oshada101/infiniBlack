@@ -44,6 +44,170 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
   class="contact min-h-screen flex flex-col scroll-mt-9 pt-[clamp(72px,11vh,130px)] px-[clamp(8px,1.2vw,18px)] pb-[clamp(18px,2.6vh,28px)] border-t border-[rgba(255,255,255,.08)]"
   id="contact"
 >
+  {/* THE CLOSING LIGHT
+      Two bodies lit from off-frame right. The thing that makes a rim light
+      read as a rim light is that a FORM ENDS at it: lit mass on one side,
+      black on the other. So each body is a <circle> whose fill is a radial
+      gradient in the circle's own coordinates — offset 1 IS the silhouette,
+      so the glow hugs the edge and the geometry cuts it dead.
+
+      NO FILTERS. The bloom is built from concentric ring gradients whose peak
+      stop sits exactly on the body's radius, not from feGaussianBlur. A blur
+      over a region this size is a convolution the compositor cannot cache,
+      and running one per frame is what made this page crawl. Ring gradients
+      paint once, cost nothing, and land in the same place.
+
+      TWO SEPARATE <svg>s, not two <g>s in one. Each is its own promoted
+      layer, so the drift below is a composited transform — the GPU moves an
+      already-painted bitmap and the renderer is never asked for a new pixel.
+      Transforming a <g> inside a single SVG would re-rasterise the whole
+      drawing every frame instead. Separate layers also mean the two forms
+      move at different rates, which is what makes it read as depth rather
+      than as one picture sliding.
+
+      Radii are huge (1250 / 1000 against a 1600-wide box) on purpose: we are
+      looking at a fragment of something much bigger, the way the reference
+      is. Anything tighter reads as a circle, or worse as a swoosh.
+
+      The two arcs converge toward the bottom and never cross — crossing
+      lines destroy the sense that one form is in front of the other.
+
+      Everything lives right of x≈850, past the statement's measure, so the
+      left half of the screen stays pure black. */}
+
+  {/* A clipping frame. The two layers below are scaled up 12% so they have
+     room to drift without pulling an edge into shot — which means 6% of each
+     one hangs outside the section, and without this it paints straight over
+     the Work items above. inset:0 with no --bleed offset: an absolutely
+     positioned child resolves against .contact’s PADDING box, whose left edge
+     is already the section’s outer edge. The negative offset that
+     .contact-action::before needs (it starts from the content box) would push
+     this one off the side of the page. */}
+  <div class="contact-light-frame" aria-hidden="true">
+    {/* --- the warm body. Fills the right of the frame; its lit edge is the
+            long, shallow arc falling from the top down past the rows. --- */}
+    <svg
+      class="contact-light contact-light--warm"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        {/* userSpaceOnUse, matched to the circle's own centre and radius, so
+            the brightest part of the fill lands exactly on the edge and stops */}
+        <radialGradient id="cl-warm-body" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1250">
+          <stop offset=".55" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".84" stop-color="#7d3315" stop-opacity=".10" />
+          <stop offset=".955" stop-color="#c14a1d" stop-opacity=".26" />
+          <stop offset="1" stop-color="#ff7038" stop-opacity=".42" />
+        </radialGradient>
+
+        {/* THE BLOOM, as rings rather than blurs. Each gradient is sized to a
+            circle slightly larger than the body, with its peak stop placed at
+            body-radius ÷ ring-radius — so the falloff straddles the real edge.
+            Two widths, because the air around a hot edge doesn't fall off at a
+            single rate and one blur always looks like one blur. */}
+        <radialGradient id="cl-warm-bloom-far" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1420">
+          <stop offset=".79" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".880" stop-color="#ff6a30" stop-opacity=".15" />
+          <stop offset=".97" stop-color="#ff5a2a" stop-opacity="0" />
+        </radialGradient>
+
+        <radialGradient id="cl-warm-bloom-near" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1310">
+          <stop offset=".895" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".954" stop-color="#ffa267" stop-opacity=".34" />
+          <stop offset="1" stop-color="#ff5a2a" stop-opacity="0" />
+        </radialGradient>
+
+        {/* the specular core. A rim light blows past its own hue at the peak
+            before falling back to the accent, which is why the middle stop is
+            near-white and the ends are pure #ff5a2a. */}
+        <linearGradient id="cl-hot" gradientUnits="userSpaceOnUse" x1="860" y1="180" x2="1120" y2="880">
+          <stop offset="0" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".26" stop-color="#ff5a2a" stop-opacity=".45" />
+          <stop offset=".47" stop-color="#ffcfae" stop-opacity="1" />
+          <stop offset=".66" stop-color="#ff7c37" stop-opacity=".62" />
+          <stop offset="1" stop-color="#ff5a2a" stop-opacity="0" />
+        </linearGradient>
+
+        {/* Masks trim the bloom and the core to the arc facing the light.
+            Gradient masks, not hard clips, so the highlight dies out instead of
+            ending — a cut end is the tell that something was drawn, not lit.
+            This arc is near-vertical, so its mask runs down the y. */}
+        <linearGradient id="cl-mask-warm" gradientUnits="userSpaceOnUse" x1="0" y1="120" x2="0" y2="920">
+          <stop offset="0" stop-color="#000" />
+          <stop offset=".3" stop-color="#fff" />
+          <stop offset=".72" stop-color="#fff" />
+          <stop offset="1" stop-color="#000" />
+        </linearGradient>
+        <mask id="cl-rim-warm">
+          <rect x="700" y="0" width="900" height="900" fill="url(#cl-mask-warm)" />
+        </mask>
+      </defs>
+
+      <circle cx="2100" cy="150" r="1250" fill="url(#cl-warm-body)" />
+      {/* far bloom, near bloom, then the core on top of its own light */}
+      <circle cx="2100" cy="150" r="1420" fill="url(#cl-warm-bloom-far)" mask="url(#cl-rim-warm)" />
+      <circle cx="2100" cy="150" r="1310" fill="url(#cl-warm-bloom-near)" mask="url(#cl-rim-warm)" />
+      <circle
+        cx="2100" cy="150" r="1250"
+        fill="none" stroke="url(#cl-hot)" stroke-width="1.5"
+        mask="url(#cl-rim-warm)"
+      />
+    </svg>
+
+    {/* --- the cool body, wedged into the bottom-right corner and behind the
+            warm one. Same light source at a glancing angle, so its rim is
+            thinner and never gets as hot. Drifts on its own clock. --- */}
+    <svg
+      class="contact-light contact-light--cool"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <radialGradient id="cl-cool-body" gradientUnits="userSpaceOnUse" cx="1750" cy="1750" r="1000">
+          <stop offset=".6" stop-color="#7fc0d4" stop-opacity="0" />
+          <stop offset=".86" stop-color="#1d4753" stop-opacity=".12" />
+          <stop offset=".97" stop-color="#3f8296" stop-opacity=".22" />
+          <stop offset="1" stop-color="#8fcadb" stop-opacity=".3" />
+        </radialGradient>
+
+        <radialGradient id="cl-cool-bloom" gradientUnits="userSpaceOnUse" cx="1750" cy="1750" r="1120">
+          <stop offset=".81" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".893" stop-color="#ff8342" stop-opacity=".20" />
+          <stop offset=".97" stop-color="#ff5a2a" stop-opacity="0" />
+        </radialGradient>
+
+        <linearGradient id="cl-hot-lower" gradientUnits="userSpaceOnUse" x1="1120" y1="900" x2="1600" y2="740">
+          <stop offset="0" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".4" stop-color="#ff6a2e" stop-opacity=".5" />
+          <stop offset=".72" stop-color="#ffb078" stop-opacity=".85" />
+          <stop offset="1" stop-color="#ff8a45" stop-opacity=".5" />
+        </linearGradient>
+
+        <linearGradient id="cl-mask-cool" gradientUnits="userSpaceOnUse" x1="1040" y1="0" x2="1600" y2="0">
+          <stop offset="0" stop-color="#000" />
+          <stop offset=".35" stop-color="#fff" />
+          <stop offset="1" stop-color="#fff" />
+        </linearGradient>
+        <mask id="cl-rim-cool">
+          <rect x="1000" y="600" width="600" height="300" fill="url(#cl-mask-cool)" />
+        </mask>
+      </defs>
+
+      <circle cx="1750" cy="1750" r="1000" fill="url(#cl-cool-body)" />
+      <circle cx="1750" cy="1750" r="1120" fill="url(#cl-cool-bloom)" mask="url(#cl-rim-cool)" />
+      <circle
+        cx="1750" cy="1750" r="1000"
+        fill="none" stroke="url(#cl-hot-lower)" stroke-width="1.3"
+        mask="url(#cl-rim-cool)"
+      />
+    </svg>
+  </div>
+
   {/* the statement. Larger than the hero h1 on purpose: the hero opens the
       argument, this closes it, and it is the last thing anyone reads. */}
   <div class="flex-1 flex flex-wrap items-center justify-between gap-x-[clamp(32px,6vw,88px)] gap-y-[clamp(36px,5vh,56px)] py-[clamp(40px,7vh,90px)]">
