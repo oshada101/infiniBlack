@@ -38,10 +38,10 @@ const marks: Record<string, { d: string; fill?: boolean }[]> = {
   class="services scroll-mt-9 pt-[clamp(80px,12vh,140px)] px-[clamp(8px,1.2vw,18px)] pb-[clamp(40px,6vh,80px)] border-t border-[rgba(255,255,255,.08)]"
   id="services"
 >
-  <h2 class="text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Services.</h2>
+  <h2 class="services-title text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Services.</h2>
 
   {featured && (
-    <article class="services-card flex flex-wrap items-center gap-[clamp(24px,3.5vw,56px)] mt-[clamp(12px,1.4vw,18px)] p-[clamp(24px,2.8vw,44px)]">
+    <article class="services-card services-card--featured flex flex-wrap items-center gap-[clamp(24px,3.5vw,56px)] mt-[clamp(12px,1.4vw,18px)] p-[clamp(24px,2.8vw,44px)]">
       {/* the loader's fluid diamond, returning to the page it opened.
           static shape — the dot-to-diamond reveal belongs to the entrance.
           ids are svc-prefixed: the loader's originals live in the DOM for
@@ -95,11 +95,11 @@ const marks: Record<string, { d: string; fill?: boolean }[]> = {
     </article>
   )}
 
-  <div class="grid grid-cols-4 gap-[clamp(12px,1.4vw,18px)] mt-[clamp(12px,1.4vw,18px)] max-[1200px]:grid-cols-2 max-[860px]:grid-cols-1">
+  <div class="services-grid grid grid-cols-4 gap-[clamp(12px,1.4vw,18px)] mt-[clamp(12px,1.4vw,18px)] max-[1200px]:grid-cols-2 max-[860px]:grid-cols-1">
     {rest.map((service) => (
       <article class="services-card flex flex-col p-[clamp(22px,2.4vw,36px)]">
         <svg
-          class="w-10 h-10 mb-[clamp(18px,2.2vh,26px)] shrink-0"
+          class="services-mark w-10 h-10 mb-[clamp(18px,2.2vh,26px)] shrink-0"
           viewBox="0 0 40 40"
           fill="none"
           stroke="#f2f2f2"
@@ -108,7 +108,9 @@ const marks: Record<string, { d: string; fill?: boolean }[]> = {
           stroke-linecap="round"
           aria-hidden="true"
         >
-          {marks[service.icon].map((m) => <path d={m.d} fill={m.fill ? '#f2f2f2' : 'none'} />)}
+          {marks[service.icon].map((m) => (
+            <path d={m.d} fill={m.fill ? '#f2f2f2' : 'none'} data-fill={m.fill ? '' : undefined} />
+          ))}
         </svg>
         <h3 class="text-[clamp(1.15rem,1.8vw,1.4rem)] font-normal text-[#f2f2f2] tracking-[-.015em] leading-[1.2] text-balance">{service.title}</h3>
         <p class="mt-[clamp(8px,1.2vh,12px)] flex-1 text-[.95rem] leading-[1.45] text-grey-300 text-pretty">{service.desc}</p>
@@ -119,3 +121,89 @@ const marks: Record<string, { d: string; fill?: boolean }[]> = {
     ))}
   </div>
 </section>
+
+<script>
+  import { animate, inView, stagger } from 'motion';
+  import { EASE, LINE_STEP, LINE_TRAVEL, RISE, STEP, reducedMotion, splitLines } from '../lib/reveal';
+
+  if (!reducedMotion()) {
+    /* Fire once and stop watching. inView keeps calling back on every entry
+       otherwise, and a section that re-animates each time you scroll past it
+       stops being an arrival and starts being a tic. */
+    const once = (el: Element, run: () => void, amount = 0.25) => {
+      const stop = inView(el, () => { stop(); run(); }, { amount });
+    };
+
+    // --- the section title -------------------------------------------------
+    const title = document.querySelector<HTMLElement>('.services-title');
+    if (title) {
+      once(title, () => {
+        const { lines, restore } = splitLines(title);
+        lines.forEach((line) => { line.style.transform = `translateY(${LINE_TRAVEL})`; });
+        animate(lines, { y: [LINE_TRAVEL, '0%'] }, { duration: .9, ease: EASE, delay: stagger(LINE_STEP) })
+          .then(restore);
+      }, 0.6);
+    }
+
+    // --- the featured banner -----------------------------------------------
+    const featured = document.querySelector<HTMLElement>('.services-card--featured');
+    if (featured) {
+      const diamond = featured.querySelector<HTMLElement>('.services-diamond');
+      featured.classList.add('is-entering');
+      diamond?.classList.add('is-entering');
+
+      once(featured, () => {
+        featured.classList.remove('is-entering');
+        diamond?.classList.remove('is-entering');
+        animate(featured, { opacity: [0, 1], y: [RISE, 0] }, { duration: .85, ease: EASE });
+        /* The diamond is the loader's shape coming back, so it gets its own
+           beat rather than riding in on the card. Scaling up from just under
+           full size, never down — it should read as settling into the page,
+           not as something dropped onto it. */
+        if (diamond) {
+          animate(
+            diamond,
+            { opacity: [0, 1], scale: [0.92, 1] },
+            { duration: 1.1, ease: EASE, delay: .18 },
+          );
+        }
+      }, 0.2);
+    }
+
+    // --- the four cards ----------------------------------------------------
+    /* Each card is watched on its own, then held back by its position in the
+       row. On a wide screen all four cross the line in the same frame and the
+       index delay is what turns that into a stagger; once the grid has
+       collapsed to a column they arrive one at a time anyway and the same
+       delay is a few hundredths nobody will notice. One rule, both layouts. */
+    const cards = [...document.querySelectorAll<HTMLElement>('.services-grid .services-card')];
+
+    cards.forEach((card, i) => {
+      const lead = i * STEP;
+      const mark = card.querySelector<SVGSVGElement>('.services-mark');
+
+      card.classList.add('is-entering');
+
+      /* The draw itself is a CSS transition — see .services-mark in
+         global.css. All that is needed here is the groundwork it can't do
+         for itself: normalise every path's length so one set of dash numbers
+         fits all four silhouettes, hand each stroke its position in the
+         order, and put the card's own delay where the stylesheet can read it.
+         [data-draw] goes on last, because it is what arms the start state. */
+      if (mark) {
+        [...mark.querySelectorAll<SVGPathElement>('path')].forEach((path, order) => {
+          path.setAttribute('pathLength', '1');
+          path.style.setProperty('--i', String(order));
+        });
+        mark.style.setProperty('--lead', `${Math.round(lead * 1000)}ms`);
+        mark.setAttribute('data-draw', '');
+      }
+
+      once(card, () => {
+        card.classList.remove('is-entering');
+        animate(card, { opacity: [0, 1], y: [RISE, 0] }, { duration: .8, ease: EASE, delay: lead });
+        mark?.classList.add('is-drawn');
+      }, 0.2);
+    });
+  }
+</script>

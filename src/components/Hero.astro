@@ -17,3 +17,77 @@ const { base } = Astro.props;
     <p class="hero-copy__body mt-[clamp(16px,2.4vh,26px)] text-[clamp(.9rem,1.25vw,1.1rem)] font-normal leading-[1.32] max-w-[50ch] text-[#eaeaea]">infiniblack is a product engineering studio. AI systems and complete web, mobile, and desktop products. designed by one team, engineered for the years they'll actually run.</p>
   </div>
 </div>
+
+<script>
+  import { animate, stagger } from 'motion';
+  import { EASE, LINE_STEP, LINE_TRAVEL, RISE, reducedMotion, splitLines } from '../lib/reveal';
+
+  /* The hero's entrance is the second half of the loader's, not a separate
+     event. The curtain spends .82s travelling off the sides, and if the page
+     underneath only started moving once that was over, the visitor would
+     watch two animations in a row instead of one handover. So the hero starts
+     LEAD ms BEFORE the halves do: by the time there is a gap to see through,
+     the headline is already on its way up. */
+  const LEAD = 250;
+
+  const title = document.querySelector<HTMLElement>('.hero-copy__title');
+  const body = document.querySelector<HTMLElement>('.hero-copy__body');
+  const video = document.querySelector<HTMLElement>('.hero-media video');
+  const nav = document.querySelector<HTMLElement>('.nav');
+
+  if (title && !reducedMotion()) {
+    const run = () => {
+      /* Split here rather than up front, deliberately. The line breaks are
+         only true for the width they were measured at, so the less time the
+         headline spends held in that shape the smaller the window in which a
+         resize can strand it — and restore() closes it for good afterwards. */
+      const { lines, restore } = splitLines(title);
+      lines.forEach((line) => { line.style.transform = `translateY(${LINE_TRAVEL})`; });
+      if (body) body.style.opacity = '0';
+      if (nav) nav.style.opacity = '0';
+
+      /* the video is already playing behind the curtain; easing the last of a
+         push-in away is what stops the reveal landing on a static frame */
+      if (video) {
+        animate(video, { scale: [1.06, 1] }, { duration: 2.4, ease: EASE });
+      }
+
+      animate(
+        lines,
+        { y: [LINE_TRAVEL, '0%'] },
+        { duration: .95, ease: EASE, delay: stagger(LINE_STEP) },
+      ).then(() => {
+        // back to ordinary text, so the headline reflows normally from here on
+        restore();
+      });
+
+      // the standfirst follows the headline in rather than with it — the two
+      // arriving together reads as one block sliding, which is the cheap version
+      if (body) {
+        animate(body, { opacity: [0, 1], y: [RISE, 0] }, { duration: .8, ease: EASE, delay: .42 });
+      }
+
+      // last, and opacity only: the nav sits over the video with a
+      // backdrop-filter, and moving that layer makes the blur crawl
+      if (nav) {
+        animate(nav, { opacity: [0, 1] }, { duration: .7, ease: EASE, delay: .55 });
+      }
+    };
+
+    /* No curtain in the document means nothing is going to announce itself —
+       a reload straight onto a deep link, or the loader failing to render. Go
+       on the spot rather than waiting for a cue that is never coming. */
+    if (document.getElementById('curtain')) {
+      document.addEventListener(
+        'curtain:reveal',
+        (e) => {
+          const partsIn = (e as CustomEvent<{ partsIn: number }>).detail?.partsIn ?? 950;
+          setTimeout(run, Math.max(0, partsIn - LEAD));
+        },
+        { once: true },
+      );
+    } else {
+      run();
+    }
+  }
+</script>

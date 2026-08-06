@@ -54,6 +54,53 @@ html {
 }
 .nav__links a.is-active sup { color: rgba(255, 90, 42, .8); }
 
+/* --- line reveal ------------------------------------------------------- *
+ *  A headline arrives one line at a time, each rising out from behind the
+ *  line above it. Both elements below are built at runtime by splitLines()
+ *  in src/lib/reveal.ts and torn down again once the move is done — the
+ *  markup ships as plain text, so this costs a reader with no JS nothing but
+ *  the animation itself.
+ *
+ *  The padding is the fiddly part. These headlines run at leading-1, where
+ *  the glyph box is taller than the line box it sits in, so a plain
+ *  overflow:hidden mask crops the tail off every g and y and shaves the caps.
+ *  Padding the mask on both sides gives the glyphs their room back; the
+ *  negative margins take the same space back out of the layout so the
+ *  leading stays exactly where the design put it. The inner then has to
+ *  travel further than its own height to clear the padded box, which is
+ *  what LINE_TRAVEL is.
+ *
+ *  Flex column, because that space-reclaiming only works if the negative
+ *  margins survive: between block siblings the two would collapse into one
+ *  and each line would gain half the padding back as a gap. Flex items do
+ *  not collapse margins. */
+.reveal-lines {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.reveal-line {
+  display: block;
+  overflow: hidden;
+  padding: .18em 0;
+  margin: -.18em 0;
+}
+
+.reveal-line__inner { display: block; }
+
+/* Held back until its entrance runs. Added by JS only — the same rule as
+   everywhere else here, that nothing ships hidden to a reader without JS —
+   and dropped again the instant the animation takes the property over.
+   A class rather than an inline style so the media query below can beat it:
+   someone who turns motion off between load and scrolling to the section
+   would otherwise be left looking at a permanently invisible one. */
+.is-entering { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .is-entering { opacity: 1; }
+}
+
 /* --- services ---------------------------------------------------------- *
  *  Card surfaces sit one step off the page ground; the hairline is the
  *  only thing that moves on hover. All the section's boldness is spent on
@@ -86,6 +133,47 @@ html {
   width: clamp(88px, 9.5vw, 128px);
 }
 .services-diamond svg { display: block; width: 100%; height: auto; }
+
+/* --- the card marks draw themselves --- *
+ *  Each mark is a few strokes of the brand diamond, so letting them draw in
+ *  stroke order says something the shapes alone don't: they are all the one
+ *  shape, built up differently. Left to CSS rather than done in JS with the
+ *  rest of the section — Motion accepts strokeDashoffset and pathLength and
+ *  then writes neither, and a transition is the more honest tool for a single
+ *  property going one way in any case.
+ *
+ *  The dash units work because JS sets pathLength="1" on every path first,
+ *  which rescales them to a share of that path's own length. Without it each
+ *  silhouette would need its own numbers.
+ *
+ *  Gated on [data-draw], which only JS adds: the start state here is an
+ *  invisible mark, and that must never be what a reader without JS is left
+ *  looking at. Same reasoning as .project-info[data-reveal] further down. */
+.services-mark[data-draw] path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset .75s cubic-bezier(.22, 1, .36, 1)
+              calc(var(--lead, 0ms) + var(--i, 0) * 100ms + 120ms);
+}
+
+/* a fill has no direction to be drawn in, so the one solid shape fades up
+   instead — after its own outline has closed around it */
+.services-mark[data-draw] path[data-fill] {
+  fill-opacity: 0;
+  transition:
+    stroke-dashoffset .75s cubic-bezier(.22, 1, .36, 1)
+      calc(var(--lead, 0ms) + var(--i, 0) * 100ms + 120ms),
+    fill-opacity .5s cubic-bezier(.22, 1, .36, 1) calc(var(--lead, 0ms) + 600ms);
+}
+
+.services-mark[data-draw].is-drawn path { stroke-dashoffset: 0; }
+.services-mark[data-draw].is-drawn path[data-fill] { fill-opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* the mark is information, not decoration — it arrives whole */
+  .services-mark[data-draw] path { stroke-dashoffset: 0; transition: none; }
+  .services-mark[data-draw] path[data-fill] { fill-opacity: 1; transition: none; }
+}
 
 /* --- work: featured projects list --- */
 

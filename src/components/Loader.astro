@@ -63,6 +63,8 @@
   const PAD       = 1000; // deliberate extra beat after everything is ready
   const MAX_HOLD  = 6000; // ms from navigation; open regardless past this
   const REVEAL_MS = 1900; // length of the CSS cut -> seam -> part sequence
+  const PART_MS   = 950;  // when the halves start travelling — the transition-delay
+                          // on .curtain__half in global.css. Keep the two in step.
 
   const curtain = document.getElementById('curtain');
 
@@ -84,6 +86,16 @@
       curtain.classList.add('reveal');
       root.classList.remove('is-loading');
       setTimeout(() => curtain.remove(), REVEAL_MS);
+
+      /* Hand off to whatever the page wants to do with its own entrance.
+         The curtain knows when it is opening and nothing else does — the
+         hold above is decided by fonts, video and network, so no listener
+         could work this out from a timer of its own. PART_MS travels with
+         the event so the page can start under the curtain and be already
+         moving by the time the halves clear it. */
+      document.dispatchEvent(
+        new CustomEvent('curtain:reveal', { detail: { partsIn: PART_MS } }),
+      );
     };
 
     // performance.now() counts from navigation. The loader's own animations do
