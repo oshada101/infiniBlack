@@ -318,9 +318,17 @@ html {
    that window down past the nav, so it matches the sticky offset. The
    page's script does the same job for browsers without this, and stands
    down when it isn't needed. */
+/* Eased, not linear. On a scroll timeline the timing function maps scroll
+   progress onto scale progress, so a curve here is the difference between
+   the picture tracking the wheel step for step and it gliding between two
+   settled states. easeInOutSine specifically: it is gentle at both ends, so
+   the image holds full-frame for the first moments of the scroll and settles
+   into the floor rather than arriving at it, but it never has the dead zone
+   at the start that a steeper ease-in-out gives you — where you scroll and
+   nothing appears to happen. */
 @keyframes project-shrink {
   from { transform: scale(1); }
-  to   { transform: scale(.4); }
+  to   { transform: scale(.6); }   /* keep in step with TO in [slug].astro */
 }
 
 @supports (animation-timeline: view()) {
@@ -330,7 +338,7 @@ html {
   }
 
   .project-stage__img {
-    animation: project-shrink linear both;
+    animation: project-shrink cubic-bezier(.37, 0, .63, 1) both;
     transform: none;               /* the keyframes own it now */
   }
 
