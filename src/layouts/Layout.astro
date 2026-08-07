@@ -44,5 +44,15 @@ const groundClass = ground === 'black' ? 'bg-black' : 'bg-ink';
   </head>
   <body class:list={['h-full font-display overflow-x-clip', groundClass]}>
     <slot />
+
+    {/* Site-wide, so the whole page reads as one surface — a project page
+        that glides while the home page steps would be worse than neither.
+        It eases the real scroll offset rather than translating a wrapper,
+        which is what keeps the sticky rows, the pinned stage and its
+        view-timeline working. See src/lib/smooth-scroll.ts. */}
+    <script>
+      import { smoothScroll } from '../lib/smooth-scroll';
+      smoothScroll();
+    </script>
   </body>
 </html>

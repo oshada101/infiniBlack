@@ -106,7 +106,7 @@ export const workItems: WorkItem[] = [
     tags: ['Marketing Site', 'Fitness', '2025'],
     media: {
       kind: 'hover-video',
-      img: { src: 'projects/glorious.webp', alt: 'Glorious Fitness Center' },
+      img: { src: 'projects/glorious.jpg', alt: 'Glorious wordmark on a dark field' },
       video: { src: 'projects/glorious.mp4' },
     },
     body: [
@@ -142,8 +142,8 @@ export const workItems: WorkItem[] = [
     media: {
       kind: 'image',
       img: {
-        src: 'projects/kratos.png',
-        alt: 'Kratos gym management system',
+        src: 'projects/kratos.jpg',
+        alt: 'Kratos wordmark on a red field',
         style: 'width:100%;height:100%;object-fit:cover;',
       },
     },

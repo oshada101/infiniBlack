@@ -103,12 +103,19 @@ const gallery = [...item.gallery].sort(
      else the shrink is a CSS scroll timeline (see .project-stage in
      global.css), which runs on the compositor and stays locked to the
      pinned frame. This is the same mapping done by hand: size tied to
-     scroll POSITION, linear, so it tracks the wheel 1:1 and stops when you
-     do. It cannot be as smooth — a transform written from the main thread
-     lands a frame after the scroll it answers to — so it only runs when
-     there is nothing better. */
+     scroll POSITION, so it stops when you do. It cannot be as smooth — a
+     transform written from the main thread lands a frame after the scroll
+     it answers to — so it only runs when there is nothing better. */
   const FROM = 1;    // full screen, where it arrives
-  const TO = 0.4;    // the floor, where the pin lets go
+  const TO = 0.6;    // the floor, where the pin lets go — matches the
+                     // project-shrink keyframe in global.css
+
+  /* easeInOutSine, the same curve the stylesheet gives the composited path.
+     It has to be duplicated here rather than shared: the CSS side is a
+     timing function on a scroll timeline, which is not a value this side can
+     read back or apply. Keep the two in step — a browser on the fallback
+     should get the same move, only a frame later, not a different one. */
+  const ease = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
 
   const stage = document.querySelector<HTMLElement>('.project-stage');
   const frame = document.querySelector<HTMLElement>('.project-stage__frame');
@@ -131,7 +138,7 @@ const gallery = [...item.gallery].sort(
     const sync = () => {
       // distance travelled since the frame pinned, as a fraction of the whole
       const p = Math.min(1, Math.max(0, (pin - stage.getBoundingClientRect().top) / travel));
-      const scale = Math.round((FROM + (TO - FROM) * p) * 1000) / 1000;
+      const scale = Math.round((FROM + (TO - FROM) * ease(p)) * 1000) / 1000;
       if (scale === last) return;             // nothing to write once it's at the floor
       last = scale;
       stage.style.setProperty('--project-scale', String(scale));
