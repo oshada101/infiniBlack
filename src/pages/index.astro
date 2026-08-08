@@ -40,18 +40,25 @@ const base = import.meta.env.BASE_URL;
 
   // scrollspy: highlight the nav link for the section currently in view
   // must stay in document order — the loop below takes the last section
-  // whose top has crossed the line
+  // whose top has crossed the line.
+  //
+  // Every link to a section is collected, not just the bar's: below 860px the
+  // same four destinations exist a second time inside the mobile panel, and
+  // one of the two saying "you are here" while the other doesn't is worse
+  // than neither saying it. Selecting on href rather than on position also
+  // means "Contact Us" needs no special case for living in .nav__right.
   const spySections = [
-    { el: document.querySelector('.hero'), link: document.querySelector('.nav__links a[href="#"]') },
-    { el: document.querySelector('#services'), link: document.querySelector('.nav__links a[href="#services"]') },
-    { el: document.querySelector('#work'), link: document.querySelector('.nav__links a[href="#work"]') },
-    // "Contact Us" sits in .nav__right, not with the other links
-    { el: document.querySelector('#contact'), link: document.querySelector('.nav__right a[href="#contact"]') },
-  ].filter((s) => s.el && s.link) as { el: Element; link: Element }[];
+    { el: document.querySelector('.hero'), hash: '#' },
+    { el: document.querySelector('#services'), hash: '#services' },
+    { el: document.querySelector('#work'), hash: '#work' },
+    { el: document.querySelector('#contact'), hash: '#contact' },
+  ]
+    .map((s) => ({ el: s.el, links: [...document.querySelectorAll(`.nav a[href="${s.hash}"]`)] }))
+    .filter((s) => s.el && s.links.length) as { el: Element; links: Element[] }[];
 
   if (spySections.length) {
-    const setActive = (link: Element) => {
-      spySections.forEach((s) => s.link.classList.toggle('is-active', s.link === link));
+    const setActive = (current: { links: Element[] }) => {
+      spySections.forEach((s) => s.links.forEach((l) => l.classList.toggle('is-active', s === current)));
     };
     const syncSpy = () => {
       // the section crossing just below the nav is the active one
@@ -60,7 +67,7 @@ const base = import.meta.env.BASE_URL;
       for (const s of spySections) {
         if (s.el.getBoundingClientRect().top <= line) current = s;
       }
-      setActive(current.link);
+      setActive(current);
     };
     syncSpy();
     window.addEventListener('scroll', syncSpy, { passive: true });
