@@ -1,4 +1,6 @@
 ---
+import { contact } from '../data/site';
+
 interface Props {
   base: string;
   /** where the section anchors live. Empty on the homepage, where they are
@@ -12,17 +14,131 @@ interface Props {
 const { base, home = '', active = 'home' } = Astro.props;
 const link = (hash = '') => (home ? `${home}${hash}` : hash || '#');
 const on = (name: string) => (active === name ? ' is-active' : '');
+
+// One list, two renderings: the bar above 860px, the panel below it. Typing
+// the destinations twice is how a menu ends up offering something the nav
+// doesn't (or the other way round) six months from now.
+const items = [
+  { name: 'home', label: 'Home', hash: '' },
+  { name: 'services', label: 'Services', hash: '#services' },
+  { name: 'work', label: 'Work', hash: '#work' },
+  { name: 'contact', label: 'Contact Us', hash: '#contact' },
+];
 ---
 
 <!-- nav -->
 <nav class="nav fixed inset-x-0 top-0 z-[3] flex items-center justify-between h-9 px-[clamp(8px,1.2vw,18px)] shadow-[0_1px_0_rgba(255,255,255,.08)]">
   <a class="nav__word flex items-center" href={link()}><img class="nav__logo h-4 w-auto block invert" src={`${base}logo-black.png`} alt="infiniblack" /></a>
   <div class="nav__links flex items-center gap-[clamp(18px,2.4vw,34px)] max-[860px]:hidden">
-    <a class={`text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white${on('home')}`} href={link()}>Home</a>
-    <a class={`text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white${on('services')}`} href={link('#services')}>Services</a>
-    <a class={`text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white${on('work')}`} href={link('#work')}>Work</a>
+    {items.filter((i) => i.name !== 'contact').map((item) => (
+      <a
+        class={`text-[rgba(255,255,255,.8)] no-underline text-[.78rem] font-medium hover:text-white${on(item.name)}`}
+        href={link(item.hash)}
+      >{item.label}</a>
+    ))}
   </div>
   <div class="nav__right flex items-center gap-4">
-    <a class="text-white no-underline text-[.78rem] font-medium" href={link('#contact')}>Contact Us</a>
+    <a class="text-white no-underline text-[.78rem] font-medium max-[860px]:hidden" href={link('#contact')}>Contact Us</a>
+
+    {/* Below 860px the three section links are gone, and a lone "Contact Us"
+        left the rest of the site unreachable from the bar. This replaces it:
+        one control that opens all four destinations. It stays a real
+        <button> so it is keyboard- and AT-reachable, and the label rides
+        next to the rule pair — a bare hamburger asks the visitor to
+        recognise an icon, two words don't. */}
+    {/* hidden above the breakpoint from global.css, not with a utility: the
+        .nav__toggle rule there is unlayered and would win over Tailwind's
+        layered `hidden` no matter which variant we asked for */}
+    <button
+      class="nav__toggle"
+      type="button"
+      aria-controls="nav-menu"
+      aria-expanded="false"
+      data-nav-toggle
+    >
+      <span class="nav__toggle-label" aria-hidden="true">Menu</span>
+      <span class="nav__burger" aria-hidden="true"><i></i><i></i></span>
+      <span class="sr-only">Open menu</span>
+    </button>
+  </div>
+
+  {/* THE PANEL — a child of the fixed nav, not a sibling. The nav carries a
+      z-index, so it is a stacking context: anything inside it is above the
+      whole page without this file having to know which section stacks where.
+      Positioned from top:100%, so it hangs off the bar and the bar itself
+      stays lit and clickable over it — the control that opened the menu is
+      the control that closes it, in the same place, not a second X somewhere
+      else on screen.
+
+      Rows rather than a centred stack: the hairline rule is this site's unit
+      everywhere else, and rules fill the height structurally instead of
+      leaving four words floating in a black field. */}
+  <div class="nav__menu" id="nav-menu" data-nav-menu>
+    <ul class="nav__menu-list">
+      {items.map((item, i) => (
+        <li class="nav__menu-row" style={`--i:${i}`}>
+          <a class={`nav__menu-link${on(item.name)}`} href={link(item.hash)} data-nav-close>
+            <span class="nav__menu-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span class="nav__menu-label">{item.label}</span>
+            <span class="nav__menu-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 18 18 6M8.5 6H18v9.5" />
+              </svg>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    {/* the way out that isn't a section. Same standing line as the footer, so
+        the panel closes on something concrete rather than on empty space. */}
+    <div class="nav__menu-foot" style={`--i:${items.length}`}>
+      <a class="nav__menu-mail" href={`mailto:${contact.email}`} data-nav-close>{contact.email}</a>
+      <p>Currently taking Q3 2026 builds</p>
+    </div>
   </div>
 </nav>
+
+<script>
+  const toggle = document.querySelector('[data-nav-toggle]') as HTMLButtonElement | null;
+  const menu = document.querySelector('[data-nav-menu]') as HTMLElement | null;
+
+  if (toggle && menu) {
+    const label = toggle.querySelector('.sr-only') as HTMLElement | null;
+
+    const setOpen = (open: boolean) => {
+      document.documentElement.classList.toggle('is-nav-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      if (label) label.textContent = open ? 'Close menu' : 'Open menu';
+      // the scroll lock smooth-scroll.ts already reads (it checks body's
+      // inline overflow directly), so the wheel stays off the page behind
+      // the panel without a second mechanism for it to learn about
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+
+    const isOpen = () => document.documentElement.classList.contains('is-nav-open');
+
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
+
+    // Every link in the panel closes it. The three section links are in-page
+    // anchors on the homepage — without this the panel would sit over the
+    // section it just scrolled to.
+    menu.querySelectorAll('[data-nav-close]').forEach((el) =>
+      el.addEventListener('click', () => setOpen(false))
+    );
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen()) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+
+    // Resizing past the breakpoint with the panel open would leave the page
+    // locked under a menu that is no longer displayed.
+    const wide = window.matchMedia('(min-width: 861px)');
+    wide.addEventListener('change', (e) => {
+      if (e.matches && isOpen()) setOpen(false);
+    });
+  }
+</script>
