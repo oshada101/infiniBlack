@@ -9,7 +9,7 @@
 
   --color-ink: #0a0a0d;      /* page/panel background */
   --color-panel: #08080a;    /* nav bar background */
-  --color-accent: #ff5a2a;   /* orange accent */
+  --color-accent: #8b5cf6;   /* purple accent */
   --color-grey-100: #d4d4d8;
   --color-grey-200: #c7c7c7;
   --color-grey-300: #8a8a92;
@@ -47,12 +47,12 @@ html {
 .nav__dots { color: rgba(255, 255, 255, .5); letter-spacing: 2px; font-size: 1.1rem; line-height: 1; }
 /* scrollspy highlight — JS toggles .is-active on the current nav link.
    scoped to .nav, not .nav__links: "Contact Us" lives in .nav__right. */
-.nav a.is-active { color: #ff5a2a; }
+.nav a.is-active { color: #8b5cf6; }
 .nav__links sup {
   font-size: .58em; font-weight: 400; margin-left: 2px;
   color: rgba(255, 255, 255, .45); vertical-align: super;
 }
-.nav__links a.is-active sup { color: rgba(255, 90, 42, .8); }
+.nav__links a.is-active sup { color: rgba(139, 92, 246, .8); }
 
 /* --- mobile menu -------------------------------------------------------- *
  *  Under 860px the bar has room for the mark and one control, so the three
@@ -653,7 +653,7 @@ html {
 /* --- the closing light --- *
  *  The page opens on the hero video and closes on two lit forms. Not a wash
  *  behind the type: bodies with edges, dark everywhere except where the rim
- *  catches. The light burns the site's own #ff5a2a rather than a new colour,
+ *  catches. The light burns the site's own #8b5cf6 rather than a new colour,
  *  so the tick bar and the nav's active link sit inside it.
  *
  *  isolation + z-index:-1 puts the whole thing above the page ground but
@@ -770,7 +770,7 @@ html {
   content: '';
   position: absolute;
   inset: 0;
-  background: #ff5a2a;      /* the section's only colour, spent on 2px */
+  background: #8b5cf6;      /* the section's only colour, spent on 2px */
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -1097,7 +1097,7 @@ html {
 .contact-row__error {
   margin-top: .6em;
   font-size: .78rem;
-  color: #ff5a2a;
+  color: #8b5cf6;
 }
 
 /* keyed to the panel, not the viewport — see .contact-dialog__inner */
@@ -1145,8 +1145,8 @@ html {
 
 /* pick many — the whole diamond fills */
 .contact-option input:checked ~ .contact-mark--multi {
-  background: #ff5a2a;
-  border-color: #ff5a2a;
+  background: #8b5cf6;
+  border-color: #8b5cf6;
 }
 
 /* pick one — an inner diamond, which the 45° parent gives us for free */
@@ -1154,11 +1154,11 @@ html {
   content: '';
   position: absolute;
   inset: 3px;
-  background: #ff5a2a;
+  background: #8b5cf6;
   transform: scale(0);
   transition: transform .15s cubic-bezier(.4, 1.6, .6, 1);
 }
-.contact-option input:checked ~ .contact-mark--single { border-color: #ff5a2a; }
+.contact-option input:checked ~ .contact-mark--single { border-color: #8b5cf6; }
 .contact-option input:checked ~ .contact-mark--single::after { transform: scale(1); }
 .contact-option input:checked ~ .contact-option__text { color: #fff; }
 .contact-option input:focus-visible ~ .contact-mark {
@@ -1179,7 +1179,7 @@ html {
   transition: border-color .2s ease;
 }
 .contact-input::placeholder { color: #57575e; }
-.contact-input:focus { outline: none; border-bottom-color: #ff5a2a; }
+.contact-input:focus { outline: none; border-bottom-color: #8b5cf6; }
 .contact-textarea { resize: vertical; min-height: 5.5em; line-height: 1.45; }
 
 /* The date field is native, so the browser draws the calendar popup and the
@@ -1221,7 +1221,7 @@ html {
   transition: background .2s ease, color .2s ease;
 }
 .contact-submit:hover:not(:disabled),
-.contact-submit:focus-visible:not(:disabled) { background: #ff5a2a; color: #fff; }
+.contact-submit:focus-visible:not(:disabled) { background: #8b5cf6; color: #fff; }
 .contact-submit:disabled { opacity: .55; cursor: default; }
 
 .contact-sent { padding: clamp(32px, 8vh, 80px) 0; border-top: 1px solid rgba(255, 255, 255, .15); }
