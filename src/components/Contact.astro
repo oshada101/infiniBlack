@@ -97,10 +97,10 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
         {/* userSpaceOnUse, matched to the circle's own centre and radius, so
             the brightest part of the fill lands exactly on the edge and stops */}
         <radialGradient id="cl-warm-body" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1250">
-          <stop offset=".55" stop-color="#ff5a2a" stop-opacity="0" />
-          <stop offset=".84" stop-color="#7d3315" stop-opacity=".10" />
-          <stop offset=".955" stop-color="#c14a1d" stop-opacity=".26" />
-          <stop offset="1" stop-color="#ff7038" stop-opacity=".42" />
+          <stop offset=".55" stop-color="#8b5cf6" stop-opacity="0" />
+          <stop offset=".84" stop-color="#3b0764" stop-opacity=".10" />
+          <stop offset=".955" stop-color="#6d28d9" stop-opacity=".26" />
+          <stop offset="1" stop-color="#7c3aed" stop-opacity=".42" />
         </radialGradient>
 
         {/* THE BLOOM, as rings rather than blurs. Each gradient is sized to a
@@ -109,26 +109,26 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
             Two widths, because the air around a hot edge doesn't fall off at a
             single rate and one blur always looks like one blur. */}
         <radialGradient id="cl-warm-bloom-far" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1420">
-          <stop offset=".79" stop-color="#ff5a2a" stop-opacity="0" />
-          <stop offset=".880" stop-color="#ff6a30" stop-opacity=".15" />
-          <stop offset=".97" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".79" stop-color="#8b5cf6" stop-opacity="0" />
+          <stop offset=".880" stop-color="#7c3aed" stop-opacity=".15" />
+          <stop offset=".97" stop-color="#8b5cf6" stop-opacity="0" />
         </radialGradient>
 
         <radialGradient id="cl-warm-bloom-near" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1310">
-          <stop offset=".895" stop-color="#ff5a2a" stop-opacity="0" />
-          <stop offset=".954" stop-color="#ffa267" stop-opacity=".34" />
-          <stop offset="1" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".895" stop-color="#8b5cf6" stop-opacity="0" />
+          <stop offset=".954" stop-color="#c4b5fd" stop-opacity=".34" />
+          <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
         </radialGradient>
 
         {/* the specular core. A rim light blows past its own hue at the peak
             before falling back to the accent, which is why the middle stop is
-            near-white and the ends are pure #ff5a2a. */}
+            near-white and the ends are pure #8b5cf6. */}
         <linearGradient id="cl-hot" gradientUnits="userSpaceOnUse" x1="860" y1="180" x2="1120" y2="880">
-          <stop offset="0" stop-color="#ff5a2a" stop-opacity="0" />
-          <stop offset=".26" stop-color="#ff5a2a" stop-opacity=".45" />
-          <stop offset=".47" stop-color="#ffcfae" stop-opacity="1" />
-          <stop offset=".66" stop-color="#ff7c37" stop-opacity=".62" />
-          <stop offset="1" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset="0" stop-color="#8b5cf6" stop-opacity="0" />
+          <stop offset=".26" stop-color="#8b5cf6" stop-opacity=".45" />
+          <stop offset=".47" stop-color="#ede9fe" stop-opacity="1" />
+          <stop offset=".66" stop-color="#8b5cf6" stop-opacity=".62" />
+          <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
         </linearGradient>
 
         {/* Masks trim the bloom and the core to the arc facing the light.
@@ -176,16 +176,16 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
         </radialGradient>
 
         <radialGradient id="cl-cool-bloom" gradientUnits="userSpaceOnUse" cx="1750" cy="1750" r="1120">
-          <stop offset=".81" stop-color="#ff5a2a" stop-opacity="0" />
-          <stop offset=".893" stop-color="#ff8342" stop-opacity=".20" />
-          <stop offset=".97" stop-color="#ff5a2a" stop-opacity="0" />
+          <stop offset=".81" stop-color="#8b5cf6" stop-opacity="0" />
+          <stop offset=".893" stop-color="#a78bfa" stop-opacity=".20" />
+          <stop offset=".97" stop-color="#8b5cf6" stop-opacity="0" />
         </radialGradient>
 
         <linearGradient id="cl-hot-lower" gradientUnits="userSpaceOnUse" x1="1120" y1="900" x2="1600" y2="740">
-          <stop offset="0" stop-color="#ff5a2a" stop-opacity="0" />
-          <stop offset=".4" stop-color="#ff6a2e" stop-opacity=".5" />
-          <stop offset=".72" stop-color="#ffb078" stop-opacity=".85" />
-          <stop offset="1" stop-color="#ff8a45" stop-opacity=".5" />
+          <stop offset="0" stop-color="#8b5cf6" stop-opacity="0" />
+          <stop offset=".4" stop-color="#7c3aed" stop-opacity=".5" />
+          <stop offset=".72" stop-color="#c4b5fd" stop-opacity=".85" />
+          <stop offset="1" stop-color="#a78bfa" stop-opacity=".5" />
         </linearGradient>
 
         <linearGradient id="cl-mask-cool" gradientUnits="userSpaceOnUse" x1="1040" y1="0" x2="1600" y2="0">
