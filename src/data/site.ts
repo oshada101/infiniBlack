@@ -101,7 +101,7 @@ export type WorkGalleryItem =
 export const workItems: WorkItem[] = [
   {
     slug: 'glorious-fitness-center',
-    desc: 'Full marketing site for a fitness center — programs, trainers, memberships.',
+    desc: 'Marketing site for a fitness center — programs, trainers, and contact.',
     title: 'Glorious Fitness Center',
     tags: ['Marketing Site', 'Fitness', '2025'],
     media: {
@@ -110,8 +110,8 @@ export const workItems: WorkItem[] = [
       video: { src: 'projects/glorious.mp4' },
     },
     body: [
-      'Glorious Fitness Center runs a full timetable, a room of trainers and a membership desk. What it did not have was anywhere to send someone who had heard about the place and wanted to know what it costs, who teaches, and when the doors open.',
-      'So the site does the work the front desk was doing twice a day. Programs are laid out the way a person asks about them — what it is, who it suits, when it runs — and every trainer gets a face and a name rather than a job title. The enquiry sits one tap away on every screen, because on a phone, in a car park, that is where the decision actually gets made.',
+      'Glorious Fitness Center needed a website people could be pointed to. Word of mouth was doing the work, but anyone who heard about the gym and wanted to know what it offers, who the trainers are, and where to find it had no page to open.',
+      'The site answers those questions and stops there. It’s a marketing site in the plainest sense — programs, trainers, opening hours, and contact details, arranged so a visitor on a phone gets the whole picture in one scroll. Static pages, nothing to log into, nothing to learn.',
     ],
     meta: [
       { label: 'Client', value: 'Glorious Fitness Center' },
@@ -121,10 +121,8 @@ export const workItems: WorkItem[] = [
       heading: 'infiniblack for Glorious Fitness Center',
       items: [
         'Site design',
-        'Program and timetable pages',
-        'Trainer profiles',
-        'Membership enquiry flow',
-        'Photography and video direction',
+        'Program and trainer pages',
+        'Opening hours and contact',
         'Copywriting',
         'Launch and handover',
       ],
@@ -191,14 +189,13 @@ export interface SocialLink {
 }
 
 export const contact = {
-  email: 'hello@infiniblack.com',
+  email: 'infiniblackteam@gmail.com',
 
-  // TODO: replace with the real profile URLs before this ships. Order is
-  // deliberate — LinkedIn is where a B2B buyer actually checks you out.
+  // Order is deliberate — LinkedIn is where a B2B buyer actually checks you out.
   socials: [
-    { label: 'LinkedIn', href: '#', icon: 'linkedin' },
-    { label: 'Instagram', href: '#', icon: 'instagram' },
-    { label: 'Facebook', href: '#', icon: 'facebook' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/infiniblack/about/?viewAsMember=true', icon: 'linkedin' },
+    { label: 'Instagram', href: 'https://www.instagram.com/infiniblack2026/', icon: 'instagram' },
+    { label: 'Facebook', href: 'https://web.facebook.com/profile.php?id=61591838997362', icon: 'facebook' },
   ] as SocialLink[],
 
   /**

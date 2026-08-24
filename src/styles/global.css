@@ -352,7 +352,7 @@ html {
 .work {
   /* clearance under the fixed nav. kept in px, not rem: the release script
      reads this value straight off the custom property. */
-  --work-pin: 36px;
+  --work-pin: 40px;
 }
 
 /* the "Featured Work" heading stays pinned at the top while the cards stack.
@@ -455,7 +455,7 @@ html {
   /* nav height, and the scroll the shrink plays out over: one screen of
      frame, and the rest is travel. In px, like --work-pin, because the
      script reads the value straight off the property. */
-  --project-pin: 36px;
+  --project-pin: 40px;
   height: 150dvh;
 }
 
@@ -949,9 +949,13 @@ html {
   color: #8a8a92;
 }
 
-.contact-social { transition: color .2s ease, transform .2s ease; }
+.contact-social {
+  transition: transform .2s ease;
+}
 .contact-social:hover,
-.contact-social:focus-visible { color: #f2f2f2; transform: translateY(-2px); }
+.contact-social:focus-visible {
+  transform: scale(1.15);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .contact-action::before { transition-duration: .01s; }
