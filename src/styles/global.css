@@ -1369,3 +1369,58 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   .work-list__hold { height: clamp(40px, 6vh, 80px); }
 
 }
+
+/* --- contact toast ------------------------------------------------------- *
+ *  Non-blocking success notification that appears on the page after form
+ *  submission. Slides in from bottom-right, auto-dismisses after 5s.        *
+ * -------------------------------------------------------------------------- */
+.contact-toast {
+  position: fixed;
+  bottom: clamp(16px, 2.5vh, 28px);
+  right: clamp(16px, 2.5vw, 32px);
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .3s cubic-bezier(.2, 0, .2, 1), transform .4s cubic-bezier(.2, 0, .2, 1);
+}
+
+.contact-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.contact-toast__inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: clamp(12px, 1.8vh, 16px) clamp(16px, 2.5vw, 24px);
+  background: #0a0a0d;
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .4), 0 0 0 1px rgba(139, 92, 246, .15);
+  min-width: 280px;
+  max-width: 420px;
+}
+
+.contact-toast__icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: #8b5cf6;
+  stroke-width: 2.5;
+}
+
+.contact-toast__text {
+  font-size: .9rem;
+  font-weight: 500;
+  letter-spacing: -.005em;
+  color: #f2f2f2;
+  line-height: 1.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-toast { transition: opacity .15s ease; }
+  .contact-toast__inner { transform: none; }
+}

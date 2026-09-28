@@ -448,12 +448,19 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       </footer>
     </form>
 
-    <div class="contact-sent" hidden>
+<div class="contact-sent" hidden>
       <p class="text-[clamp(1.4rem,2.6vw,2rem)] font-normal tracking-[-.02em] text-[#f2f2f2]" data-sent-headline>Request sent.</p>
       <p class="mt-[clamp(10px,1.4vh,14px)] max-w-[44ch] text-[1rem] leading-[1.45] text-grey-300" data-sent-body>
-        We’ll come back to you within 48 hours.
+        We'll come back to you within 48 hours. A confirmation email has been sent to your inbox.
       </p>
       <button class="contact-submit mt-[clamp(24px,3vh,32px)] px-[clamp(20px,2.4vw,32px)] py-[clamp(13px,1.7vh,17px)] text-[.95rem] font-medium" type="button" data-contact-close>Close</button>
+    </div>
+
+    <div class="contact-toast" hidden role="status" aria-live="polite" aria-atomic="true">
+      <div class="contact-toast__inner">
+        <svg class="contact-toast__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span class="contact-toast__text">Request sent — confirmation email on its way</span>
+      </div>
     </div>
   </div>
 </dialog>
@@ -599,6 +606,14 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       window.location.href = href;
     };
 
+    const toast = document.querySelector('.contact-toast') as HTMLElement | null;
+
+    const showToast = () => {
+      if (!toast) return;
+      toast.classList.add('is-visible');
+      setTimeout(() => toast.classList.remove('is-visible'), 5000);
+    };
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!validate()) {
@@ -614,7 +629,7 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
         mailtoFallback(body);
         sentBody.textContent =
           'Your mail app should be opening with the details filled in — send it and we’ll take it from there.';
-      } else {
+} else {
         submit.disabled = true;
         submit.textContent = 'Sending…';
         try {
@@ -623,18 +638,24 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
             headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             body: JSON.stringify(body),
           });
-          if (!res.ok) throw new Error(String(res.status));
-        } catch {
+          const resText = await res.text();
+          console.log('Worker response:', res.status, resText);
+          if (!res.ok) throw new Error(`${res.status}: ${resText}`);
+          let resJson;
+          try { resJson = JSON.parse(resText); } catch { throw new Error(`Invalid JSON response: ${resText}`); }
+          if (resJson.ok !== true) throw new Error(resJson.error ?? 'Unknown worker error');
+        } catch (err) {
           // never strand a real lead on a failed request
+          console.error('Form submit error:', err);
           mailtoFallback(body);
           sentBody.textContent =
-            'We couldn’t send that from here, so your mail app is opening with the details filled in instead.';
+            'We couldn\'t send that from here, so your mail app is opening with the details filled in instead.';
           submit.disabled = false;
           submit.textContent = 'Send request';
           form.hidden = true;
           sent.hidden = false;
           return;
-        }
+}
         submit.disabled = false;
         submit.textContent = 'Send request';
       }
@@ -642,6 +663,7 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       form.hidden = true;
       sent.hidden = false;
       (sent.querySelector('[data-contact-close]') as HTMLElement | null)?.focus();
+      showToast();
     });
   }
 </script>

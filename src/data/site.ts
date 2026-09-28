@@ -207,7 +207,7 @@ export const contact = {
    * the visitor's mail client with every answer pre-filled, so the modal is
    * never a dead end. Set it and the fallback stops being used.
    */
-  formEndpoint: '',
+  formEndpoint: 'https://infiniblack-contact.starterio03.workers.dev/',
 };
 
 /**
