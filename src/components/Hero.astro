@@ -21,17 +21,10 @@ const lines = [
   { text: 'We build the software', align: 'start' },
   { text: 'your business runs on.', align: 'end' },
 ];
-
-const offer = ['AI', 'Websites', 'Apps', 'Business software', 'Marketing'];
 ---
 
 <section class="hero" aria-labelledby="hero-title">
   <div class="hero-stage" data-hero-stage>
-    <p class="hero-meta hero-meta--left" data-hero-fade>Product engineering studio</p>
-    <ul class="hero-meta hero-meta--right" data-hero-fade aria-label="What we build">
-      {offer.map((item) => <li>{item}</li>)}
-    </ul>
-
     <h1 class="hero-type" id="hero-title">
       {lines.map((line, i) => (
         <>
@@ -57,9 +50,9 @@ const offer = ['AI', 'Websites', 'Apps', 'Business software', 'Marketing'];
       <div class="hero-actions" data-hero-fade>
         {/* same words as the contact section's door, and the same dialog —
             Contact.astro binds every [data-contact-open] on the page */}
-        <button class="hero-cta" type="button" data-contact-open>
-          <span class="hero-cta__label">Make a request</span>
-          <svg class="hero-cta__mark" viewBox="0 0 100 170" fill="currentColor" aria-hidden="true">
+        <button class="cta hero-cta" type="button" data-contact-open>
+          Make a request
+          <svg class="cta__mark" viewBox="0 0 100 170" fill="currentColor" aria-hidden="true">
             <path d="M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z" />
           </svg>
         </button>
@@ -166,28 +159,6 @@ const offer = ['AI', 'Websites', 'Apps', 'Business software', 'Marketing'];
      never strands the last word on a line of its own */
   .hero-line__inner { display: block; text-wrap: balance; }
 
-  /* --- utility layer ----------------------------------------------------- */
-  .hero-meta {
-    position: absolute;
-    z-index: 2;
-    top: calc(40px + clamp(14px, 2.6vh, 28px));
-    margin: 0;
-    font-size: .68rem;
-    font-weight: 650;
-    font-variation-settings: 'opsz' 8;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: #8a8a92;
-  }
-  .hero-meta--left { left: var(--pad); }
-  .hero-meta--right {
-    right: var(--pad);
-    display: flex;
-    gap: 1.6em;
-    list-style: none;
-    padding: 0;
-  }
-
   .hero-foot {
     position: absolute;
     z-index: 2;
@@ -215,44 +186,6 @@ const offer = ['AI', 'Websites', 'Apps', 'Business software', 'Marketing'];
     gap: clamp(18px, 2vw, 28px);
   }
 
-  /* the CTA keeps its colour inside it too: hovering opens the prism through
-     the button, left to right — the site's wipe, carrying the aperture's
-     colours rather than a flat accent */
-  .hero-cta {
-    position: relative;
-    isolation: isolate;
-    display: inline-flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 22px 16px 24px;
-    border: 0;
-    background: #f2f2f2;
-    color: #0a0a0d;
-    font: inherit;
-    font-size: .95rem;
-    font-weight: 550;
-    letter-spacing: -.005em;
-    cursor: pointer;
-  }
-  .hero-cta::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(100deg, #3f6bff, #9a5cff 30%, #ff3f9a 55%, #ff6a37 78%, #ff9a2e);
-    clip-path: inset(0 100% 0 0);
-    transition: clip-path .5s cubic-bezier(.76, 0, .18, 1);
-  }
-  .hero-cta:hover::before,
-  .hero-cta:focus-visible::before { clip-path: inset(0 0 0 0); }
-  .hero-cta:focus-visible { outline: 1px solid #f2f2f2; outline-offset: 3px; }
-  .hero-cta__mark {
-    width: 9px;
-    height: 15px;
-    transition: transform .35s cubic-bezier(.6, 0, .2, 1);
-  }
-  .hero-cta:hover .hero-cta__mark { transform: translateX(4px); }
-
   .hero-link {
     display: inline-flex;
     align-items: center;
@@ -270,10 +203,6 @@ const offer = ['AI', 'Websites', 'Apps', 'Business software', 'Marketing'];
   }
   .hero-link:hover svg { transform: translate(2px, 2px); }
   .hero-link:hover { text-decoration: underline; text-underline-offset: .2em; }
-
-  @media (max-width: 1100px) {
-    .hero-meta--right { display: none; }
-  }
 
   @media (max-width: 760px) {
     .hero-stage { --dh: min(54svh, 122vw); }
