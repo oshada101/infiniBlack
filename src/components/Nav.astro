@@ -134,19 +134,6 @@ const diamond =
     window.addEventListener('scroll', sync, { passive: true });
   }
 
-  /* One "Make a request" on screen at a time. While the hero's own button is
-     in view the bar's waits; it arrives as that one leaves. Pages with no
-     hero button (a project page) never hide it. */
-  const heroCta = document.querySelector('.hero-cta');
-  if (nav && heroCta) {
-    // the strip under the bar doesn't count as in view: a button sitting
-    // behind the glass is one nobody can press
-    new IntersectionObserver(
-      ([entry]) => nav.classList.toggle('is-cta-held', entry.isIntersecting),
-      { rootMargin: `-${nav.offsetHeight}px 0px 0px 0px` },
-    ).observe(heroCta);
-  }
-
   if (toggle && menu) {
     const label = toggle.querySelector('.sr-only') as HTMLElement | null;
 

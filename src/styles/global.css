@@ -112,15 +112,6 @@ html {
 .nav__link.is-active .nav__pip { transform: scale(1); }
 
 .nav__right { justify-self: end; display: flex; align-items: center; gap: 16px; }
-.nav__right > .cta {
-  transition: opacity .35s ease, transform .45s cubic-bezier(.2, .7, .3, 1), visibility 0s;
-}
-.nav.is-cta-held .nav__right > .cta {
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity .25s ease, transform .3s ease, visibility 0s linear .3s;
-}
 
 /* --- the call to action ------------------------------------------------ *
  *  Shared by the hero and the nav. It keeps colour inside it, like the
