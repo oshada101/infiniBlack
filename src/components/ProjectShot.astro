@@ -1,0 +1,97 @@
+---
+/* A project's picture, the one way the site shows it: the project's own title
+ * card behind, and one screen of the real thing rising into it from the
+ * bottom edge — brand first, then proof.
+ *
+ * Fills whatever box it is put in (position: absolute, inset 0), so the
+ * homepage panel, the project page's opening stage and the next-project
+ * panel all get the same composition at their own size. A parent can make
+ * the screen bigger for a cramped frame with --shot-k (a multiplier on the
+ * screen's width), and lift it on hover by targeting .shot__screen.
+ */
+import type { WorkItem } from '../data/site';
+
+interface Props {
+  cover: WorkItem['cover'];
+  base: string;
+  /** the curtain waits on this picture's first paint (see Loader.astro) */
+  curtain?: boolean;
+  /** above the fold: don't lazy-load */
+  eager?: boolean;
+}
+
+const { cover, base, curtain = false, eager = false } = Astro.props;
+const loading = eager ? 'eager' : 'lazy';
+---
+
+<div class="shot">
+  {cover.kind === 'shot' ? (
+    <>
+      <img
+        class="shot__field"
+        src={`${base}${cover.field}`}
+        alt=""
+        loading={loading}
+        decoding="async"
+        data-curtain-media={curtain ? '' : undefined}
+      />
+      <img
+        class="shot__screen"
+        src={`${base}${cover.screen}`}
+        alt={cover.alt}
+        loading={loading}
+        decoding="async"
+        style={cover.width ? `--shot-w:${cover.width}%` : undefined}
+      />
+    </>
+  ) : (
+    <img
+      class="shot__field"
+      src={`${base}${cover.src}`}
+      alt={cover.alt}
+      loading={loading}
+      decoding="async"
+      style={cover.position ? `object-position:${cover.position}` : undefined}
+      data-curtain-media={curtain ? '' : undefined}
+    />
+  )}
+</div>
+
+<style>
+  .shot {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .shot__field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transform: scale(1.001);
+    transition: transform 1.4s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  /* below the field's wordmark, cropped by the frame so only its top shows */
+  .shot__screen {
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    width: min(calc(var(--shot-w, 74%) * var(--shot-k, 1)), 96%, 1180px);
+    height: auto;
+    display: block;
+    translate: -50% 0;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, .08),
+      0 40px 120px rgba(0, 0, 0, .65);
+    transition: transform 1.2s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shot__field, .shot__screen { transition: none; }
+  }
+</style>

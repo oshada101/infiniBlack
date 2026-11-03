@@ -398,22 +398,30 @@ html {
 }
 
 /* --- project page: the stage ------------------------------------------- *
- *  The work arrives at full screen and scroll takes it down continuously,
- *  100% to 40%, passing through 70% at the halfway mark. The frame is
- *  pinned for the length of that travel; at the floor the pin releases and
- *  the image leaves the way any other section would, with the write-up
- *  behind it.
+ *  The page opens on the homepage panel's picture at full screen: the title
+ *  card, and the screen peeking up from the bottom edge. Scrolling lifts the
+ *  screen to the centre of the frame, over the wordmark, while the card
+ *  behind it dims and drifts back — brand first, then the product brought up
+ *  to look at. The frame is pinned for that travel, then lets go, and the
+ *  write-up is directly behind it.
  *
- *  The mapping itself lives in the page's script — scroll position to size
- *  is not a thing CSS can state. Everything here just consumes the
- *  --project-scale that script writes.
+ *  One number drives all of it: --p, 0 on arrival and 1 when the screen has
+ *  settled. A scroll timeline animates it where the browser has one; the
+ *  page's script writes it everywhere else. The rest of the page's styles
+ *  are scoped in src/pages/work/[slug].astro.
  * ------------------------------------------------------------------------ */
+@property --p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 .project-stage {
-  /* nav height, and the scroll the shrink plays out over: one screen of
-     frame, and the rest is travel. In px, because the
-     script reads the value straight off the property. */
+  /* nav height, and the scroll the lift plays out over: one screen of
+     frame, and the rest is travel. In px, because the fallback script reads
+     the value straight off the property. */
   --project-pin: var(--nav-h);
-  height: 150dvh;
+  height: 170dvh;
 }
 
 .project-stage__frame {
@@ -424,180 +432,67 @@ html {
   background: #000;
 }
 
-/* transform, not width/height: the crop is fixed at the full-screen framing
-   and the whole picture shrinks with it, so nothing reflows mid-scroll and
-   the image never re-crops itself on the way down. */
-.project-stage__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  transform: scale(var(--project-scale, 1));
-  will-change: transform;
+.project-stage__art {
+  position: absolute;
+  inset: 0;
 }
 
-/* Hand the shrink to the compositor where the browser can do it: a scroll
+/* The selectors carry the stage twice on purpose: ProjectShot's own scoped
+   rules give these the same transform and a hover transition, and a
+   transition here would make the picture trail the scroll. */
+.project-stage .project-stage__art .shot__field {
+  transform: scale(calc(1 + var(--p) * .08));
+  filter: brightness(calc(1 - var(--p) * .4));
+  transition: none;
+}
+/* from where it rests (top: 56% of the frame) to the frame's centre: up by
+   the 6% between the two, and by half its own height */
+.project-stage .project-stage__art .shot__screen {
+  transform:
+    translateY(calc(var(--p) * (-50% - .06 * (100dvh - var(--project-pin)))))
+    scale(calc(1 + var(--p) * .06));
+  transition: none;
+}
+
+/* a phone frame is portrait and the screens are landscape: give the
+   screen inside more of the width */
+@media (max-width: 640px) {
+  .project-stage__art { --shot-k: 1.5; }
+}
+
+@keyframes project-rise {
+  from { --p: 0; }
+  to   { --p: 1; }
+}
+
+/* Hand the lift to the compositor where the browser can do it: a scroll
    timeline runs on the same thread that moves the sticky frame, so the two
-   stay locked together. Driving it from a scroll listener cannot — the
-   transform lands a frame after the scroll it answers to, and a pinned
-   element scaling one frame late is exactly what reads as judder.
-
-   `contain` is the range where the stage covers the whole screen, which is
-   the same window the frame is pinned for; the inset moves the top edge of
-   that window down past the nav, so it matches the sticky offset. The
-   page's script does the same job for browsers without this, and stands
-   down when it isn't needed. */
-/* Eased, not linear. On a scroll timeline the timing function maps scroll
-   progress onto scale progress, so a curve here is the difference between
-   the picture tracking the wheel step for step and it gliding between two
-   settled states. easeInOutSine specifically: it is gentle at both ends, so
-   the image holds full-frame for the first moments of the scroll and settles
-   into the floor rather than arriving at it, but it never has the dead zone
-   at the start that a steeper ease-in-out gives you — where you scroll and
-   nothing appears to happen. */
-@keyframes project-shrink {
-  from { transform: scale(1); }
-  to   { transform: scale(.6); }   /* keep in step with TO in [slug].astro */
-}
-
+   stay locked together. Eased in and out (easeInOutSine), so the screen
+   starts moving with the wheel and settles rather than stops. */
 @supports (animation-timeline: view()) {
   .project-stage {
     view-timeline-name: --project-stage;
     view-timeline-inset: var(--project-pin) 0;
   }
 
-  .project-stage__img {
-    animation: project-shrink cubic-bezier(.37, 0, .63, 1) both;
-    transform: none;               /* the keyframes own it now */
+  .project-stage__art {
+    animation: project-rise cubic-bezier(.37, 0, .63, 1) both;
   }
 
-  /* Deliberately a different selector, and it has to stay that way: the
-     minifier folds animation longhands into the `animation` shorthand when
-     they share a rule, and the shorthand does not carry a timeline — the
-     declaration comes out invalid and the whole effect silently dies. It
-     can't fold across two rules. */
-  .project-stage .project-stage__img {
+  /* Deliberately a different selector: the minifier folds animation
+     longhands into the `animation` shorthand when they share a rule, and the
+     shorthand does not carry a timeline. It can't fold across two rules. */
+  .project-stage .project-stage__art {
     animation-timeline: --project-stage;
     animation-range: contain 0% contain 100%;
   }
 }
 
-/* --- project page: the write-up ---------------------------------------- *
- *  Editorial, not a spec sheet: the account of the job on the left, the
- *  facts of it in columns to the right, and nothing between them but the
- *  gap. Every line is the same size — label, value, prose and list alike —
- *  so the only hierarchy is where a thing sits and how grey it is. Rules,
- *  pills and bold labels would each be a way of shouting in a block that
- *  works because nothing in it shouts.
- * ------------------------------------------------------------------------ */
-/* One column, centred, carrying the title, the write-up and the way back.
-   The gallery below runs down the middle too, so the page has a single
-   spine rather than a left-aligned top half and a centred bottom one. */
-.project-info__col {
-  width: min(70vw, 100%);
-  margin-inline: auto;
-}
-
-.project-info__grid {
-  display: grid;
-  /* the account gets the width of two fact columns; --meta-cols is set from
-     the data, so adding a fourth fact doesn't need a new rule here */
-  grid-template-columns: minmax(0, 1.7fr) repeat(var(--meta-cols, 2), minmax(0, 1fr));
-  gap: clamp(24px, 3vw, 64px);
-
-  /* set once, inherited by everything: one size is the whole idea */
-  font-size: clamp(.92rem, 1.05vw, 1.2rem);
-  line-height: 1.24;
-  letter-spacing: -.01em;
-  color: #d4d4d8;
-}
-
-@media (max-width: 860px) {
-  /* the narrowed column is a luxury of wide screens; here the block takes
-     the page and the fact columns stack under the prose */
-  .project-info__col { width: 100%; }
-  .project-info__grid { grid-template-columns: minmax(0, 1fr); }
-}
-
-/* one blank line between blocks, measured in the copy's own leading, so the
-   rhythm holds when the type resizes */
-.project-copy p + p,
-.project-copy__list,
-.project-meta__value { margin-top: 1.24em; }
-
-.project-copy__list { list-style: none; }
-.project-meta__label { color: #8a8a92; }
-.project-meta__value { color: #f2f2f2; }
-
-/* the write-up is the payoff for the sequence, so it doesn't sit there
-   through it. It arrives on the wipe — one of the two gestures this site
-   is allowed (docs/design-direction.md), the same left-to-right pass the
-   curtain opens with and the contact rows answer to.
-
-   The start state is a clip, i.e. invisible, so it is gated on [data-reveal]
-   — an attribute the script sets on itself before it observes anything. No
-   script, no clip: the write-up is simply there, which is the only
-   acceptable failure for the part of the page that carries the words. */
-.project-info[data-reveal] .project-reveal {
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path .7s cubic-bezier(.76, 0, .18, 1) calc(var(--i, 0) * 110ms);
-}
-.project-info[data-reveal].is-in .project-reveal { clip-path: inset(0 0 0 0); }
-
 @media (prefers-reduced-motion: reduce) {
-  /* no pin, no sequence: one screen of the work, then the write-up */
+  /* no pin, no sequence: one screen of the work, already lifted */
   .project-stage { height: auto; }
-  .project-stage__frame { position: static; height: calc(100dvh - var(--project-pin)); }
-  .project-stage__img { transform: none; animation: none; }
-  .project-info[data-reveal] .project-reveal { clip-path: none; transition: none; }
-}
-
-/* --- project page: the gallery ----------------------------------------- *
- *  The work, one piece after another, each at its own proportions. A column
- *  narrower than the page is what makes a stack of screenshots read as a
- *  portfolio rather than as a scroll of assets — the margin either side is
- *  doing as much work as the pictures.
- *
- *  Square corners, deliberately: a rounded frame is a device the site uses
- *  nowhere else, and the work inside these frames has corners of its own.
- * ------------------------------------------------------------------------ */
-.project-gallery {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(60px, 12vh, 144px);
-  padding: clamp(40px, 8vh, 96px) clamp(8px, 1.2vw, 18px);
-}
-
-.project-gallery__item {
-  width: min(63vw, 100%);
-  margin: 0;
-  border: 1px solid rgba(255, 255, 255, .1);
-
-  /* the corner dots off the featured-work frames, and only those — the hatch
-     and the fill there are a placeholder for a picture that hasn't loaded,
-     which is not this frame's job. Sits on the border box, so the dots ride
-     the hairline rather than getting covered by the picture. */
-  background:
-    radial-gradient(circle, #fff .75px, transparent 1px) left -1px top -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) right -1px top -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) left -1px bottom -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) right -1px bottom -1px / 2px 2px no-repeat;
-  background-origin: border-box;
-}
-
-/* each piece keeps its own aspect — nothing here is cropped to a common
-   shape, because a screenshot cropped to fit is a screenshot lying */
-.project-gallery__media {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-@media (max-width: 860px) {
-  /* the column that made the stack read as a portfolio is a wide-screen
-     luxury; here the picture takes the page */
-  .project-gallery__item { width: 100%; }
+  .project-stage__frame { position: relative; height: calc(100dvh - var(--project-pin)); }
+  .project-stage__art { animation: none; --p: 1; }
 }
 
 /* --- contact ----------------------------------------------------------- *

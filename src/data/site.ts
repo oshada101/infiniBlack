@@ -94,8 +94,10 @@ export interface WorkItem {
 
   /** the write-up, one string per paragraph */
   body: string[];
-  /** the column beside it: label above value, no rules, everything one size */
+  /** the facts beside it — type, industry, year or status, role */
   meta: { label: string; value: string }[];
+  /** the live product, when there is one to send people to */
+  url?: string;
   /** what was actually handed over, under its own heading */
   delivered: { heading: string; items: string[] };
   /** the work itself, stacked under the write-up. Videos come first — the
@@ -103,9 +105,10 @@ export interface WorkItem {
   gallery: WorkGalleryItem[];
 }
 
+/** `caption`: one line under the picture saying what it shows */
 export type WorkGalleryItem =
-  | { kind: 'video'; src: string; poster?: string }
-  | { kind: 'image'; src: string; alt: string };
+  | { kind: 'video'; src: string; poster?: string; caption?: string }
+  | { kind: 'image'; src: string; alt: string; caption?: string };
 
 export const workItems: WorkItem[] = [
   {
@@ -134,11 +137,14 @@ export const workItems: WorkItem[] = [
       'The site answers those questions and stops there. It’s a marketing site in the plainest sense — programs, trainers, opening hours, and contact details, arranged so a visitor on a phone gets the whole picture in one scroll. Static pages, nothing to log into, nothing to learn.',
     ],
     meta: [
-      { label: 'Client', value: 'Glorious Fitness Center' },
-      { label: 'Role', value: 'Marketing site — design, build and launch' },
+      { label: 'Type', value: 'Marketing site' },
+      { label: 'Industry', value: 'Fitness' },
+      { label: 'Year', value: '2025' },
+      { label: 'Role', value: 'Design, build and launch' },
     ],
+    url: 'https://gloriousfitness.lk/',
     delivered: {
-      heading: 'infiniblack for Glorious Fitness Center',
+      heading: 'What we delivered',
       items: [
         'Site design',
         'Program and trainer pages',
@@ -148,8 +154,18 @@ export const workItems: WorkItem[] = [
       ],
     },
     gallery: [
-      { kind: 'video', src: 'projects/glorious.mp4', poster: 'projects/glorious.webp' },
-      { kind: 'image', src: 'projects/glorious.webp', alt: 'Glorious Fitness Center — home page' },
+      {
+        kind: 'video',
+        src: 'projects/glorious.mp4',
+        poster: 'projects/glorious.webp',
+        caption: 'The site from top to bottom — the opening screen, about, the programs and the gallery.',
+      },
+      {
+        kind: 'image',
+        src: 'projects/glorious.webp',
+        alt: 'Glorious Fitness Center home page: “Wear the moment.” over a photo of the gym floor',
+        caption: 'The home page — one line over the gym floor, and two ways in.',
+      },
     ],
   },
   {
@@ -178,11 +194,13 @@ export const workItems: WorkItem[] = [
       'The work is ongoing. We build it in short cycles against a real gym running real days, which is the only way to find out that renewals matter more than reports and that attendance has to be one tap, not a form.',
     ],
     meta: [
-      { label: 'Client', value: 'Kratos' },
-      { label: 'Role', value: 'Product design and engineering, ongoing' },
+      { label: 'Type', value: 'Gym management system' },
+      { label: 'Industry', value: 'Fitness' },
+      { label: 'Status', value: 'Ongoing' },
+      { label: 'Role', value: 'Product design and engineering' },
     ],
     delivered: {
-      heading: 'infiniblack for Kratos',
+      heading: 'What we delivered',
       items: [
         'Member records',
         'Billing and renewals',
@@ -192,13 +210,27 @@ export const workItems: WorkItem[] = [
         'Weekly build cycles',
       ],
     },
-    // alt text is honest but generic — replace it with what each screen
-    // actually shows, which only someone who has used the thing can write
+    // kratos-2.png (a member's profile) is left out: it was shot with test
+    // data in it. Re-shoot it with believable demo data and add it back.
     gallery: [
-      { kind: 'image', src: 'projects/kratos-1.png', alt: 'Kratos gym management system — screen one' },
-      { kind: 'image', src: 'projects/kratos-2.png', alt: 'Kratos gym management system — screen two' },
-      { kind: 'image', src: 'projects/kratos-3.png', alt: 'Kratos gym management system — screen three' },
-      { kind: 'image', src: 'projects/kratos-4.png', alt: 'Kratos gym management system — screen four' },
+      {
+        kind: 'image',
+        src: 'projects/kratos-1.png',
+        alt: 'Kratos overview: check-ins today, today’s income, memberships expiring soon, quick actions and recent payments',
+        caption: 'Overview — today’s check-ins and income, memberships about to lapse, recent payments, and the four things the desk does most.',
+      },
+      {
+        kind: 'image',
+        src: 'projects/kratos-3.png',
+        alt: 'Kratos membership plans with the new-plan form open: name, price, duration, gender, age group and inclusions',
+        caption: 'Membership plans — price, length, who it’s for and what it includes, in one form.',
+      },
+      {
+        kind: 'image',
+        src: 'projects/kratos-4.png',
+        alt: 'Kratos check-ins with the check-in dialog open, searching members by name or code',
+        caption: 'Check-in — find a member by name or code, and they’re in.',
+      },
     ],
   },
 ];

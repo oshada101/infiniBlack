@@ -320,6 +320,21 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
     const close = () => dialog.close();
 
     document.querySelectorAll('[data-contact-open]').forEach((el) => el.addEventListener('click', open));
+
+    // Arriving at /#request (the project pages' "Make a request") opens the
+    // form straight away — once the curtain has cleared, if there is one —
+    // and takes the hash back off so a reload doesn't open it again.
+    if (window.location.hash === '#request') {
+      const go = () => {
+        open();
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      };
+      if (document.getElementById('curtain')) {
+        document.addEventListener('curtain:reveal', () => setTimeout(go, 1200), { once: true });
+      } else {
+        go();
+      }
+    }
     dialog.querySelectorAll('[data-contact-close]').forEach((el) => el.addEventListener('click', close));
 
     dialog.addEventListener('close', () => {

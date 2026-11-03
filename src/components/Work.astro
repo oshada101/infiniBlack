@@ -13,6 +13,7 @@
  * supplies it, which is the hero's rule seen from the other side.
  */
 import { workItems, workHref } from '../data/site';
+import ProjectShot from './ProjectShot.astro';
 
 interface Props {
   base: string;
@@ -30,28 +31,7 @@ const { base } = Astro.props;
     {workItems.map((item, i) => (
       <article class="wk-panel" style={`--i:${i}`}>
         <div class="wk-media">
-          {item.cover.kind === 'shot' ? (
-            <>
-              <img class="wk-media__el" src={`${base}${item.cover.field}`} alt="" loading="lazy" decoding="async" />
-              <img
-                class="wk-shot"
-                src={`${base}${item.cover.screen}`}
-                alt={item.cover.alt}
-                loading="lazy"
-                decoding="async"
-                style={item.cover.width ? `--shot-w:${item.cover.width}%` : undefined}
-              />
-            </>
-          ) : (
-            <img
-              class="wk-media__el"
-              src={`${base}${item.cover.src}`}
-              alt={item.cover.alt}
-              loading="lazy"
-              decoding="async"
-              style={item.cover.position ? `object-position:${item.cover.position}` : undefined}
-            />
-          )}
+          <ProjectShot cover={item.cover} base={base} />
         </div>
 
         <div class="wk-info">
@@ -130,34 +110,9 @@ const { base } = Astro.props;
     overflow: hidden;
     background: #000;
   }
-  .wk-media__el {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    transform: scale(1.001);
-    transition: transform 1.4s cubic-bezier(.22, 1, .36, 1);
-  }
-  .wk-panel:hover .wk-media__el { transform: scale(1.035); }
-
-  /* the product shot: one screen rising out of the bottom edge, below the
-     field's wordmark, cropped by the frame so only its top shows */
-  .wk-shot {
-    position: absolute;
-    left: 50%;
-    top: 56%;
-    width: min(var(--shot-w, 74%), 1180px);
-    height: auto;
-    display: block;
-    translate: -50% 0;
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, .08),
-      0 40px 120px rgba(0, 0, 0, .65);
-    transition: transform 1.2s cubic-bezier(.22, 1, .36, 1);
-  }
-  .wk-panel:hover .wk-shot { transform: translateY(-14px); }
+  /* the picture's own styles live in ProjectShot; the panel only moves it */
+  .wk-panel:hover :global(.shot__field) { transform: scale(1.035); }
+  .wk-panel:hover :global(.shot__screen) { transform: translateY(-14px); }
 
   /* --- the row under it ------------------------------------------------ */
   /* one row, always: name, what it was, the way in. The name never wraps —
@@ -248,7 +203,8 @@ const { base } = Astro.props;
        at its own shape, rather than a sliver of it cropped to the screen */
     .wk-media { flex: none; aspect-ratio: 16 / 10; }
     /* a phone frame is small: every screen a size up, keeping their ratio */
-    .wk-shot { width: calc(var(--shot-w, 74%) * 1.16); top: 60%; }
+    .wk-media { --shot-k: 1.16; }
+    .wk-media :global(.shot__screen) { top: 60%; }
     .wk-title { white-space: normal; text-wrap: balance; }
     .wk-info { grid-template-columns: minmax(0, 1fr); gap: 10px; }
     .wk-view { display: none; }
@@ -258,7 +214,7 @@ const { base } = Astro.props;
     .wk-panel { position: relative; top: auto; }
     .wk-panel + .wk-panel { margin-top: clamp(24px, 5vh, 48px); }
     .wk-list::after { display: none; }
-    .wk-media__el, .wk-shot, .wk-view svg { transition: none; }
+    .wk-view svg { transition: none; }
   }
 </style>
 
