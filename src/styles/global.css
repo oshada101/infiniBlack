@@ -694,295 +694,164 @@ html {
 }
 
 /* --- contact ----------------------------------------------------------- *
- *  The closing screen: one statement, two full-bleed action rows, a
- *  standing line. The section's own left/right inset, so the hover wipe
- *  can bleed past the text to the screen edges.
+ *  The closing screen: the statement in colour, the promises, two full-bleed
+ *  action rows, a standing line. --bleed is the section's own inset, so the
+ *  rows' hover wipe can run past the text to the screen edges.
  * ------------------------------------------------------------------------ */
-.contact { --bleed: clamp(8px, 1.2vw, 18px); }
-
-/* --- the closing light --- *
- *  The page opens on the hero video and closes on two lit forms. Not a wash
- *  behind the type: bodies with edges, dark everywhere except where the rim
- *  catches. The light burns the site's own #8b5cf6 rather than a new colour,
- *  so the tick bar and the nav's active link sit inside it.
- *
- *  isolation + z-index:-1 puts the whole thing above the page ground but
- *  under every child, so the action rows' white wipe still covers it. */
 .contact {
+  --bleed: clamp(8px, 1.2vw, 18px);
+  /* the statement's size, shared with the line under it, which has to clear
+     the field's overshoot below the letters */
+  --ct-size: clamp(3.1rem, 12.5vw, 11.5rem);
   position: relative;
-  isolation: isolate;
-}
-
-/* The frame that keeps the light inside the section. The layers below are
-   scaled past their own box so they have room to drift, and 6% of each one
-   hangs over the edge — without this it paints up into the Work items.
-   inset:0, no --bleed offset: an absolutely positioned child resolves
-   against .contact's PADDING box, and with no left border that edge is
-   already the section's outer edge. */
-.contact-light-frame {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-/* Each form is its own promoted layer, painted once. The circles inside are
-   enormous but the SVG viewport clips them, so a layer never exceeds the
-   frame. */
-.contact-light {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  /* transform ONLY. That is the whole performance story: the compositor moves
-     an already-rasterised bitmap and the renderer is never asked for a new
-     pixel. The version that made this page crawl rotated the geometry inside
-     the SVG, which invalidates the raster and re-runs every gradient and mask
-     in the drawing, every frame. Same visual family, ~40x the cost. */
-  will-change: transform;
-}
-
-/* The base scale is what buys room to move. At 1.12 there is 6% of overscan
-   on every side, so a drift of up to 3% plus ~1.5deg of roll never pulls an
-   edge into frame — no wrapper and no overflow clipping needed.
-   13s and 17s: close enough to feel like one atmosphere, coprime enough that
-   the pair doesn't visibly repeat. */
-.contact-light--warm {
-  animation: contact-warm 13s ease-in-out infinite alternate;
-}
-.contact-light--cool {
-  animation: contact-cool 17s ease-in-out infinite alternate;
-}
-
-/* The two run opposite on x, which is what turns a slide into parallax —
-   the gap between the two rims opens and closes as they pass. */
-@keyframes contact-warm {
-  from { transform: scale(1.12) translate(-2.6%, 1.4%) rotate(-.9deg); }
-  to   { transform: scale(1.12) translate(2.6%, -1.4%) rotate(.9deg); }
-}
-
-@keyframes contact-cool {
-  from { transform: scale(1.12) translate(2.2%, 1.8%) rotate(.7deg); }
-  to   { transform: scale(1.12) translate(-2.2%, -1%) rotate(-.7deg); }
-}
-
-/* THE GRAIN is not decoration. Gradients this dark and this wide ramp one
-   8-bit level per ~40px, which shows as concentric rings on a good display
-   in a dark room. Noise breaks the step up, and hero.mp4 is grainy film, so
-   the fix and the reference are the same thing. Alpha is deliberately tiny —
-   it lifts the section's black by about one level, which is the size of the
-   artifact it's cancelling. Painted last, above the light, or it would have
-   nothing to dither. */
-.contact::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .14 0 0 0 -.06'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
-}
-
-.contact-statement { font-variation-settings: 'opsz' 96; }
-
-/* --- the rotating line --- *
- *  Beside the statement, where there was nothing. Grid-stacked so every
- *  line occupies the same cell: the block is as tall as the longest one
- *  and never reflows as they swap. */
-.contact-why {
-  flex: none;
-  width: clamp(260px, 30vw, 400px);
-}
-
-/* --- the ticks --- *
- *  Each one is a track that fills over exactly one cycle, so the row is a
- *  countdown to the next line as well as a position in the list. --cycle
- *  is the single source of truth for the timing: the script reads it back
- *  out rather than holding its own copy, so the bar can't drift out of
- *  step with the rotation. Written in ms, but the minifier ships it as
- *  "4.2s" — which is why the script parses the unit instead of trusting
- *  parseFloat. */
-.contact-why__ticks {
-  --cycle: 3200ms;
   display: flex;
-  gap: 6px;
-  margin-bottom: clamp(16px, 2.4vh, 24px);
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(72px, 11vh, 130px) var(--bleed) clamp(18px, 2.6vh, 28px);
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  scroll-margin-top: var(--nav-h);
 }
 
-.contact-why__tick {
+.ct-label {
+  margin: 0;
+  font-size: clamp(1rem, 1.1vw, 1.1rem);
+  font-weight: 650;
+  font-variation-settings: 'opsz' 8;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #8a8a92;
+}
+
+.ct-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 6vh, 72px) 0;
+}
+
+/* the box the field fills. Its font size is the statement's, so the canvas
+   can overshoot the letters in em — descenders and the last letter's
+   overhang — without reaching the line below it. */
+.ct-word {
   position: relative;
-  width: 30px;
-  height: 2px;
-  background: rgba(255, 255, 255, .16);
+  font-size: var(--ct-size);
 }
-.contact-why__tick::after {
-  content: '';
+.ct-statement {
+  margin: 0;
+  font-size: 1em;
+  font-weight: 450;
+  font-variation-settings: 'opsz' 144;
+  letter-spacing: -.055em;
+  line-height: .9;
+  color: #fff;
+  text-wrap: balance;
+}
+.ct-field {
   position: absolute;
-  inset: 0;
-  background: #8b5cf6;      /* the section's only colour, spent on 2px */
-  transform: scaleX(0);
-  transform-origin: left;
+  inset: -.08em -.16em -.26em -.12em;
+  width: calc(100% + .28em);
+  height: calc(100% + .34em);
+  display: block;
+  pointer-events: none;
+  /* darken keeps the darker of the two: the ground stays exactly itself and
+     the white letters take the field's colour */
+  mix-blend-mode: darken;
+}
+.ct-field.is-armed {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.6s cubic-bezier(.76, 0, .18, 1);
+}
+.ct-field.is-armed.is-in { clip-path: inset(0 0 0 0); }
+
+.ct-sub {
+  /* clears the field's overshoot below the statement (.26em of its size),
+     or darken would tint the top of this line */
+  margin: calc(var(--ct-size) * .32) 0 0;
+  max-width: 42ch;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.4;
+  color: #8a8a92;
+  text-wrap: pretty;
 }
 
-/* lines already shown stay filled but drop to grey — without this the row
-   shows how long is left without showing how far in you are */
-.contact-why__tick.is-done::after {
-  transform: scaleX(1);
-  background: rgba(255, 255, 255, .3);
-}
-
-.contact-why__tick.is-current::after {
-  animation: contact-tick var(--cycle) linear forwards;
-}
-
-@keyframes contact-tick {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-
-.contact-why__list {
+/* --- the promises --- */
+.ct-why {
   display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px clamp(18px, 2.4vw, 36px);
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: clamp(20px, 3vh, 30px) 0;
+  border-top: 1px solid rgba(255, 255, 255, .15);
 }
-.contact-why__item {
-  grid-area: 1 / 1;
-  font-size: clamp(1.15rem, 1.9vw, 1.55rem);
-  font-weight: 400;
-  letter-spacing: -.015em;
-  line-height: 1.35;
-  color: #c7c7c7;
+.ct-why li {
+  display: flex;
+  gap: 10px;
+  font-size: .9rem;
+  line-height: 1.4;
+  color: #d4d4d8;
   text-wrap: pretty;
-  /* stacked in one cell, so the hidden lines must not be selectable. The
-     delay holds the outgoing line visible just long enough to fade. */
-  visibility: hidden;
-  transition: visibility 0s linear .22s;
 }
-.contact-why__item.is-current { visibility: visible; transition-delay: 0s; }
-
-/* WORD AT A TIME — the swap staggers across the words rather than typing
-   out characters. The unit is the word because that's the unit you read
-   in, so it lands as a reveal instead of a performance, and the whole line
-   has arrived in ~250ms and then holds still and readable. */
-.contact-why__word {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(.45em);
-  transition:
-    opacity .42s ease,
-    transform .42s cubic-bezier(.2, 0, .2, 1);
-  transition-delay: calc(var(--i) * 45ms);
-}
-.contact-why__item.is-current .contact-why__word { opacity: 1; transform: none; }
-
-/* leaving, the line goes all at once and fast — staggering the exit too
-   would double the time the column has nothing readable in it */
-.contact-why__item:not(.is-current) .contact-why__word {
-  transition-duration: .18s;
-  transition-delay: 0s;
+.ct-why__mark {
+  flex: none;
+  width: 6px;
+  height: 10px;
+  margin-top: .3em;
+  background: currentColor;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
-/* the rotation is the only thing carrying these lines, so when motion is
-   off they all show at once as a plain list rather than four of them
-   becoming unreachable */
-@media (prefers-reduced-motion: reduce) {
-  .contact-why__ticks { display: none; }
-  .contact-why__list { display: block; }
-  .contact-why__item {
-    visibility: visible;
-    transition: none;
-    font-size: clamp(1rem, 1.4vw, 1.15rem);
-    margin-bottom: .5em;
-  }
-  .contact-why__word {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
+/* --- the way in --- */
+.ct-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px clamp(28px, 3.4vw, 48px);
+  margin-top: clamp(24px, 4vh, 40px);
 }
+.cta--lg { gap: 16px; padding: 20px 26px 20px 28px; font-size: 1.05rem; }
+.cta--lg .cta__mark { width: 10px; height: 17px; }
 
-/* --- action rows --- *
- *  Not buttons. The hairline rule is this site's unit in every other
- *  section, so the two ways to reach us are rules too — which also means
- *  they fill the viewport structurally instead of floating in it. */
-.contact-actions { border-top: 1px solid rgba(255, 255, 255, .15); }
-
-.contact-action {
-  position: relative;
+.ct-mail {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: baseline;
-  gap: 0 clamp(16px, 2.5vw, 40px);
-  width: 100%;
-  padding: clamp(20px, 3.4vh, 38px) 0;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, .15);
-  background: transparent;
+  gap: 4px;
+  margin: 0;
+  font-size: .78rem;
+  font-weight: 500;
+  color: #8a8a92;
+}
+.ct-mail a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
   color: #f2f2f2;
-  font-family: inherit;
-  text-align: left;
   text-decoration: none;
-  cursor: pointer;
-  isolation: isolate;
-  transition: color .25s ease .06s;
-}
-
-/* THE WIPE — white sweeps in from the left and the type inverts to ink.
-   Same left-to-right reveal as the opening curtain, so the page closes in
-   the motion it opened with. clip-path, not scaleX: a scaled panel would
-   smear its own edge. Bleeds past the section inset to the screen edges. */
-.contact-action::before {
-  content: '';
-  position: absolute;
-  inset: 0 calc(-1 * var(--bleed));
-  z-index: -1;
-  background: #f2f2f2;
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path .5s cubic-bezier(.76, 0, .18, 1);
-}
-.contact-action:hover,
-.contact-action:focus-visible { color: #0a0a0d; outline: none; }
-.contact-action:hover::before,
-.contact-action:focus-visible::before { clip-path: inset(0 0 0 0); }
-
-.contact-action__label {
-  font-size: clamp(1.45rem, 3.4vw, 2.75rem);
-  font-weight: 400;
-  letter-spacing: -.025em;
-  line-height: 1.05;
-  min-width: 0;
   overflow-wrap: anywhere;
 }
-
-/* says what happens next, so neither row is a leap of faith */
-.contact-action__meta {
-  font-size: .8rem;
-  font-weight: 500;
-  letter-spacing: .02em;
-  color: #8a8a92;
-  white-space: nowrap;
-  transition: color .25s ease .06s;
-}
-.contact-action:hover .contact-action__meta,
-.contact-action:focus-visible .contact-action__meta { color: #57575e; }
-
-.contact-action__mark {
-  align-self: center;
-  display: block;
+.ct-mail a:hover,
+.ct-mail a:focus-visible { text-decoration: underline; text-underline-offset: .2em; }
+.ct-mail svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
   transition: transform .35s cubic-bezier(.6, 0, .2, 1);
 }
-.contact-action__mark svg { display: block; width: 13px; height: 22px; }
-.contact-action__mark--arrow svg { width: 22px; height: 22px; }
-.contact-action:hover .contact-action__mark { transform: translateX(6px); }
-.contact-action:hover .contact-action__mark--arrow { transform: translate(4px, -4px); }
+.ct-mail a:hover svg { transform: translate(3px, -3px); }
 
+@media (max-width: 1100px) {
+  .ct-why { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 640px) {
-  /* the meta line is the first thing to go — the label and the mark are
-     what the row is for */
-  .contact-action { grid-template-columns: minmax(0, 1fr) auto; }
-  .contact-action__meta { display: none; }
+  .contact { --ct-size: 15.5vw; }
+  .ct-actions .cta { flex: 1 1 100%; justify-content: space-between; }
+  .ct-why { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-field.is-armed { transition: none; clip-path: none; }
 }
 
 /* --- standing line --- */
@@ -993,6 +862,7 @@ html {
   justify-content: space-between;
   gap: clamp(12px, 2vw, 28px);
   padding-top: clamp(14px, 2.2vh, 20px);
+  border-top: 1px solid rgba(255, 255, 255, .15);
   font-size: .78rem;
   font-weight: 500;
   letter-spacing: .02em;
@@ -1002,17 +872,16 @@ html {
 .contact-social {
   transition: transform .2s ease;
 }
+.contact-top { color: #8a8a92; text-decoration: none; transition: color .2s ease; }
+.contact-top:hover,
+.contact-top:focus-visible { color: #f2f2f2; }
 .contact-social:hover,
 .contact-social:focus-visible {
   transform: scale(1.15);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .contact-action::before { transition-duration: .01s; }
-  .contact-action__mark, .contact-social { transition-property: color; }
-  /* the light stays, the drift stops — it's atmosphere, not information.
-     The scale has to survive or the composition reframes when it settles. */
-  .contact-light { animation: none; transform: scale(1.12); }
+  .contact-social, .ct-mail svg { transition-property: color; }
 }
 
 /* --- contact modal ------------------------------------------------------ *
@@ -1151,7 +1020,7 @@ html {
 .contact-row__error {
   margin-top: .6em;
   font-size: .78rem;
-  color: #8b5cf6;
+  color: #ff6a37;
 }
 
 /* keyed to the panel, not the viewport — see .contact-dialog__inner */
@@ -1198,9 +1067,11 @@ html {
 }
 
 /* pick many — the whole diamond fills */
+/* a ticked option is a diamond with the prism inside it — the page's one
+   rule for colour, at the size of a checkbox */
 .contact-option input:checked ~ .contact-mark--multi {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  background: linear-gradient(135deg, #3f6bff, #9a5cff 30%, #ff3f9a 60%, #ff9a2e);
+  border-color: transparent;
 }
 
 /* pick one — an inner diamond, which the 45° parent gives us for free */
@@ -1208,11 +1079,11 @@ html {
   content: '';
   position: absolute;
   inset: 3px;
-  background: #8b5cf6;
+  background: linear-gradient(135deg, #3f6bff, #9a5cff 30%, #ff3f9a 60%, #ff9a2e);
   transform: scale(0);
   transition: transform .15s cubic-bezier(.4, 1.6, .6, 1);
 }
-.contact-option input:checked ~ .contact-mark--single { border-color: #8b5cf6; }
+.contact-option input:checked ~ .contact-mark--single { border-color: #f2f2f2; }
 .contact-option input:checked ~ .contact-mark--single::after { transform: scale(1); }
 .contact-option input:checked ~ .contact-option__text { color: #fff; }
 .contact-option input:focus-visible ~ .contact-mark {
@@ -1233,7 +1104,7 @@ html {
   transition: border-color .2s ease;
 }
 .contact-input::placeholder { color: #57575e; }
-.contact-input:focus { outline: none; border-bottom-color: #8b5cf6; }
+.contact-input:focus { outline: none; border-bottom-color: #f2f2f2; }
 .contact-textarea { resize: vertical; min-height: 5.5em; line-height: 1.45; }
 
 /* The date field is native, so the browser draws the calendar popup and the
@@ -1275,7 +1146,10 @@ html {
   transition: background .2s ease, color .2s ease;
 }
 .contact-submit:hover:not(:disabled),
-.contact-submit:focus-visible:not(:disabled) { background: #8b5cf6; color: #fff; }
+.contact-submit:focus-visible:not(:disabled) {
+  background: linear-gradient(100deg, #3f6bff, #9a5cff 30%, #ff3f9a 55%, #ff6a37 78%, #ff9a2e);
+  color: #0a0a0d;
+}
 .contact-submit:disabled { opacity: .55; cursor: default; }
 
 .contact-sent { padding: clamp(32px, 8vh, 80px) 0; border-top: 1px solid rgba(255, 255, 255, .15); }
@@ -1452,7 +1326,7 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   background: #0a0a0d;
   border: 1px solid rgba(255, 255, 255, .15);
   border-radius: 8px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, .4), 0 0 0 1px rgba(139, 92, 246, .15);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .4);
   min-width: 280px;
   max-width: 420px;
 }
@@ -1461,7 +1335,7 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   flex: none;
   width: 20px;
   height: 20px;
-  color: #8b5cf6;
+  color: #f2f2f2;
   stroke-width: 2.5;
 }
 

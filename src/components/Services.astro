@@ -276,7 +276,7 @@ const diamond =
 
   // --- the window ---------------------------------------------------------
   if (index && canvas) {
-    const field = prismField(canvas, { animate: !still, autoplay: false });
+    const field = prismField(canvas, { animate: !still, autoplay: false, unit: window.innerHeight * 0.76 });
 
     /* A word's window, in the index's own coordinates, padded past the word's
        box. The tight negative tracking is subtracted after the last letter

@@ -19,6 +19,7 @@ void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
 const FRAG = `
 precision highp float;
 uniform vec2 uRes;
+uniform float uUnit;
 uniform float uTime;
 uniform vec2 uPointer;
 
@@ -101,8 +102,9 @@ vec3 ramp(float t) {
 float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 
 void main() {
-  // height-normalised, so the field keeps its scale whatever the aspect
-  vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
+  // normalised to uUnit (the canvas height unless the caller fixes it), so
+  // the field keeps its scale whatever the aspect
+  vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uUnit;
   float t = uTime * 0.05;
 
   // the pointer leans on the field, never drags it
@@ -146,12 +148,17 @@ export function prismField(
   {
     animate = true,
     autoplay = true,
+    unit,
     pointerTarget,
   }: {
     animate?: boolean;
     /** false: draw the first frame and wait for start(). Anything hidden at
         load (behind the curtain) shouldn't spend frames nobody can see. */
     autoplay?: boolean;
+    /** px that one unit of the field spans. Defaults to the canvas height;
+        fix it when a canvas is much shorter than the hero's aperture, or
+        the same field reads as a busier one. */
+    unit?: number;
     pointerTarget?: HTMLElement;
   } = {},
 ): PrismField | null {
@@ -197,6 +204,7 @@ export function prismField(
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
   const uRes = gl.getUniformLocation(prog, 'uRes');
+  const uUnit = gl.getUniformLocation(prog, 'uUnit');
   const uTime = gl.getUniformLocation(prog, 'uTime');
   const uPointer = gl.getUniformLocation(prog, 'uPointer');
 
@@ -209,6 +217,7 @@ export function prismField(
       gl.viewport(0, 0, w, h);
     }
     gl.uniform2f(uRes, w, h);
+    gl.uniform1f(uUnit, Math.max(h, unit ?? 0));
   };
 
   // a fixed starting point, so the first frame is always a good one
