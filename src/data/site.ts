@@ -80,12 +80,11 @@ export interface WorkItem {
   /** what the homepage panel shows: the work itself, not a title card.
       `position` is the object-position to crop from (default: centre). */
   cover:
-    /** `start`: seconds to begin (and loop back to), past any intro card */
-    | { kind: 'video'; src: string; poster: string; start?: number }
     | { kind: 'image'; src: string; alt: string; position?: string }
     /** a product shot: the brand field behind, one screen of the product
-        rising into it from the bottom edge */
-    | { kind: 'shot'; field: string; screen: string; alt: string };
+        rising into it from the bottom edge. `width`: the screen's share of
+        the frame, in percent (default 74) */
+    | { kind: 'shot'; field: string; screen: string; alt: string; width?: number };
 
   /* --- the project's own page ------------------------------------------ *
    *  PLACEHOLDER COPY. Written to hold the shape of the layout; replace it
@@ -119,9 +118,17 @@ export const workItems: WorkItem[] = [
       img: { src: 'projects/glorious.jpg', alt: 'Glorious wordmark on a dark field' },
       video: { src: 'projects/glorious.mp4' },
     },
-    // the recording opens on the site's own loading card; start where the
-    // site itself appears
-    cover: { kind: 'video', src: 'projects/glorious.mp4', poster: 'projects/glorious.webp', start: 4.2 },
+    // a still, not the recording: a site scrolling by itself inside a
+    // page that is also scrolling was disorienting
+    cover: {
+      kind: 'shot',
+      field: 'projects/glorious.jpg',
+      screen: 'projects/glorious.webp',
+      alt: 'Glorious Fitness Center home page: “Wear the moment.” over a photo of the gym floor',
+      // narrower than the default, so the frame shows down to the red
+      // headline block rather than only the nav and the photo above it
+      width: 52,
+    },
     body: [
       'Glorious Fitness Center needed a website people could be pointed to. Word of mouth was doing the work, but anyone who heard about the gym and wanted to know what it offers, who the trainers are, and where to find it had no page to open.',
       'The site answers those questions and stops there. It’s a marketing site in the plainest sense — programs, trainers, opening hours, and contact details, arranged so a visitor on a phone gets the whole picture in one scroll. Static pages, nothing to log into, nothing to learn.',

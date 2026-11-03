@@ -7,9 +7,10 @@
  * and the next one slides up over the last, so the section reads as a stack
  * being dealt rather than a list being scrolled.
  *
- * The section brings no colour of its own. Glorious is broadcast red, Kratos
- * is a dark dashboard with a red accent — the work supplies the colour, which
- * is the hero's rule seen from the other side: colour lives inside a frame.
+ * Each picture is a product shot: the project's own title card behind, and
+ * one screen of the real thing rising into it from the bottom edge — brand
+ * first, then proof. The section brings no colour of its own; the work
+ * supplies it, which is the hero's rule seen from the other side.
  */
 import { workItems, workHref } from '../data/site';
 
@@ -29,23 +30,17 @@ const { base } = Astro.props;
     {workItems.map((item, i) => (
       <article class="wk-panel" style={`--i:${i}`}>
         <div class="wk-media">
-          {item.cover.kind === 'video' ? (
-            <video
-              class="wk-media__el"
-              src={`${base}${item.cover.src}`}
-              poster={`${base}${item.cover.poster}`}
-              muted
-              loop={!item.cover.start}
-              playsinline
-              preload="none"
-              aria-hidden="true"
-              data-wk-video
-              data-start={item.cover.start}
-            ></video>
-          ) : item.cover.kind === 'shot' ? (
+          {item.cover.kind === 'shot' ? (
             <>
               <img class="wk-media__el" src={`${base}${item.cover.field}`} alt="" loading="lazy" decoding="async" />
-              <img class="wk-shot" src={`${base}${item.cover.screen}`} alt={item.cover.alt} loading="lazy" decoding="async" />
+              <img
+                class="wk-shot"
+                src={`${base}${item.cover.screen}`}
+                alt={item.cover.alt}
+                loading="lazy"
+                decoding="async"
+                style={item.cover.width ? `--shot-w:${item.cover.width}%` : undefined}
+              />
             </>
           ) : (
             <img
@@ -62,10 +57,12 @@ const { base } = Astro.props;
         <div class="wk-info">
           {/* the name is the link; its ::after stretches over the whole panel */}
           <h3 class="wk-title"><a href={workHref(base, item)}>{item.title}</a></h3>
-          <p class="wk-desc">{item.desc}</p>
-          <ul class="wk-tags" aria-label="Project type">
-            {item.tags.map((tag) => <li>{tag}</li>)}
-          </ul>
+          <div class="wk-about">
+            <p class="wk-desc">{item.desc}</p>
+            <ul class="wk-tags" aria-label="Project type">
+              {item.tags.map((tag) => <li>{tag}</li>)}
+            </ul>
+          </div>
           <span class="wk-view" aria-hidden="true">
             View project
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -107,19 +104,29 @@ const { base } = Astro.props;
     top: var(--nav-h);
     display: flex;
     flex-direction: column;
+    /* exactly the screen under the nav, whatever its height: the picture
+       takes what the row below it doesn't need */
     height: calc(100svh - var(--nav-h));
-    min-height: 520px;
+    min-height: 420px;
     background: #0a0a0d;
     /* the edge the next panel slides in on: a shadow cast up onto the one
        being covered, so the stack reads as depth and not as a cut */
     box-shadow: 0 -24px 60px rgba(0, 0, 0, .65);
   }
-  .wk-panel + .wk-panel { margin-top: clamp(32px, 6vh, 64px); }
+  /* The hold. A panel pinned under the nav is pushed down from where it
+     would sit, so the next one — which has not been — starts covering its
+     bottom edge, the info row, as soon as the gap between them runs out.
+     With a gap of a few dozen pixels that was almost at once. A third of a
+     screen gives each panel a beat at full size first. The gap itself never
+     shows: it passes behind the pinned panel, which fills the screen. */
+  .wk-panel + .wk-panel { margin-top: 34vh; }
+  /* and the same beat for the last one, before the section lets go of it */
+  .wk-list::after { content: ''; display: block; height: 34vh; }
 
   .wk-media {
     position: relative;
     flex: 1;
-    min-height: 0;
+    min-height: 180px;
     overflow: hidden;
     background: #000;
   }
@@ -140,8 +147,8 @@ const { base } = Astro.props;
   .wk-shot {
     position: absolute;
     left: 50%;
-    top: 60%;
-    width: min(74%, 1180px);
+    top: 56%;
+    width: min(var(--shot-w, 74%), 1180px);
     height: auto;
     display: block;
     translate: -50% 0;
@@ -153,22 +160,26 @@ const { base } = Astro.props;
   .wk-panel:hover .wk-shot { transform: translateY(-14px); }
 
   /* --- the row under it ------------------------------------------------ */
+  /* one row, always: name, what it was, the way in. The name never wraps —
+     a two-line name is what pushed the row off the bottom of short screens */
   .wk-info {
+    flex: none;
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 12px clamp(24px, 4vw, 64px);
-    padding: clamp(18px, 3vh, 30px) var(--gut) clamp(8px, 1.6vh, 16px);
+    gap: 10px clamp(24px, 4vw, 64px);
+    padding: clamp(12px, 2.4vh, 26px) var(--gut) clamp(6px, 1.4vh, 14px);
   }
 
   .wk-title {
     margin: 0;
-    font-size: clamp(2.2rem, 5vw, 5.4rem);
+    /* sized by whichever runs out first, width or height */
+    font-size: clamp(1.8rem, min(4.4vw, 7.5vh), 4.8rem);
     font-weight: 450;
     font-variation-settings: 'opsz' 144;
     letter-spacing: -.05em;
-    line-height: .95;
-    text-wrap: balance;
+    line-height: 1;
+    white-space: nowrap;
   }
   .wk-title a { color: #f2f2f2; text-decoration: none; }
   .wk-title a::after { content: ''; position: absolute; inset: 0; }
@@ -186,8 +197,12 @@ const { base } = Astro.props;
   }
   .wk-panel:hover .wk-desc { color: #d4d4d8; }
 
+  .wk-about { display: grid; gap: 6px; min-width: 0; }
+
   .wk-tags {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.4em;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -195,9 +210,9 @@ const { base } = Astro.props;
     font-weight: 650;
     font-variation-settings: 'opsz' 8;
     letter-spacing: .12em;
-    line-height: 2;
+    line-height: 1.8;
     text-transform: uppercase;
-    color: #8a8a92;
+    color: #5f5f67;
   }
 
   .wk-view {
@@ -219,64 +234,31 @@ const { base } = Astro.props;
   .wk-panel:hover .wk-view svg { transform: translate(3px, -3px); }
 
   /* --- narrower -------------------------------------------------------- */
-  @media (max-width: 1100px) {
+  @media (max-width: 900px) {
     .wk-info { grid-template-columns: minmax(0, 1fr) auto; }
-    .wk-title { grid-column: 1 / -1; }
-    .wk-tags { display: flex; flex-wrap: wrap; gap: 0 1.4em; }
+    .wk-about { grid-column: 1 / -1; grid-row: 2; }
   }
 
   @media (max-width: 640px) {
     .wk-panel { height: auto; min-height: 0; }
+    /* panels here are shorter than the screen, so there is nothing to hold */
+    .wk-panel + .wk-panel { margin-top: clamp(24px, 5vh, 48px); }
+    .wk-list::after { display: none; }
     /* a phone frame is portrait and the work is landscape: show it whole,
        at its own shape, rather than a sliver of it cropped to the screen */
     .wk-media { flex: none; aspect-ratio: 16 / 10; }
-    .wk-shot { width: 86%; top: 62%; }
+    /* a phone frame is small: every screen a size up, keeping their ratio */
+    .wk-shot { width: calc(var(--shot-w, 74%) * 1.16); top: 60%; }
+    .wk-title { white-space: normal; text-wrap: balance; }
     .wk-info { grid-template-columns: minmax(0, 1fr); gap: 10px; }
     .wk-view { display: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .wk-panel { position: relative; top: auto; }
+    .wk-panel + .wk-panel { margin-top: clamp(24px, 5vh, 48px); }
+    .wk-list::after { display: none; }
     .wk-media__el, .wk-shot, .wk-view svg { transition: none; }
   }
 </style>
 
-<script>
-  /* The video plays while its panel is on screen and stops when it isn't —
-     on every device, because hover was the only way to see it before and a
-     phone has no hover. preload="none" until then, so the eight megabytes
-     are only spent on visitors who actually reach it. Reduced motion keeps
-     the poster. */
-  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const videos = [...document.querySelectorAll<HTMLVideoElement>('[data-wk-video]')];
-
-  // where a clip starts, and loops back to, past any intro card
-  const start = (video: HTMLVideoElement) => Number(video.dataset.start) || 0;
-
-  videos.forEach((video) => {
-    if (!start(video)) return;
-    video.addEventListener('ended', () => {
-      video.currentTime = start(video);
-      video.play().catch(() => {});
-    });
-  });
-
-  if (!still && videos.length) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const video = entry.target as HTMLVideoElement;
-          if (entry.isIntersecting) {
-            video.preload = 'auto';
-            if (video.currentTime < start(video)) video.currentTime = start(video);
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        });
-      },
-      { threshold: 0.35 },
-    );
-    videos.forEach((video) => io.observe(video));
-  }
-</script>
