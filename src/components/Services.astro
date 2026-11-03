@@ -279,10 +279,20 @@ const diamond =
       if (!word) return;
       const box = index.getBoundingClientRect();
       const r = word.getBoundingClientRect();
-      canvas.style.setProperty('--t', `${r.top - box.top}px`);
-      canvas.style.setProperty('--l', `${r.left - box.left}px`);
-      canvas.style.setProperty('--r', `${box.right - r.right}px`);
-      canvas.style.setProperty('--b', `${box.bottom - r.bottom}px`);
+      /* Pad the window past the word's box. The tight negative tracking is
+         subtracted after the last letter too, so the box stops short of that
+         letter's right edge — unpadded, a sliver of it stayed white. Darken
+         leaves the ground untouched, so a generous margin costs nothing. */
+      const em = parseFloat(getComputedStyle(word).fontSize) || 16;
+      const px = em * 0.14;
+      // and further below than above: descenders (the g in Marketing) hang
+      // past the box the tight line-height gives the word
+      const top = em * 0.08;
+      const bottom = em * 0.24;
+      canvas.style.setProperty('--t', `${r.top - box.top - top}px`);
+      canvas.style.setProperty('--l', `${r.left - box.left - px}px`);
+      canvas.style.setProperty('--r', `${box.right - r.right - px}px`);
+      canvas.style.setProperty('--b', `${box.bottom - r.bottom - bottom}px`);
     };
 
     const setCurrent = (row: HTMLElement | null) => {
