@@ -454,9 +454,20 @@ html {
   transition: none;
 }
 
-/* a phone frame is portrait and the screens are landscape: give the
-   screen inside more of the width */
+/* PHONES. A full-height portrait frame around a landscape screen was mostly
+   empty card above and below it. Here the frame is a phone-shaped box
+   instead (about 10:11), not pinned: the screen fills its width, and the
+   lift plays out over the first stretch of scroll while the box travels up
+   into the write-up like any other block. The page's script drives --p
+   for it — see the stage script in [slug].astro. */
 @media (max-width: 640px) {
+  .project-stage { height: auto; }
+  .project-stage__frame {
+    position: relative;
+    top: auto;
+    margin-top: var(--project-pin);
+    height: min(calc(100svh - var(--project-pin)), 110vw);
+  }
   .project-stage__art { --shot-k: 1.5; }
 }
 
@@ -485,6 +496,12 @@ html {
   .project-stage .project-stage__art {
     animation-timeline: --project-stage;
     animation-range: contain 0% contain 100%;
+  }
+
+  /* nothing is pinned on a phone, so there is no contain range to ride:
+     the script writes --p there instead, and the stage passes it down */
+  @media (max-width: 640px) {
+    .project-stage .project-stage__art { animation: none; }
   }
 }
 

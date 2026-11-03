@@ -436,11 +436,11 @@ ordered.forEach((media, i) => {
 </style>
 
 <script>
-  /* THE STAGE, for browsers without scroll-driven animations — everywhere
-     else the lift is a CSS scroll timeline (see .project-stage in
-     global.css), which runs on the compositor and stays locked to the
-     pinned frame. This is the same mapping done by hand: --p tied to
-     scroll POSITION, so it stops when you do. */
+  /* THE STAGE, for phones and for browsers without scroll-driven
+     animations — everywhere else the lift is a CSS scroll timeline (see
+     .project-stage in global.css), which runs on the compositor and stays
+     locked to the pinned frame. This is the same idea done by hand: --p tied
+     to scroll POSITION, so it stops when you do. */
 
   // easeInOutSine, the same curve the stylesheet gives the composited path
   const ease = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
@@ -449,19 +449,29 @@ ordered.forEach((media, i) => {
   const frame = document.querySelector<HTMLElement>('.project-stage__frame');
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const composited = CSS.supports('animation-timeline: view()');
+  const phone = window.matchMedia('(max-width: 640px)');
 
-  if (stage && frame && !still && !composited) {
-    let pin = 0;
-    let travel = 0;
+  if (stage && frame && !still) {
     let last = -1;
 
-    const measure = () => {
-      pin = parseFloat(getComputedStyle(stage).getPropertyValue('--project-pin')) || 0;
-      travel = Math.max(1, stage.offsetHeight - frame.offsetHeight);
+    /* Two mappings from scroll to --p:
+       - pinned (wider screens, only where there is no scroll timeline):
+         progress through the stretch the frame is held for;
+       - phone (always — there is no pin to ride there): progress through
+         the first 55% of the box's own height, from the top of the page, so
+         the screen has settled by the time most of the box has gone. */
+    const progress = () => {
+      if (phone.matches) {
+        return window.scrollY / Math.max(1, frame.offsetHeight * 0.55);
+      }
+      const pin = parseFloat(getComputedStyle(stage).getPropertyValue('--project-pin')) || 0;
+      const travel = Math.max(1, stage.offsetHeight - frame.offsetHeight);
+      return (pin - stage.getBoundingClientRect().top) / travel;
     };
 
     const sync = () => {
-      const t = Math.min(1, Math.max(0, (pin - stage.getBoundingClientRect().top) / travel));
+      if (!phone.matches && composited) return; // the stylesheet has it
+      const t = Math.min(1, Math.max(0, progress()));
       const p = Math.round(ease(t) * 1000) / 1000;
       if (p === last) return;
       last = p;
@@ -478,11 +488,10 @@ ordered.forEach((media, i) => {
       });
     };
 
-    measure();
     sync();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', () => {
-      measure();
+      last = -1;
       sync();
     });
   }
