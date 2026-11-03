@@ -55,7 +55,7 @@ const diamond =
         <svg class="cta__mark" viewBox="0 0 100 170" fill="currentColor" aria-hidden="true"><path d={diamond} /></svg>
       </button>
     ) : (
-      <a class="cta cta--sm" href={link('#contact')}>
+      <a class="cta cta--sm" href={`${home}#request`}>
         Make a request
         <svg class="cta__mark" viewBox="0 0 100 170" fill="currentColor" aria-hidden="true"><path d={diamond} /></svg>
       </a>
@@ -90,21 +90,22 @@ const diamond =
       {items.map((item, i) => (
         <li class="nav__menu-row" style={`--i:${i}`}>
           <a class={`nav__menu-link${on(item.name)}`} href={link(item.hash)} data-nav-close>
-            <span class="nav__menu-label">
-              <span class="nav__pip" aria-hidden="true"></span>
-              {item.label}
-            </span>
+            <span class="nav__menu-label">{item.label}</span>
+            {/* an arrow says "go"; on the section you're already in it
+                becomes the diamond, and the word fills with the prism */}
             <span class="nav__menu-mark" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg class="nav__menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M6 18 18 6M8.5 6H18v9.5" />
               </svg>
+              <svg class="nav__menu-here" viewBox="0 0 100 170" fill="currentColor"><path d={diamond} /></svg>
             </span>
           </a>
         </li>
       ))}
     </ul>
 
-    {/* the panel closes on the thing most people opened it for */}
+    {/* the panel closes on the thing most people opened it for, and the
+        ways to reach us that aren't a form */}
     <div class="nav__menu-foot" style={`--i:${items.length}`}>
       {onHome ? (
         <button class="cta" type="button" data-contact-open data-nav-close>
@@ -112,12 +113,19 @@ const diamond =
           <svg class="cta__mark" viewBox="0 0 100 170" fill="currentColor" aria-hidden="true"><path d={diamond} /></svg>
         </button>
       ) : (
-        <a class="cta" href={link('#contact')} data-nav-close>
+        <a class="cta" href={`${home}#request`} data-nav-close>
           Make a request
           <svg class="cta__mark" viewBox="0 0 100 170" fill="currentColor" aria-hidden="true"><path d={diamond} /></svg>
         </a>
       )}
-      <a class="nav__menu-mail" href={`mailto:${contact.email}`} data-nav-close>{contact.email}</a>
+      <div class="nav__menu-contact">
+        <a class="nav__menu-mail" href={`mailto:${contact.email}`} data-nav-close>{contact.email}</a>
+        <ul class="nav__menu-social" aria-label="Social">
+          {contact.socials.map((social) => (
+            <li><a href={social.href} target="_blank" rel="noopener noreferrer">{social.label}</a></li>
+          ))}
+        </ul>
+      </div>
     </div>
   </div>
 </nav>
@@ -136,14 +144,19 @@ const diamond =
 
   if (toggle && menu) {
     const label = toggle.querySelector('.sr-only') as HTMLElement | null;
+    const word = toggle.querySelector('.nav__toggle-label') as HTMLElement | null;
 
     const setOpen = (open: boolean) => {
       document.documentElement.classList.toggle('is-nav-open', open);
       toggle.setAttribute('aria-expanded', String(open));
       if (label) label.textContent = open ? 'Close menu' : 'Open menu';
-      // the scroll lock smooth-scroll.ts already reads (it checks body's
-      // inline overflow directly), so the wheel stays off the page behind
-      // the panel without a second mechanism for it to learn about
+      // the word beside the cross says what pressing it will do now
+      if (word) word.textContent = open ? 'Close' : 'Menu';
+      // Body's inline overflow is the lock smooth-scroll.ts already reads,
+      // and with <html> left alone it carries to the viewport, so it holds
+      // the page for touch as well. Don't also set it on <html>: then body
+      // keeps it for itself, and body is height:100%, so the page loses its
+      // scroll height and jumps back to the top.
       document.body.style.overflow = open ? 'hidden' : '';
     };
 
