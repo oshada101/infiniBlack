@@ -219,6 +219,13 @@ const diamond =
   /* arriving from nothing, the window opens where it is rather than sliding
      in from wherever it last was */
   .svc-field.is-jump { transition: opacity .35s ease; }
+  /* touch: masks, not the clip, decide what shows — see the script */
+  .svc-field.is-scrub {
+    clip-path: none;
+    transition: none;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+  }
 
   /* --- entrance ---------------------------------------------------------- *
    *  Armed by JS only ([data-arm] on the list), so a reader without it never
@@ -270,83 +277,124 @@ const diamond =
   // --- the window ---------------------------------------------------------
   if (index && canvas) {
     const field = prismField(canvas, { animate: !still, autoplay: false });
-    let current: HTMLElement | null = null;
 
-    // move the clip to the active word's box, in the index's own coordinates
-    const place = () => {
-      if (!current) return;
-      const word = current.querySelector<HTMLElement>('[data-svc-word]');
-      if (!word) return;
+    /* A word's window, in the index's own coordinates, padded past the word's
+       box. The tight negative tracking is subtracted after the last letter
+       too, so the box stops short of that letter's right edge; descenders
+       (the g in Marketing) hang below what the tight line-height gives it.
+       Darken leaves the ground untouched, so a generous margin costs nothing. */
+    const windowOf = (row: HTMLElement) => {
+      const word = row.querySelector<HTMLElement>('[data-svc-word]')!;
       const box = index.getBoundingClientRect();
       const r = word.getBoundingClientRect();
-      /* Pad the window past the word's box. The tight negative tracking is
-         subtracted after the last letter too, so the box stops short of that
-         letter's right edge — unpadded, a sliver of it stayed white. Darken
-         leaves the ground untouched, so a generous margin costs nothing. */
       const em = parseFloat(getComputedStyle(word).fontSize) || 16;
-      const px = em * 0.14;
-      // and further below than above: descenders (the g in Marketing) hang
-      // past the box the tight line-height gives the word
-      const top = em * 0.08;
-      const bottom = em * 0.24;
-      canvas.style.setProperty('--t', `${r.top - box.top - top}px`);
-      canvas.style.setProperty('--l', `${r.left - box.left - px}px`);
-      canvas.style.setProperty('--r', `${box.right - r.right - px}px`);
-      canvas.style.setProperty('--b', `${box.bottom - r.bottom - bottom}px`);
-    };
-
-    const setCurrent = (row: HTMLElement | null) => {
-      if (row === current) return;
-      const fromNothing = !current;
-      rows.forEach((r) => r.classList.toggle('is-current', r === row));
-      current = row;
-
-      if (!field) return; // no WebGL: the rows still brighten, the words stay white
-      if (row) {
-        canvas.classList.toggle('is-jump', fromNothing);
-        place();
-        canvas.classList.add('is-on');
-        field.start();
-      } else {
-        canvas.classList.remove('is-on');
-        // hold the frame once it has faded, rather than drawing into nothing
-        setTimeout(() => { if (!current) field.pause(); }, 400);
-      }
+      const x = r.left - box.left - em * 0.14;
+      const y = r.top - box.top - em * 0.08;
+      return { x, y, w: r.width + em * 0.28, h: r.height + em * 0.32, top: r.top, box };
     };
 
     if (window.matchMedia('(hover: hover)').matches) {
-      rows.forEach((row) => row.addEventListener('pointerenter', () => setCurrent(row)));
-      index.addEventListener('pointerleave', () => setCurrent(null));
+      // --- with a pointer: the window follows the hovered row -------------
+      let current: HTMLElement | null = null;
+
+      const place = () => {
+        if (!current) return;
+        const { x, y, w, h, box } = windowOf(current);
+        canvas.style.setProperty('--t', `${y}px`);
+        canvas.style.setProperty('--l', `${x}px`);
+        canvas.style.setProperty('--r', `${box.width - x - w}px`);
+        canvas.style.setProperty('--b', `${box.height - y - h}px`);
+      };
+
+      const setCurrent = (row: HTMLElement | null) => {
+        if (row === current) return;
+        const fromNothing = !current;
+        rows.forEach((r) => r.classList.toggle('is-current', r === row));
+        current = row;
+
+        if (!field) return; // no WebGL: the rows still brighten, the words stay white
+        if (row) {
+          canvas.classList.toggle('is-jump', fromNothing);
+          place();
+          canvas.classList.add('is-on');
+          field.start();
+        } else {
+          canvas.classList.remove('is-on');
+          // hold the frame once it has faded, rather than drawing into nothing
+          setTimeout(() => { if (!current) field.pause(); }, 400);
+        }
+      };
+
       rows.forEach((row) => {
+        row.addEventListener('pointerenter', () => setCurrent(row));
         row.addEventListener('focusin', () => setCurrent(row));
         row.addEventListener('focusout', () => setCurrent(null));
+        // a row can be hovered while its entrance is still moving it
+        row.addEventListener('transitionend', () => { if (row === current) place(); });
       });
-    } else {
-      // with no pointer to hover, the row crossing the middle of the screen
-      // is the one — a line, not a band, so only one row can be on it
-      const line = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) setCurrent(entry.target as HTMLElement);
-            else if (entry.target === current) setCurrent(null);
-          });
-        },
-        { rootMargin: '-49.5% 0px -49.5% 0px' },
-      );
-      rows.forEach((row) => line.observe(row));
+      index.addEventListener('pointerleave', () => setCurrent(null));
+
+      new ResizeObserver(() => {
+        canvas.classList.add('is-jump');
+        place();
+      }).observe(index);
+    } else if (field) {
+      /* --- touch: the scroll is the hand ------------------------------------
+         Nothing to hover, so each name fills as it rises up the screen: the
+         colour wipes in left to right — the site's wipe — between the word
+         reaching 88% and 48% of the way down, and stays. By the bottom of the
+         list all five are lit; scroll back and they drain again. Many windows
+         at once, so this is a stack of mask layers, one per word, rather than
+         the single clip the pointer version moves. */
+      canvas.classList.add('is-scrub', 'is-on');
+      const START = 0.88;
+      const END = 0.48;
+      let queued = false;
+      let running = false;
+
+      const scrub = () => {
+        queued = false;
+        const vh = window.innerHeight;
+        const layers: { size: string; pos: string }[] = [];
+
+        rows.forEach((row) => {
+          const { x, y, w, h, top } = windowOf(row);
+          const raw = (START * vh - top) / ((START - END) * vh);
+          const t = Math.min(1, Math.max(0, raw));
+          const p = t * t * (3 - 2 * t); // ease in and out of the wipe
+          row.classList.toggle('is-current', p > 0.98);
+          if (p > 0) layers.push({ size: `${w * p}px ${h}px`, pos: `${x}px ${y}px` });
+        });
+
+        if (layers.length) {
+          const image = layers.map(() => 'linear-gradient(#000, #000)').join(', ');
+          const size = layers.map((l) => l.size).join(', ');
+          const pos = layers.map((l) => l.pos).join(', ');
+          canvas.style.setProperty('mask-image', image);
+          canvas.style.setProperty('-webkit-mask-image', image);
+          canvas.style.setProperty('mask-size', size);
+          canvas.style.setProperty('-webkit-mask-size', size);
+          canvas.style.setProperty('mask-position', pos);
+          canvas.style.setProperty('-webkit-mask-position', pos);
+          if (!running) { field.start(); running = true; }
+        } else {
+          // nothing lit: an empty mask, and no frames drawn into it
+          canvas.style.setProperty('mask-image', 'linear-gradient(transparent, transparent)');
+          canvas.style.setProperty('-webkit-mask-image', 'linear-gradient(transparent, transparent)');
+          if (running) { field.pause(); running = false; }
+        }
+      };
+
+      const request = () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(scrub);
+      };
+      window.addEventListener('scroll', request, { passive: true });
+      new ResizeObserver(request).observe(index);
+      rows.forEach((row) => row.addEventListener('transitionend', request));
+      scrub();
     }
-
-    // a row can become current while its entrance is still moving it; follow
-    // it home once that settles
-    rows.forEach((row) =>
-      row.addEventListener('transitionend', () => { if (row === current) place(); }),
-    );
-
-    // the boxes move when the type reflows; keep the window on its word
-    new ResizeObserver(() => {
-      canvas.classList.add('is-jump');
-      place();
-    }).observe(index);
   }
 
   // --- entrance -----------------------------------------------------------
