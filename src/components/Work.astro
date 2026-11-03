@@ -1,5 +1,19 @@
 ---
+/* WORK — the projects, one screen each.
+ *
+ * Each project is a panel nearly the height of the screen: the work itself,
+ * as large as the page allows, and under it one row set like a Services row
+ * (name, what it was, what kind, the way in). The panels stick under the nav
+ * and the next one slides up over the last, so the section reads as a stack
+ * being dealt rather than a list being scrolled.
+ *
+ * Each picture is a product shot: the project's own title card behind, and
+ * one screen of the real thing rising into it from the bottom edge — brand
+ * first, then proof. The section brings no colour of its own; the work
+ * supplies it, which is the hero's rule seen from the other side.
+ */
 import { workItems, workHref } from '../data/site';
+import ProjectShot from './ProjectShot.astro';
 
 interface Props {
   base: string;
@@ -8,137 +22,199 @@ interface Props {
 const { base } = Astro.props;
 ---
 
-<!-- work: featured projects -->
-<section class="work pt-[clamp(80px,12vh,140px)] px-[clamp(8px,1.2vw,18px)] border-t border-[rgba(255,255,255,.08)]" id="work">
-  <h2 class="section-title text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pt-[clamp(20px,3vh,34px)] pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Featured Work</h2>
+<section class="work" id="work" aria-labelledby="work-title">
+  <header class="wk-head">
+    <h2 class="wk-label" id="work-title">Work</h2>
+  </header>
 
-  <div class="work-list relative ">
-    {workItems.map((item) => (
-      <article class="work-item flex flex-wrap gap-[clamp(24px,3vw,48px)] py-[clamp(16px,2vh,22px)] shadow-[0_-1px_0_rgba(255,255,255,.12)]">
-        {item.media.kind === 'hover-video' ? (
-          <a
-            class="work-item__media work-item__media--hover-video group relative flex-[1_1_55%] min-w-[280px] aspect-video flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
-            href={workHref(base, item)}
-          >
-            <img
-              class="work-item__media-img absolute inset-0 w-full h-full object-cover [transition:opacity_.2s_ease] group-hover:opacity-0"
-              src={`${base}${item.media.img.src}`}
-              alt={item.media.img.alt}
-            />
-            <video
-              class="work-item__media-video absolute inset-0 w-full h-full object-cover opacity-0 [transition:opacity_.2s_ease] group-hover:opacity-100"
-              src={`${base}${item.media.video.src}`}
-              muted
-              loop
-              playsinline
-              preload="metadata"
-            ></video>
-            <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
-          </a>
-        ) : (
-          <a
-            class="work-item__media group relative flex-[1_1_55%] min-w-[280px] aspect-video flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
-            href={workHref(base, item)}
-          >
-            <img src={`${base}${item.media.img.src}`} alt={item.media.img.alt} style={item.media.img.style} />
-            <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
-          </a>
-        )}
-        <div class="work-item__info flex-[1_1_35%] min-w-[240px] flex flex-col justify-between gap-[clamp(24px,4vh,48px)] bg-ink">
-          {/* masthead: standfirst left, name right, closed by a hairline. The
-              shared bottom edge is what stops the two ragged edges reading as
-              a jagged channel — same trick a newspaper nameplate uses. */}
-          <div class="work-item__masthead flex justify-between items-start gap-[clamp(20px,2.6vw,52px)]">
-            <p class="work-item__desc min-w-0 text-[1.15rem] font-normal leading-[1.4] text-grey-200 max-w-[30ch] text-pretty">{item.desc}</p>
-            <h3 class="work-item__title flex-initial text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-white tracking-[-.015em] leading-[1.05] text-right text-balance"><a class="text-inherit no-underline hover:underline hover:[text-underline-offset:.12em]" href={workHref(base, item)}>{item.title}</a></h3>
-          </div>
+  <div class="wk-list">
+    {workItems.map((item, i) => (
+      <article class="wk-panel" style={`--i:${i}`}>
+        <div class="wk-media">
+          <ProjectShot cover={item.cover} base={base} />
+        </div>
 
-          <div class="work-item__foot">
-            <ul class="work-item__tags list-none">
-              {item.tags.map((tag) => <li class="text-[.82rem] font-semibold uppercase tracking-[.08em] text-grey-300 leading-[1.9]">{tag}</li>)}
+        <div class="wk-info">
+          {/* the name is the link; its ::after stretches over the whole panel */}
+          <h3 class="wk-title"><a href={workHref(base, item)}>{item.title}</a></h3>
+          <div class="wk-about">
+            <p class="wk-desc">{item.desc}</p>
+            <ul class="wk-tags" aria-label="Project type">
+              {item.tags.map((tag) => <li>{tag}</li>)}
             </ul>
           </div>
+          <span class="wk-view" aria-hidden="true">
+            View project
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 18 18 6M8.5 6H18v9.5" />
+            </svg>
+          </span>
         </div>
       </article>
     ))}
-    <div class="work-list__hold" aria-hidden="true"></div>
   </div>
 </section>
 
-<script>
-  const workSection = document.querySelector('.work') as HTMLElement | null;
-  const workTitle = workSection?.querySelector('.section-title') as HTMLElement | null;
-  const workHold = workSection?.querySelector('.work-list__hold') as HTMLElement | null;
-  const workCards = [...(workSection?.querySelectorAll('.work-item') ?? [])] as HTMLElement[];
-  const lastCard = workCards[workCards.length - 1];
-
-  let pin = 0;
-  let titleH = 0;
-  let cardH = 0;
-
-  // keep the stacking cards pinned right below the sticky "Featured Work"
-  // title — measure its height (fluid font, so it changes on resize).
-  const measure = () => {
-    if (!workSection || !workTitle) return;
-    pin = parseFloat(getComputedStyle(workSection).getPropertyValue('--work-pin')) || 0;
-    titleH = workTitle.offsetHeight;
-    cardH = lastCard ? lastCard.offsetHeight : 0;
-    document.documentElement.style.setProperty('--work-title-h', titleH + 'px');
-  };
-
-  /* Both the title and the cards are clamped by the bottom of their sticky
-     containing block, and a taller box hits that clamp sooner — so the last
-     card (a whole card tall) unpins one card-height of scroll BEFORE the
-     title does, stranding "Featured Work" over dead space.
-
-     Rather than fight the clamp, close that gap by hand: the .work-list__hold
-     spacer is static, so its bottom edge is a reliable read on how far the
-     stack has left to travel. Once that edge climbs past where the pinned
-     title + last card end, drag the title up by the difference and the two
-     exit as one. Cheaper than it looks — one rect read per frame. */
-  const syncRelease = () => {
-    if (!workTitle || !workHold) return;
-    const overshoot = pin + titleH + cardH - workHold.getBoundingClientRect().bottom;
-    workTitle.style.transform = overshoot > 0 ? `translateY(${-overshoot}px)` : '';
-  };
-
-  if (workSection && workTitle) {
-    let queued = false;
-    const onScroll = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(() => {
-        queued = false;
-        syncRelease();
-      });
-    };
-
-    measure();
-    syncRelease();
-    window.addEventListener('resize', () => {
-      measure();
-      syncRelease();
-    });
-    window.addEventListener('scroll', onScroll, { passive: true });
+<style>
+  .work {
+    --gut: clamp(8px, 1.2vw, 18px);
+    padding: clamp(80px, 12vh, 140px) var(--gut) clamp(40px, 6vh, 72px);
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    scroll-margin-top: var(--nav-h);
   }
 
-  // hover-to-play: pauses in place on mouseleave, no rewind
-  document.querySelectorAll('.work-item__media--hover-video').forEach((el) => {
-    const video = el.querySelector('video');
-    if (!video) return;
-    el.addEventListener('mouseenter', () => video.play());
-    el.addEventListener('mouseleave', () => video.pause());
-  });
+  .wk-head { margin-bottom: clamp(24px, 4vh, 48px); }
+  .wk-label {
+    margin: 0;
+    font-size: clamp(1rem, 1.1vw, 1.1rem);
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #8a8a92;
+  }
 
-  // tooltip follows the cursor while hovering a project's media
-  document.querySelectorAll('.work-item__media').forEach((el) => {
-    const tooltip = el.querySelector('.work-item__tooltip') as HTMLElement | null;
-    if (!tooltip) return;
-    el.addEventListener('mousemove', (e) => {
-      const rect = (el as HTMLElement).getBoundingClientRect();
-      const x = (e as MouseEvent).clientX - rect.left + 14;
-      const y = (e as MouseEvent).clientY - rect.top + 14;
-      tooltip.style.transform = `translate(${x}px, ${y}px)`;
-    });
-  });
-</script>
+  /* the panels run out to <main>'s edge, past the section's own inset, so
+     the work gets the full width the page has */
+  .wk-list { margin: 0 calc(-1 * var(--gut)); }
+
+  /* --- the panel ------------------------------------------------------- */
+  .wk-panel {
+    position: sticky;
+    top: var(--nav-h);
+    display: flex;
+    flex-direction: column;
+    /* exactly the screen under the nav, whatever its height: the picture
+       takes what the row below it doesn't need */
+    height: calc(100svh - var(--nav-h));
+    min-height: 420px;
+    background: #0a0a0d;
+    /* the edge the next panel slides in on: a shadow cast up onto the one
+       being covered, so the stack reads as depth and not as a cut */
+    box-shadow: 0 -24px 60px rgba(0, 0, 0, .65);
+  }
+  /* The hold. A panel pinned under the nav is pushed down from where it
+     would sit, so the next one — which has not been — starts covering its
+     bottom edge, the info row, as soon as the gap between them runs out.
+     With a gap of a few dozen pixels that was almost at once. A third of a
+     screen gives each panel a beat at full size first. The gap itself never
+     shows: it passes behind the pinned panel, which fills the screen. */
+  .wk-panel + .wk-panel { margin-top: 34vh; }
+  /* and the same beat for the last one, before the section lets go of it */
+  .wk-list::after { content: ''; display: block; height: 34vh; }
+
+  .wk-media {
+    position: relative;
+    flex: 1;
+    min-height: 180px;
+    overflow: hidden;
+    background: #000;
+  }
+  /* the picture's own styles live in ProjectShot; the panel only moves it */
+  .wk-panel:hover :global(.shot__field) { transform: scale(1.035); }
+  .wk-panel:hover :global(.shot__screen) { transform: translateY(-14px); }
+
+  /* --- the row under it ------------------------------------------------ */
+  /* one row, always: name, what it was, the way in. The name never wraps —
+     a two-line name is what pushed the row off the bottom of short screens */
+  .wk-info {
+    flex: none;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px clamp(24px, 4vw, 64px);
+    padding: clamp(12px, 2.4vh, 26px) var(--gut) clamp(6px, 1.4vh, 14px);
+  }
+
+  .wk-title {
+    margin: 0;
+    /* sized by whichever runs out first, width or height */
+    font-size: clamp(1.8rem, min(4.4vw, 7.5vh), 4.8rem);
+    font-weight: 450;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -.05em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .wk-title a { color: #f2f2f2; text-decoration: none; }
+  .wk-title a::after { content: ''; position: absolute; inset: 0; }
+  .wk-title a:focus-visible { outline: none; }
+  .wk-panel:has(.wk-title a:focus-visible) { outline: 1px solid #f2f2f2; outline-offset: 4px; }
+
+  .wk-desc {
+    margin: 0;
+    max-width: 36ch;
+    font-size: .98rem;
+    line-height: 1.45;
+    color: #8a8a92;
+    text-wrap: pretty;
+    transition: color .3s ease;
+  }
+  .wk-panel:hover .wk-desc { color: #d4d4d8; }
+
+  .wk-about { display: grid; gap: 6px; min-width: 0; }
+
+  .wk-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.4em;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: .66rem;
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    line-height: 1.8;
+    text-transform: uppercase;
+    color: #5f5f67;
+  }
+
+  .wk-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .68rem;
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #f2f2f2;
+  }
+  .wk-view svg {
+    width: 16px;
+    height: 16px;
+    transition: transform .35s cubic-bezier(.6, 0, .2, 1);
+  }
+  .wk-panel:hover .wk-view svg { transform: translate(3px, -3px); }
+
+  /* --- narrower -------------------------------------------------------- */
+  @media (max-width: 900px) {
+    .wk-info { grid-template-columns: minmax(0, 1fr) auto; }
+    .wk-about { grid-column: 1 / -1; grid-row: 2; }
+  }
+
+  @media (max-width: 640px) {
+    .wk-panel { height: auto; min-height: 0; }
+    /* panels here are shorter than the screen, so there is nothing to hold */
+    .wk-panel + .wk-panel { margin-top: clamp(24px, 5vh, 48px); }
+    .wk-list::after { display: none; }
+    /* a phone frame is portrait and the work is landscape: show it whole,
+       at its own shape, rather than a sliver of it cropped to the screen */
+    .wk-media { flex: none; aspect-ratio: 16 / 10; }
+    /* a phone frame is small: every screen a size up, keeping their ratio */
+    .wk-media { --shot-k: 1.16; }
+    .wk-media :global(.shot__screen) { top: 60%; }
+    .wk-title { white-space: normal; text-wrap: balance; }
+    .wk-info { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .wk-view { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wk-panel { position: relative; top: auto; }
+    .wk-panel + .wk-panel { margin-top: clamp(24px, 5vh, 48px); }
+    .wk-list::after { display: none; }
+    .wk-view svg { transition: none; }
+  }
+</style>
+

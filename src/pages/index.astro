@@ -24,19 +24,7 @@ const base = import.meta.env.BASE_URL;
 </Layout>
 
 <script>
-  // nav is solid over the hero video, transparent once scrolled past it
   const nav = document.querySelector('.nav');
-  const heroMedia = document.querySelector('.hero-media');
-  if (nav && heroMedia) {
-    const syncNav = () => {
-      // switch when the video is nearly scrolled out (leave the nav's own height)
-      const threshold = (heroMedia as HTMLElement).offsetHeight - (nav as HTMLElement).offsetHeight;
-      nav.classList.toggle('is-transparent', window.scrollY > threshold);
-    };
-    syncNav();
-    window.addEventListener('scroll', syncNav, { passive: true });
-    window.addEventListener('resize', syncNav);
-  }
 
   // scrollspy: highlight the nav link for the section currently in view
   // must stay in document order — the loop below takes the last section

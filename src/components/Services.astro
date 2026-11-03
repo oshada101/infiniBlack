@@ -1,209 +1,416 @@
 ---
+/* SERVICES — an index of five words, each a window.
+ *
+ * The names are set big enough to be shapes, and the same prism field the
+ * hero shows through its diamond lies under the whole list. It is seen only
+ * through one name at a time: hover a row (or, on a touch screen, bring it to
+ * the middle of the screen) and the field pours into its letters. Moving to
+ * another row slides that window across to the next word over the one
+ * continuous field — the hero's rule, colour only inside a shape, with the
+ * words as the shapes.
+ *
+ * How: the field's canvas lies over the list with mix-blend-mode: darken,
+ * which keeps the darker of the two. Every colour in the field is lighter
+ * than the ground, so the ground stays exactly itself; white type is lighter
+ * than every colour, so the type becomes the field. A clip-path inset, moved
+ * to the active name's box, decides which word that is.
+ *
+ * Each row is also a door. Its names are the request form's options word for
+ * word (Contact.astro builds them from the same list), so picking a row opens
+ * the form with that service already ticked.
+ */
 import { services } from '../data/site';
 
-const featured = services.find((s) => s.featured);
-const rest = services.filter((s) => !s.featured);
-
-// Card marks, drawn in a 40-unit box at the brand diamond's proportion.
-// One shape, three silhouettes that stay distinct at a glance: a diamond
-// with a solid header band (a page), two diamonds at different sizes
-// (a phone and a desktop), and four diamonds clustered into one (many
-// things in one place).
-const marks: Record<string, { d: string; fill?: boolean }[]> = {
-  websites: [
-    { d: 'M20 1 31 20 20 39 9 20Z' },
-    { d: 'M20 1 27 13 13 13Z', fill: true },
-  ],
-  apps: [
-    { d: 'M11 10 16.9 20 11 30 5.1 20Z' },
-    { d: 'M27 4 36.4 20 27 36 17.6 20Z' },
-  ],
-  business: [
-    { d: 'M20 2 24.7 10 20 18 15.3 10Z' },
-    { d: 'M12 12 16.7 20 12 28 7.3 20Z' },
-    { d: 'M28 12 32.7 20 28 28 23.3 20Z' },
-    { d: 'M20 22 24.7 30 20 38 15.3 30Z' },
-  ],
-  // the diamond's own right edge, repeated outwards — a signal leaving it
-  marketing: [
-    { d: 'M14 5 22.8 20 14 35 5.2 20Z' },
-    { d: 'M26.5 9 33 20 26.5 31' },
-    { d: 'M35 13 38.5 20 35 27' },
-  ],
-};
+const diamond =
+  'M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z';
 ---
 
-<!-- services: what we sell, in the buyer's words -->
-<section
-  class="services scroll-mt-9 pt-[clamp(80px,12vh,140px)] px-[clamp(8px,1.2vw,18px)] pb-[clamp(40px,6vh,80px)] border-t border-[rgba(255,255,255,.08)]"
-  id="services"
->
-  <h2 class="services-title text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Services.</h2>
+<section class="services" id="services" aria-labelledby="services-title">
+  <header class="svc-head">
+    <h2 class="svc-title" id="services-title">Services</h2>
+  </header>
 
-  {featured && (
-    <article class="services-card services-card--featured flex flex-wrap items-center gap-[clamp(24px,3.5vw,56px)] mt-[clamp(12px,1.4vw,18px)] p-[clamp(24px,2.8vw,44px)]">
-      {/* the loader's fluid diamond, returning to the page it opened.
-          static shape — the dot-to-diamond reveal belongs to the entrance.
-          ids are svc-prefixed: the loader's originals live in the DOM for
-          the first few seconds and url(#…) refs would collide. */}
-      <div class="services-diamond">
-        <svg viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <clipPath id="svc-diamond" clipPathUnits="userSpaceOnUse">
-              <path d="M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z" />
-            </clipPath>
-            <filter id="svc-goo" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="11" />
-            </filter>
-            <radialGradient id="svc-gCoral" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff6a37" stop-opacity="1" /><stop offset="55%" stop-color="#ff6a37" stop-opacity=".85" /><stop offset="100%" stop-color="#ff6a37" stop-opacity="0" /></radialGradient>
-            <radialGradient id="svc-gOrange" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff9a2e" stop-opacity="1" /><stop offset="55%" stop-color="#ff9a2e" stop-opacity=".85" /><stop offset="100%" stop-color="#ff9a2e" stop-opacity="0" /></radialGradient>
-            <radialGradient id="svc-gPurple" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#9a5cff" stop-opacity="1" /><stop offset="55%" stop-color="#9a5cff" stop-opacity=".85" /><stop offset="100%" stop-color="#9a5cff" stop-opacity="0" /></radialGradient>
-            <radialGradient id="svc-gBlue" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3f6bff" stop-opacity="1" /><stop offset="55%" stop-color="#3f6bff" stop-opacity=".85" /><stop offset="100%" stop-color="#3f6bff" stop-opacity="0" /></radialGradient>
-            <radialGradient id="svc-gMagenta" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff3f9a" stop-opacity="1" /><stop offset="55%" stop-color="#ff3f9a" stop-opacity=".85" /><stop offset="100%" stop-color="#ff3f9a" stop-opacity="0" /></radialGradient>
-          </defs>
+  <div class="svc-index" data-svc-index>
+    <ul class="svc-list">
+      {services.map((service, i) => (
+        <li class="svc-row" style={`--i:${i}`} data-svc-row>
+          <h3 class="svc-name">
+            <button class="svc-open" type="button" data-contact-open data-help={service.title}>
+              <span class="svc-name__text" data-svc-word>{service.title}</span>
+              <span class="sr-only"> — make a request</span>
+            </button>
+          </h3>
 
-          <g clip-path="url(#svc-diamond)">
-            <rect x="0" y="0" width="100" height="170" fill="#fff" />
-            <g filter="url(#svc-goo)">
-              <circle class="blob b1" cx="50" cy="66" r="38" fill="url(#svc-gCoral)" />
-              <circle class="blob b2" cx="50" cy="104" r="38" fill="url(#svc-gPurple)" />
-              <circle class="blob b3" cx="50" cy="58" r="34" fill="url(#svc-gBlue)" />
-              <circle class="blob b4" cx="50" cy="112" r="32" fill="url(#svc-gMagenta)" />
-              <circle class="blob b5" cx="50" cy="85" r="34" fill="url(#svc-gOrange)" />
-            </g>
-          </g>
-        </svg>
-      </div>
+          <div class="svc-about">
+            <p class="svc-desc">{service.desc}</p>
+            {/* AI's worked examples give their labels here like the others'
+                tags; the longer write-ups stay in site.ts for a services page */}
+            <ul class="svc-tags" aria-label="For example">
+              {(service.tags ?? service.details?.map((d) => d.label) ?? []).map((tag) => <li>{tag}</li>)}
+            </ul>
+          </div>
 
-      <div class="flex-1 min-w-[260px]">
-        <h3 class="text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-[#f2f2f2] tracking-[-.015em] leading-[1.05]">{featured.title}</h3>
-        <p class="mt-[clamp(8px,1.2vh,12px)] text-[clamp(1.05rem,1.6vw,1.35rem)] leading-[1.35] text-grey-100 max-w-[34ch] text-pretty">{featured.desc}</p>
-      </div>
+          <span class="svc-go" aria-hidden="true">
+            Request
+            <svg viewBox="0 0 100 170" fill="currentColor"><path d={diamond} /></svg>
+          </span>
+        </li>
+      ))}
+    </ul>
 
-      {/* pills can't fill a banner this wide — the examples get room to
-          say what they actually do instead */}
-      {featured.details && (
-        <dl class="services-detail flex-1 min-w-[280px] max-w-[520px]">
-          {featured.details.map((detail) => (
-            <div class="services-detail__row py-[clamp(10px,1.4vh,15px)]">
-              <dt class="text-[.95rem] font-medium text-[#f2f2f2] tracking-[-.005em]">{detail.label}</dt>
-              <dd class="mt-1 text-[.88rem] leading-[1.4] text-grey-300 text-pretty">{detail.body}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </article>
-  )}
-
-  <div class="services-grid grid grid-cols-4 gap-[clamp(12px,1.4vw,18px)] mt-[clamp(12px,1.4vw,18px)] max-[1200px]:grid-cols-2 max-[860px]:grid-cols-1">
-    {rest.map((service) => (
-      <article class="services-card flex flex-col p-[clamp(22px,2.4vw,36px)]">
-        <svg
-          class="services-mark w-10 h-10 mb-[clamp(18px,2.2vh,26px)] shrink-0"
-          viewBox="0 0 40 40"
-          fill="none"
-          stroke="#f2f2f2"
-          stroke-width="1.4"
-          stroke-linejoin="round"
-          stroke-linecap="round"
-          aria-hidden="true"
-        >
-          {marks[service.icon].map((m) => (
-            <path d={m.d} fill={m.fill ? '#f2f2f2' : 'none'} data-fill={m.fill ? '' : undefined} />
-          ))}
-        </svg>
-        <h3 class="text-[clamp(1.15rem,1.8vw,1.4rem)] font-normal text-[#f2f2f2] tracking-[-.015em] leading-[1.2] text-balance">{service.title}</h3>
-        <p class="mt-[clamp(8px,1.2vh,12px)] flex-1 text-[.95rem] leading-[1.45] text-grey-300 text-pretty">{service.desc}</p>
-        <ul class="mt-[clamp(18px,2.2vh,26px)] flex flex-wrap gap-2 list-none">
-          {(service.tags ?? []).map((tag) => <li class="services-tag px-[10px] py-1 text-[.72rem] font-medium tracking-[.02em] text-grey-300">{tag}</li>)}
-        </ul>
-      </article>
-    ))}
+    <canvas class="svc-field" aria-hidden="true" data-svc-field></canvas>
   </div>
 </section>
 
-<script>
-  import { animate, inView, stagger } from 'motion';
-  import { EASE, LINE_STEP, LINE_TRAVEL, RISE, STEP, reducedMotion, splitLines } from '../lib/reveal';
+<style>
+  .services {
+    padding: clamp(80px, 12vh, 140px) clamp(8px, 1.2vw, 18px) clamp(56px, 9vh, 110px);
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    scroll-margin-top: var(--nav-h);
+  }
 
-  if (!reducedMotion()) {
-    /* Fire once and stop watching. inView keeps calling back on every entry
-       otherwise, and a section that re-animates each time you scroll past it
-       stops being an arrival and starts being a tic. */
-    const once = (el: Element, run: () => void, amount = 0.25) => {
-      const stop = inView(el, () => { stop(); run(); }, { amount });
+  /* --- head -------------------------------------------------------------- */
+  .svc-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px 48px;
+    margin-bottom: clamp(24px, 4vh, 48px);
+  }
+  .svc-title {
+    margin: 0;
+    font-size: clamp(1rem, 1.1vw, 1.1rem);
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #8a8a92;
+  }
+
+  /* --- the index --------------------------------------------------------- */
+  .svc-index { position: relative; }
+
+  .svc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .15);
+  }
+
+  .svc-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr) auto;
+    gap: 14px clamp(24px, 4vw, 64px);
+    align-items: center;
+    padding: clamp(14px, 2.2vh, 24px) 0;
+  }
+  /* the rule over each row draws itself in from the left as the row arrives —
+     the site's wipe, at the width of a hairline */
+  .svc-row::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: rgba(255, 255, 255, .15);
+    transform-origin: left;
+    transition: transform .9s cubic-bezier(.76, 0, .18, 1) calc(var(--i) * 70ms);
+  }
+
+  .svc-name { margin: 0; }
+
+  /* the button is the row's only control; its ::after stretches over the
+     whole row so the row is the target, while the name stays its label */
+  .svc-open {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #f2f2f2;
+    font: inherit;
+    font-size: clamp(2.5rem, 6.2vw, 6.6rem);
+    font-weight: 450;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -.05em;
+    line-height: .95;
+    text-align: left;
+    cursor: pointer;
+  }
+  .svc-open::after { content: ''; position: absolute; inset: 0; }
+  .svc-open:focus-visible { outline: none; }
+  .svc-row:has(.svc-open:focus-visible) { outline: 1px solid #f2f2f2; outline-offset: 6px; }
+
+  /* inline-block so its box is the words' own width — that box is the window */
+  .svc-name__text {
+    display: inline-block;
+    max-width: 100%;
+    padding-bottom: .06em;
+    text-wrap: balance;
+  }
+
+  .svc-about { display: grid; gap: 12px; }
+  .svc-desc {
+    margin: 0;
+    max-width: 38ch;
+    font-size: .98rem;
+    line-height: 1.45;
+    color: #8a8a92;
+    text-wrap: pretty;
+    transition: color .3s ease;
+  }
+  .svc-row.is-current .svc-desc { color: #d4d4d8; }
+
+  /* examples as a plain run of words: they are a list, not buttons */
+  .svc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5em;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: .66rem;
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    line-height: 2;
+    text-transform: uppercase;
+    color: #5f5f67;
+    transition: color .3s ease;
+  }
+  .svc-row.is-current .svc-tags { color: #8a8a92; }
+
+  .svc-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .68rem;
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #f2f2f2;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity .3s ease, transform .45s cubic-bezier(.6, 0, .2, 1);
+  }
+  .svc-go svg { width: 7px; height: 12px; }
+  .svc-row.is-current .svc-go { opacity: 1; transform: none; }
+
+  /* --- the field --------------------------------------------------------- */
+  .svc-field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+    /* darken, not multiply: multiply tints the ground inside the box too,
+       and the box shows as a faint rectangle round the word */
+    mix-blend-mode: darken;
+    opacity: 0;
+    /* --t/--r/--b/--l come from the script: the active word's box */
+    clip-path: inset(var(--t, 50%) var(--r, 50%) var(--b, 50%) var(--l, 50%));
+    transition:
+      clip-path .6s cubic-bezier(.65, 0, .2, 1),
+      opacity .35s ease;
+  }
+  .svc-field.is-on { opacity: 1; }
+  /* arriving from nothing, the window opens where it is rather than sliding
+     in from wherever it last was */
+  .svc-field.is-jump { transition: opacity .35s ease; }
+  /* touch: masks, not the clip, decide what shows — see the script */
+  .svc-field.is-scrub {
+    clip-path: none;
+    transition: none;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+  }
+
+  /* --- entrance ---------------------------------------------------------- *
+   *  Armed by JS only ([data-arm] on the list), so a reader without it never
+   *  sees rows waiting to arrive. */
+  .svc-list[data-arm] .svc-row::before { transform: scaleX(0); }
+  .svc-list[data-arm] .svc-row > :not(.svc-go) {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .7s ease, transform .9s cubic-bezier(.22, 1, .36, 1);
+    transition-delay: calc(var(--i) * 70ms + 120ms);
+  }
+  .svc-list[data-arm] .svc-row.is-in::before { transform: scaleX(1); }
+  .svc-list[data-arm] .svc-row.is-in > :not(.svc-go) { opacity: 1; transform: none; }
+
+  /* --- narrower ---------------------------------------------------------- */
+  @media (max-width: 1100px) {
+    .svc-row { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: clamp(18px, 2.6vh, 26px) 0; }
+    .svc-go { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .svc-row::before, .svc-go, .svc-field { transition: none; }
+  }
+</style>
+
+<script>
+  import { reducedMotion } from '../lib/reveal';
+  import { prismField } from '../lib/prism-field';
+
+  const index = document.querySelector<HTMLElement>('[data-svc-index]');
+  const list = index?.querySelector<HTMLElement>('.svc-list');
+  const canvas = index?.querySelector<HTMLCanvasElement>('[data-svc-field]');
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-svc-row]')];
+  const still = reducedMotion();
+
+  // A row opens the request form with its own service ticked. This listener
+  // is bound before the dialog's own (this section comes first in the page),
+  // so the box is set by the time the form appears.
+  document.querySelectorAll<HTMLElement>('.svc-open[data-help]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const value = button.dataset.help ?? '';
+      const box = document.querySelector<HTMLInputElement>(
+        `[data-help-group] input[value="${CSS.escape(value)}"]`,
+      );
+      if (box) box.checked = true;
+    });
+  });
+
+  // --- the window ---------------------------------------------------------
+  if (index && canvas) {
+    const field = prismField(canvas, { animate: !still, autoplay: false, unit: window.innerHeight * 0.76 });
+
+    /* A word's window, in the index's own coordinates, padded past the word's
+       box. The tight negative tracking is subtracted after the last letter
+       too, so the box stops short of that letter's right edge; descenders
+       (the g in Marketing) hang below what the tight line-height gives it.
+       Darken leaves the ground untouched, so a generous margin costs nothing. */
+    const windowOf = (row: HTMLElement) => {
+      const word = row.querySelector<HTMLElement>('[data-svc-word]')!;
+      const box = index.getBoundingClientRect();
+      const r = word.getBoundingClientRect();
+      const em = parseFloat(getComputedStyle(word).fontSize) || 16;
+      const x = r.left - box.left - em * 0.14;
+      const y = r.top - box.top - em * 0.08;
+      return { x, y, w: r.width + em * 0.28, h: r.height + em * 0.32, top: r.top, box };
     };
 
-    // --- the section title -------------------------------------------------
-    const title = document.querySelector<HTMLElement>('.services-title');
-    if (title) {
-      once(title, () => {
-        const { lines, restore } = splitLines(title);
-        lines.forEach((line) => { line.style.transform = `translateY(${LINE_TRAVEL})`; });
-        animate(lines, { y: [LINE_TRAVEL, '0%'] }, { duration: .9, ease: EASE, delay: stagger(LINE_STEP) })
-          .then(restore);
-      }, 0.6);
-    }
+    if (window.matchMedia('(hover: hover)').matches) {
+      // --- with a pointer: the window follows the hovered row -------------
+      let current: HTMLElement | null = null;
 
-    // --- the featured banner -----------------------------------------------
-    const featured = document.querySelector<HTMLElement>('.services-card--featured');
-    if (featured) {
-      const diamond = featured.querySelector<HTMLElement>('.services-diamond');
-      featured.classList.add('is-entering');
-      diamond?.classList.add('is-entering');
+      const place = () => {
+        if (!current) return;
+        const { x, y, w, h, box } = windowOf(current);
+        canvas.style.setProperty('--t', `${y}px`);
+        canvas.style.setProperty('--l', `${x}px`);
+        canvas.style.setProperty('--r', `${box.width - x - w}px`);
+        canvas.style.setProperty('--b', `${box.height - y - h}px`);
+      };
 
-      once(featured, () => {
-        featured.classList.remove('is-entering');
-        diamond?.classList.remove('is-entering');
-        animate(featured, { opacity: [0, 1], y: [RISE, 0] }, { duration: .85, ease: EASE });
-        /* The diamond is the loader's shape coming back, so it gets its own
-           beat rather than riding in on the card. Scaling up from just under
-           full size, never down — it should read as settling into the page,
-           not as something dropped onto it. */
-        if (diamond) {
-          animate(
-            diamond,
-            { opacity: [0, 1], scale: [0.92, 1] },
-            { duration: 1.1, ease: EASE, delay: .18 },
-          );
+      const setCurrent = (row: HTMLElement | null) => {
+        if (row === current) return;
+        const fromNothing = !current;
+        rows.forEach((r) => r.classList.toggle('is-current', r === row));
+        current = row;
+
+        if (!field) return; // no WebGL: the rows still brighten, the words stay white
+        if (row) {
+          canvas.classList.toggle('is-jump', fromNothing);
+          place();
+          canvas.classList.add('is-on');
+          field.start();
+        } else {
+          canvas.classList.remove('is-on');
+          // hold the frame once it has faded, rather than drawing into nothing
+          setTimeout(() => { if (!current) field.pause(); }, 400);
         }
-      }, 0.2);
-    }
+      };
 
-    // --- the four cards ----------------------------------------------------
-    /* Each card is watched on its own, then held back by its position in the
-       row. On a wide screen all four cross the line in the same frame and the
-       index delay is what turns that into a stagger; once the grid has
-       collapsed to a column they arrive one at a time anyway and the same
-       delay is a few hundredths nobody will notice. One rule, both layouts. */
-    const cards = [...document.querySelectorAll<HTMLElement>('.services-grid .services-card')];
+      rows.forEach((row) => {
+        row.addEventListener('pointerenter', () => setCurrent(row));
+        row.addEventListener('focusin', () => setCurrent(row));
+        row.addEventListener('focusout', () => setCurrent(null));
+        // a row can be hovered while its entrance is still moving it
+        row.addEventListener('transitionend', () => { if (row === current) place(); });
+      });
+      index.addEventListener('pointerleave', () => setCurrent(null));
 
-    cards.forEach((card, i) => {
-      const lead = i * STEP;
-      const mark = card.querySelector<SVGSVGElement>('.services-mark');
+      new ResizeObserver(() => {
+        canvas.classList.add('is-jump');
+        place();
+      }).observe(index);
+    } else if (field) {
+      /* --- touch: the scroll is the hand ------------------------------------
+         Nothing to hover, so each name fills as it rises up the screen: the
+         colour wipes in left to right — the site's wipe — between the word
+         reaching 88% and 48% of the way down, and stays. By the bottom of the
+         list all five are lit; scroll back and they drain again. Many windows
+         at once, so this is a stack of mask layers, one per word, rather than
+         the single clip the pointer version moves. */
+      canvas.classList.add('is-scrub', 'is-on');
+      const START = 0.88;
+      const END = 0.48;
+      let queued = false;
+      let running = false;
 
-      card.classList.add('is-entering');
+      const scrub = () => {
+        queued = false;
+        const vh = window.innerHeight;
+        const layers: { size: string; pos: string }[] = [];
 
-      /* The draw itself is a CSS transition — see .services-mark in
-         global.css. All that is needed here is the groundwork it can't do
-         for itself: normalise every path's length so one set of dash numbers
-         fits all four silhouettes, hand each stroke its position in the
-         order, and put the card's own delay where the stylesheet can read it.
-         [data-draw] goes on last, because it is what arms the start state. */
-      if (mark) {
-        [...mark.querySelectorAll<SVGPathElement>('path')].forEach((path, order) => {
-          path.setAttribute('pathLength', '1');
-          path.style.setProperty('--i', String(order));
+        rows.forEach((row) => {
+          const { x, y, w, h, top } = windowOf(row);
+          const raw = (START * vh - top) / ((START - END) * vh);
+          const t = Math.min(1, Math.max(0, raw));
+          const p = t * t * (3 - 2 * t); // ease in and out of the wipe
+          row.classList.toggle('is-current', p > 0.98);
+          if (p > 0) layers.push({ size: `${w * p}px ${h}px`, pos: `${x}px ${y}px` });
         });
-        mark.style.setProperty('--lead', `${Math.round(lead * 1000)}ms`);
-        mark.setAttribute('data-draw', '');
-      }
 
-      once(card, () => {
-        card.classList.remove('is-entering');
-        animate(card, { opacity: [0, 1], y: [RISE, 0] }, { duration: .8, ease: EASE, delay: lead });
-        mark?.classList.add('is-drawn');
-      }, 0.2);
-    });
+        if (layers.length) {
+          const image = layers.map(() => 'linear-gradient(#000, #000)').join(', ');
+          const size = layers.map((l) => l.size).join(', ');
+          const pos = layers.map((l) => l.pos).join(', ');
+          canvas.style.setProperty('mask-image', image);
+          canvas.style.setProperty('-webkit-mask-image', image);
+          canvas.style.setProperty('mask-size', size);
+          canvas.style.setProperty('-webkit-mask-size', size);
+          canvas.style.setProperty('mask-position', pos);
+          canvas.style.setProperty('-webkit-mask-position', pos);
+          if (!running) { field.start(); running = true; }
+        } else {
+          // nothing lit: an empty mask, and no frames drawn into it
+          canvas.style.setProperty('mask-image', 'linear-gradient(transparent, transparent)');
+          canvas.style.setProperty('-webkit-mask-image', 'linear-gradient(transparent, transparent)');
+          if (running) { field.pause(); running = false; }
+        }
+      };
+
+      const request = () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(scrub);
+      };
+      window.addEventListener('scroll', request, { passive: true });
+      new ResizeObserver(request).observe(index);
+      rows.forEach((row) => row.addEventListener('transitionend', request));
+      scrub();
+    }
+  }
+
+  // --- entrance -----------------------------------------------------------
+  // Rows arrive once, as each reaches the screen, and stay arrived.
+  if (list && !still) {
+    list.setAttribute('data-arm', '');
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in');
+          io.unobserve(entry.target);
+        });
+      },
+      { rootMargin: '0px 0px -12% 0px' },
+    );
+    rows.forEach((row) => io.observe(row));
   }
 </script>

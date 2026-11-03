@@ -32,33 +32,141 @@ html {
 }
 
 /* ---------------------------------------------------------------- *
- *  NAV — solid over the hero video by default; JS toggles
- *  .is-transparent once scrolled past the hero.
+ *  NAV — no bar of its own at the top of the page: it floats on the
+ *  ground, so the hero reads edge to edge. Once the page moves,
+ *  Nav.astro sets .is-scrolled and it becomes glass with a hairline.
+ *
+ *  --nav-h is the one source for its height. The work and project
+ *  pins, the anchor offsets and the hero's top row all read it, so
+ *  changing it here moves everything that has to clear the bar.
  * ---------------------------------------------------------------- */
+:root {
+  --nav-h: 52px;
+  /* the page's own content edge: <main>'s inset plus a section's */
+  --edge: calc(clamp(8px, 1.2vw, 18px) * 2);
+}
+
 .nav {
-  background: #08080a;
-  transition: background .25s ease, backdrop-filter .25s ease;
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 3;
+  height: var(--nav-h);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  /* aligned to the content edge, not the window's: the mark sits over the
+     first letter of every heading below it */
+  padding: 0 var(--edge);
+  background: transparent;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0);
+  transition: background .3s ease, box-shadow .3s ease;
 }
-.nav.is-transparent {
-  background: rgba(8, 8, 10, .6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+.nav.is-scrolled {
+  background: rgba(10, 10, 13, .72);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .08);
 }
-.nav__dots { color: rgba(255, 255, 255, .5); letter-spacing: 2px; font-size: 1.1rem; line-height: 1; }
-/* scrollspy highlight — JS toggles .is-active on the current nav link.
-   scoped to .nav, not .nav__links: "Contact Us" lives in .nav__right. */
-.nav a.is-active { color: #8b5cf6; }
-.nav__links sup {
-  font-size: .58em; font-weight: 400; margin-left: 2px;
-  color: rgba(255, 255, 255, .45); vertical-align: super;
+/* the standard and -webkit- blur each get their own block: declared side by
+   side, the minifier keeps only the prefixed one and Firefox loses the blur */
+@supports (backdrop-filter: blur(1px)) {
+  .nav.is-scrolled { backdrop-filter: blur(14px) saturate(1.2); }
 }
-.nav__links a.is-active sup { color: rgba(139, 92, 246, .8); }
+@supports (-webkit-backdrop-filter: blur(1px)) {
+  .nav.is-scrolled { -webkit-backdrop-filter: blur(14px) saturate(1.2); }
+}
+
+.nav__word { justify-self: start; display: flex; align-items: center; }
+.nav__logo { display: block; width: auto; height: 17px; filter: invert(1); }
+
+.nav__links { display: flex; align-items: center; gap: clamp(26px, 3vw, 44px); }
+
+.nav__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-size: .84rem;
+  font-weight: 500;
+  letter-spacing: -.005em;
+  color: rgba(255, 255, 255, .6);
+  text-decoration: none;
+  transition: color .2s ease;
+}
+.nav__link:hover,
+.nav__link:focus-visible,
+.nav__link.is-active { color: #f2f2f2; }
+
+/* "You are here" is the mark, not a colour: a small diamond opens in front
+   of the word. Absolutely placed, so the words never shift to make room. */
+.nav__pip {
+  position: absolute;
+  left: -13px;
+  top: 50%;
+  width: 6px;
+  height: 10px;
+  margin-top: -5px;
+  background: currentColor;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  transform: scale(0);
+  transition: transform .4s cubic-bezier(.6, 0, .2, 1);
+}
+.nav__link:hover .nav__pip { transform: scale(.55); }
+.nav__link.is-active .nav__pip { transform: scale(1); }
+
+.nav__right { justify-self: end; display: flex; align-items: center; gap: 16px; }
+
+/* --- the call to action ------------------------------------------------ *
+ *  Shared by the hero and the nav. It keeps colour inside it, like the
+ *  aperture: hovering wipes the prism through the button left to right —
+ *  the site's wipe, carrying the five colours rather than a flat accent.
+ * ------------------------------------------------------------------------ */
+.cta {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 22px 16px 24px;
+  border: 0;
+  background: #f2f2f2;
+  color: #0a0a0d;
+  font: inherit;
+  font-size: .95rem;
+  font-weight: 550;
+  letter-spacing: -.005em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(100deg, #3f6bff, #9a5cff 30%, #ff3f9a 55%, #ff6a37 78%, #ff9a2e);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path .5s cubic-bezier(.76, 0, .18, 1);
+}
+.cta:hover::before,
+.cta:focus-visible::before { clip-path: inset(0 0 0 0); }
+.cta:focus-visible { outline: 1px solid #f2f2f2; outline-offset: 3px; }
+.cta__mark {
+  flex: none;
+  width: 9px;
+  height: 15px;
+  transition: transform .35s cubic-bezier(.6, 0, .2, 1);
+}
+.cta:hover .cta__mark { transform: translateX(4px); }
+
+.cta--sm { gap: 10px; padding: 10px 14px 10px 16px; font-size: .8rem; }
+.cta--sm .cta__mark { width: 7px; height: 12px; }
+.cta--sm:hover .cta__mark { transform: translateX(3px); }
 
 /* --- mobile menu -------------------------------------------------------- *
- *  Under 860px the bar has room for the mark and one control, so the three
- *  section links move into a panel behind that control. Everything here is
- *  driven by .is-nav-open on <html> — one class, so the bar, the burger and
- *  the panel can never disagree about whether the menu is open.
+ *  Under 860px the bar has room for the mark and one control, so the
+ *  section links and the call to action move into a panel behind it.
+ *  Everything here is driven by .is-nav-open on <html> — one class, so the
+ *  bar, the burger and the panel can never disagree about whether the menu
+ *  is open.
  * ------------------------------------------------------------------------ */
 .nav__toggle {
   display: flex;
@@ -69,7 +177,7 @@ html {
   background: transparent;
   color: #fff;
   font: inherit;
-  font-size: .78rem;
+  font-size: .84rem;
   font-weight: 500;
   cursor: pointer;
 }
@@ -98,26 +206,27 @@ html {
 .is-nav-open .nav__burger i:first-child { transform: translateY(3px) rotate(45deg); }
 .is-nav-open .nav__burger i:last-child { transform: translateY(-3px) rotate(-45deg); }
 
-/* the bar stops being glass while the panel is behind it — a blurred strip
-   over a flat black sheet reads as a rendering fault, not as depth */
-.is-nav-open .nav.is-transparent {
-  background: #08080a;
+/* the bar is solid while the panel is behind it — a strip of glass over a
+   flat black sheet reads as a rendering fault, not as depth */
+.is-nav-open .nav {
+  background: #0a0a0d;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .08);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
 /* position:fixed, not absolute: the panel is measured against the viewport,
-   not against a 36px-tall bar, and it stays inside the nav's stacking
-   context either way — so it covers the page without this file knowing which
-   section stacks where. The top inset is the nav's own height (h-9). */
+   not against the bar, and it stays inside the nav's stacking context either
+   way — so it covers the page without this file knowing which section stacks
+   where. The top inset is the nav's own height. */
 .nav__menu {
   position: fixed;
-  inset: 2.25rem 0 0;
+  inset: var(--nav-h) 0 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 24px;
-  padding: clamp(20px, 4vh, 40px) clamp(8px, 1.2vw, 18px) clamp(18px, 3vh, 28px);
+  gap: 28px;
+  padding: clamp(20px, 4vh, 40px) var(--edge) clamp(20px, 3.4vh, 32px);
   background: #0a0a0d;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -134,8 +243,7 @@ html {
 }
 
 /* the rows share the height rather than stacking at the top and leaving a
-   screen of black under them — same reasoning as the contact section, where
-   the rules are what fill the viewport structurally */
+   screen of black under them */
 .nav__menu-list {
   flex: 1;
   display: flex;
@@ -166,61 +274,77 @@ html {
 .nav__menu-link {
   flex: 1;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-content: center;
-  align-items: baseline;
-  gap: 0 clamp(14px, 4vw, 24px);
+  align-items: center;
+  gap: 0 16px;
   padding: clamp(16px, 2.6vh, 24px) 0;
   border-bottom: 1px solid rgba(255, 255, 255, .15);
+  /* full white: at this size grey reads as disabled. The diamond alone
+     says which one is current. */
   color: #f2f2f2;
   text-decoration: none;
-  transition: color .2s ease;
-}
-.nav__menu-num {
-  font-size: .7rem;
-  font-weight: 500;
-  letter-spacing: .06em;
-  color: #8a8a92;
 }
 .nav__menu-label {
-  font-size: clamp(1.9rem, 9vw, 3rem);
-  font-weight: 400;
-  letter-spacing: -.025em;
+  display: flex;
+  align-items: center;
+  gap: .35em;
+  font-size: clamp(2.2rem, 11vw, 3.4rem);
+  font-weight: 300;
+  font-variation-settings: 'opsz' 144;
+  letter-spacing: -.04em;
   line-height: 1;
 }
-.nav__menu-mark { align-self: center; color: #8a8a92; transition: transform .3s cubic-bezier(.6, 0, .2, 1), color .2s ease; }
-.nav__menu-mark svg { display: block; width: 20px; height: 20px; }
+/* the bar's diamond, at the panel's scale; folded away unless current */
+.nav__menu-link .nav__pip {
+  position: static;
+  flex: none;
+  width: 0;
+  height: .5em;
+  margin: 0;
+  transform: scale(0);
+  transition: width .35s cubic-bezier(.6, 0, .2, 1), transform .35s cubic-bezier(.6, 0, .2, 1);
+}
+.nav__menu-link.is-active .nav__pip { width: .3em; transform: scale(1); }
+.nav__menu-mark { color: #8a8a92; transition: transform .3s cubic-bezier(.6, 0, .2, 1), color .2s ease; }
+.nav__menu-mark svg { display: block; width: 22px; height: 22px; }
 .nav__menu-link:active .nav__menu-mark,
 .nav__menu-link:focus-visible .nav__menu-mark { transform: translate(3px, -3px); color: #f2f2f2; }
-/* the same orange the bar uses for the section you are standing in */
-.nav a.nav__menu-link.is-active .nav__menu-num { color: rgba(255, 90, 42, .8); }
 
 .nav__menu-foot {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px clamp(12px, 3vw, 24px);
-  font-size: .78rem;
-  font-weight: 500;
-  letter-spacing: .02em;
-  color: #8a8a92;
+  flex-direction: column;
+  gap: 16px;
   opacity: 0;
   transform: translateY(10px);
   transition: opacity .35s ease, transform .45s cubic-bezier(.2, .7, .3, 1);
 }
-.nav__menu-mail { color: #f2f2f2; text-decoration: none; }
+.nav__menu-foot .cta { justify-content: space-between; width: 100%; }
+.nav__menu-mail {
+  align-self: flex-start;
+  font-size: .84rem;
+  font-weight: 500;
+  color: #8a8a92;
+  text-decoration: none;
+}
+.nav__menu-mail:active,
+.nav__menu-mail:focus-visible { color: #f2f2f2; }
 
 @media (prefers-reduced-motion: reduce) {
   .nav__menu-row, .nav__menu-foot { transform: none; transition: opacity .2s ease; }
   .is-nav-open .nav__menu-row, .is-nav-open .nav__menu-foot { transition-delay: 0s; }
-  .nav__burger i { transition: none; }
+  .nav__burger i, .nav__pip { transition: none; }
 }
 
-/* Above the breakpoint neither the control nor the panel is a thing that
-   exists. Both are switched off here rather than with a `min-[861px]:hidden`
-   utility on the markup: the rules in this file sit outside Tailwind's
-   layers, so they win over any utility regardless of the variant asked for. */
+/* Each breakpoint switches off what doesn't exist on that side of it. Done
+   here rather than with utilities on the markup: the rules in this file sit
+   outside Tailwind's layers, so they win over any utility regardless of the
+   variant asked for. */
+@media (max-width: 860px) {
+  .nav { grid-template-columns: 1fr auto; }
+  .nav__links,
+  .nav__right > .cta { display: none; }
+}
 @media (min-width: 861px) {
   .nav__toggle,
   .nav__menu { display: none; }
@@ -273,190 +397,31 @@ html {
   .is-entering { opacity: 1; }
 }
 
-/* --- services ---------------------------------------------------------- *
- *  Card surfaces sit one step off the page ground; the hairline is the
- *  only thing that moves on hover. All the section's boldness is spent on
- *  the fluid diamond in the AI card.
- * ------------------------------------------------------------------------ */
-/* no fill — the page ground shows through and the hairline does all the
-   work. the top edge still catches more light than the sides, so the card
-   reads as a surface rather than an outline. */
-.services-card {
-  border: 1px solid rgba(255, 255, 255, .3);
-  border-top-color: #fff;
-  transition: border-color .2s ease;
-}
-.services-card:hover {
-  border-color: rgba(255, 255, 255, .5);
-  border-top-color: #fff;
-}
-
-.services-tag { border: 1px solid rgba(255, 255, 255, .1); }
-
-/* hairline-separated rows, no box around them — the card is the box */
-.services-detail__row { border-top: 1px solid rgba(255, 255, 255, .08); }
-.services-detail__row:first-child { border-top: none; padding-top: 0; }
-.services-detail__row:last-child { padding-bottom: 0; }
-
-/* the diamond stays whole — its points are the shape. it sits beside the
-   copy and is never cropped. */
-.services-diamond {
-  flex: none;
-  width: clamp(88px, 9.5vw, 128px);
-}
-.services-diamond svg { display: block; width: 100%; height: auto; }
-
-/* --- the card marks draw themselves --- *
- *  Each mark is a few strokes of the brand diamond, so letting them draw in
- *  stroke order says something the shapes alone don't: they are all the one
- *  shape, built up differently. Left to CSS rather than done in JS with the
- *  rest of the section — Motion accepts strokeDashoffset and pathLength and
- *  then writes neither, and a transition is the more honest tool for a single
- *  property going one way in any case.
- *
- *  The dash units work because JS sets pathLength="1" on every path first,
- *  which rescales them to a share of that path's own length. Without it each
- *  silhouette would need its own numbers.
- *
- *  Gated on [data-draw], which only JS adds: the start state here is an
- *  invisible mark, and that must never be what a reader without JS is left
- *  looking at. Same reasoning as .project-info[data-reveal] further down. */
-.services-mark[data-draw] path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset .75s cubic-bezier(.22, 1, .36, 1)
-              calc(var(--lead, 0ms) + var(--i, 0) * 100ms + 120ms);
-}
-
-/* a fill has no direction to be drawn in, so the one solid shape fades up
-   instead — after its own outline has closed around it */
-.services-mark[data-draw] path[data-fill] {
-  fill-opacity: 0;
-  transition:
-    stroke-dashoffset .75s cubic-bezier(.22, 1, .36, 1)
-      calc(var(--lead, 0ms) + var(--i, 0) * 100ms + 120ms),
-    fill-opacity .5s cubic-bezier(.22, 1, .36, 1) calc(var(--lead, 0ms) + 600ms);
-}
-
-.services-mark[data-draw].is-drawn path { stroke-dashoffset: 0; }
-.services-mark[data-draw].is-drawn path[data-fill] { fill-opacity: 1; }
-
-@media (prefers-reduced-motion: reduce) {
-  /* the mark is information, not decoration — it arrives whole */
-  .services-mark[data-draw] path { stroke-dashoffset: 0; transition: none; }
-  .services-mark[data-draw] path[data-fill] { fill-opacity: 1; transition: none; }
-}
-
-/* --- work: featured projects list --- */
-
-.work {
-  /* clearance under the fixed nav. kept in px, not rem: the release script
-     reads this value straight off the custom property. */
-  --work-pin: 40px;
-}
-
-/* the "Featured Work" heading stays pinned at the top while the cards stack.
-   Its own sticky range runs to the end of .work, which outlasts the final
-   card — the script translates it up early so the two leave together.
-   Opaque bg + z-index keep it above the stacking cards. */
-.work .section-title {
-  position: sticky;
-  top: var(--work-pin);
-  z-index: 2;
-  background: #0a0a0d;
-}
-
-/* --- stacking cards --------------------------------------------------- *
- *  Each card sticks below the pinned title. Every card shares .work-list
- *  as its containing block and the same top anchor, so later cards — later
- *  in source order — simply paint over (fully cover) whichever card is
- *  currently pinned.
- * ------------------------------------------------------------------------ */
-.work-item {
-  position: sticky;
-  /* pin below the sticky title: nav height + measured title height (JS sets
-     --work-title-h; fallback keeps it sane before the script runs) */
-  top: calc(var(--work-pin) + var(--work-title-h, 6rem));
-  background: #0a0a0d;             /* opaque: fully hides the card stacked underneath */
-}
-
-/* The room the last card sticks into: without it the card sits flush with the
-   bottom of .work-list and never pins at all.
-
-   Kept short on purpose. Every pixel here is scroll during which the last
-   card is pinned and nothing on screen moves — a held beat at 20vh reads as
-   the page having stopped responding, not as emphasis, and Contact's own
-   padding-top follows it immediately with more of the same. .work carries no
-   padding-bottom for that reason: this is the section's bottom spacing. */
-.work-list__hold {
-  height: clamp(24px, 4vh, 48px);
-}
-
-/* below the nav breakpoint, drop the effect: plain stacked rows */
-@media (max-width: 860px) {
-  .work-item {
-    position: static;
-    transform: none;
-    margin-bottom: 0;
-    border-top: 1px solid rgba(255, 255, 255, .12);
-  }
-  .work-item:first-child { border-top: none; }
-  /* nothing pins here, so the hold has no beat to keep — drop it to the
-     standard section bottom padding the other sections use */
-  .work-list__hold { height: clamp(40px, 6vh, 80px); }
-}
-
-/* decorative corner dots + diagonal hatch behind the project media */
-.work-item__media {
-  background:
-    radial-gradient(circle, #fff .75px, transparent 1px) left -1px top -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) right -1px top -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) left -1px bottom -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) right -1px bottom -1px / 2px 2px no-repeat,
-    repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 12px, rgba(255,255,255,.02) 12px 24px),
-    #141417;
-  background-origin: border-box;
-}
-
-.work-item__tooltip {
-  backdrop-filter: blur(2px);
-}
-
-/* --- the masthead ------------------------------------------------------ *
- *  Standfirst and project name sit on one baseline and share a bottom edge.
- *  Without that closing rule the two blocks float, and their opposed ragged
- *  edges read as interference down the middle of the column; with it, the
- *  gutter is a gutter. Quiet on purpose — the phase track below is where
- *  this section spends itself.
- * ------------------------------------------------------------------------ */
-.work-item__masthead {
-  padding-bottom: clamp(14px, 2vh, 22px);
-  border-bottom: 1px solid rgba(255, 255, 255, .14);
-}
-
-.work-item__foot {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(18px, 2.6vh, 30px);
-}
-
 /* --- project page: the stage ------------------------------------------- *
- *  The work arrives at full screen and scroll takes it down continuously,
- *  100% to 40%, passing through 70% at the halfway mark. The frame is
- *  pinned for the length of that travel; at the floor the pin releases and
- *  the image leaves the way any other section would, with the write-up
- *  behind it.
+ *  The page opens on the homepage panel's picture at full screen: the title
+ *  card, and the screen peeking up from the bottom edge. Scrolling lifts the
+ *  screen to the centre of the frame, over the wordmark, while the card
+ *  behind it dims and drifts back — brand first, then the product brought up
+ *  to look at. The frame is pinned for that travel, then lets go, and the
+ *  write-up is directly behind it.
  *
- *  The mapping itself lives in the page's script — scroll position to size
- *  is not a thing CSS can state. Everything here just consumes the
- *  --project-scale that script writes.
+ *  One number drives all of it: --p, 0 on arrival and 1 when the screen has
+ *  settled. A scroll timeline animates it where the browser has one; the
+ *  page's script writes it everywhere else. The rest of the page's styles
+ *  are scoped in src/pages/work/[slug].astro.
  * ------------------------------------------------------------------------ */
+@property --p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 .project-stage {
-  /* nav height, and the scroll the shrink plays out over: one screen of
-     frame, and the rest is travel. In px, like --work-pin, because the
-     script reads the value straight off the property. */
-  --project-pin: 40px;
-  height: 150dvh;
+  /* nav height, and the scroll the lift plays out over: one screen of
+     frame, and the rest is travel. In px, because the fallback script reads
+     the value straight off the property. */
+  --project-pin: var(--nav-h);
+  height: 170dvh;
 }
 
 .project-stage__frame {
@@ -467,472 +432,245 @@ html {
   background: #000;
 }
 
-/* transform, not width/height: the crop is fixed at the full-screen framing
-   and the whole picture shrinks with it, so nothing reflows mid-scroll and
-   the image never re-crops itself on the way down. */
-.project-stage__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  transform: scale(var(--project-scale, 1));
-  will-change: transform;
+.project-stage__art {
+  position: absolute;
+  inset: 0;
 }
 
-/* Hand the shrink to the compositor where the browser can do it: a scroll
+/* The selectors carry the stage twice on purpose: ProjectShot's own scoped
+   rules give these the same transform and a hover transition, and a
+   transition here would make the picture trail the scroll. */
+.project-stage .project-stage__art .shot__field {
+  transform: scale(calc(1 + var(--p) * .08));
+  filter: brightness(calc(1 - var(--p) * .4));
+  transition: none;
+}
+/* from where it rests (top: 56% of the frame) to the frame's centre: up by
+   the 6% between the two, and by half its own height */
+.project-stage .project-stage__art .shot__screen {
+  transform:
+    translateY(calc(var(--p) * (-50% - .06 * (100dvh - var(--project-pin)))))
+    scale(calc(1 + var(--p) * .06));
+  transition: none;
+}
+
+/* PHONES. A full-height portrait frame around a landscape screen was mostly
+   empty card above and below it. Here the frame is a phone-shaped box
+   instead (about 10:11), not pinned: the screen fills its width, and the
+   lift plays out over the first stretch of scroll while the box travels up
+   into the write-up like any other block. The page's script drives --p
+   for it — see the stage script in [slug].astro. */
+@media (max-width: 640px) {
+  .project-stage { height: auto; }
+  .project-stage__frame {
+    position: relative;
+    top: auto;
+    margin-top: var(--project-pin);
+    height: min(calc(100svh - var(--project-pin)), 110vw);
+  }
+  .project-stage__art { --shot-k: 1.5; }
+}
+
+@keyframes project-rise {
+  from { --p: 0; }
+  to   { --p: 1; }
+}
+
+/* Hand the lift to the compositor where the browser can do it: a scroll
    timeline runs on the same thread that moves the sticky frame, so the two
-   stay locked together. Driving it from a scroll listener cannot — the
-   transform lands a frame after the scroll it answers to, and a pinned
-   element scaling one frame late is exactly what reads as judder.
-
-   `contain` is the range where the stage covers the whole screen, which is
-   the same window the frame is pinned for; the inset moves the top edge of
-   that window down past the nav, so it matches the sticky offset. The
-   page's script does the same job for browsers without this, and stands
-   down when it isn't needed. */
-/* Eased, not linear. On a scroll timeline the timing function maps scroll
-   progress onto scale progress, so a curve here is the difference between
-   the picture tracking the wheel step for step and it gliding between two
-   settled states. easeInOutSine specifically: it is gentle at both ends, so
-   the image holds full-frame for the first moments of the scroll and settles
-   into the floor rather than arriving at it, but it never has the dead zone
-   at the start that a steeper ease-in-out gives you — where you scroll and
-   nothing appears to happen. */
-@keyframes project-shrink {
-  from { transform: scale(1); }
-  to   { transform: scale(.6); }   /* keep in step with TO in [slug].astro */
-}
-
+   stay locked together. Eased in and out (easeInOutSine), so the screen
+   starts moving with the wheel and settles rather than stops. */
 @supports (animation-timeline: view()) {
   .project-stage {
     view-timeline-name: --project-stage;
     view-timeline-inset: var(--project-pin) 0;
   }
 
-  .project-stage__img {
-    animation: project-shrink cubic-bezier(.37, 0, .63, 1) both;
-    transform: none;               /* the keyframes own it now */
+  .project-stage__art {
+    animation: project-rise cubic-bezier(.37, 0, .63, 1) both;
   }
 
-  /* Deliberately a different selector, and it has to stay that way: the
-     minifier folds animation longhands into the `animation` shorthand when
-     they share a rule, and the shorthand does not carry a timeline — the
-     declaration comes out invalid and the whole effect silently dies. It
-     can't fold across two rules. */
-  .project-stage .project-stage__img {
+  /* Deliberately a different selector: the minifier folds animation
+     longhands into the `animation` shorthand when they share a rule, and the
+     shorthand does not carry a timeline. It can't fold across two rules. */
+  .project-stage .project-stage__art {
     animation-timeline: --project-stage;
     animation-range: contain 0% contain 100%;
   }
+
+  /* nothing is pinned on a phone, so there is no contain range to ride:
+     the script writes --p there instead, and the stage passes it down */
+  @media (max-width: 640px) {
+    .project-stage .project-stage__art { animation: none; }
+  }
 }
-
-/* --- project page: the write-up ---------------------------------------- *
- *  Editorial, not a spec sheet: the account of the job on the left, the
- *  facts of it in columns to the right, and nothing between them but the
- *  gap. Every line is the same size — label, value, prose and list alike —
- *  so the only hierarchy is where a thing sits and how grey it is. Rules,
- *  pills and bold labels would each be a way of shouting in a block that
- *  works because nothing in it shouts.
- * ------------------------------------------------------------------------ */
-/* One column, centred, carrying the title, the write-up and the way back.
-   The gallery below runs down the middle too, so the page has a single
-   spine rather than a left-aligned top half and a centred bottom one. */
-.project-info__col {
-  width: min(70vw, 100%);
-  margin-inline: auto;
-}
-
-.project-info__grid {
-  display: grid;
-  /* the account gets the width of two fact columns; --meta-cols is set from
-     the data, so adding a fourth fact doesn't need a new rule here */
-  grid-template-columns: minmax(0, 1.7fr) repeat(var(--meta-cols, 2), minmax(0, 1fr));
-  gap: clamp(24px, 3vw, 64px);
-
-  /* set once, inherited by everything: one size is the whole idea */
-  font-size: clamp(.92rem, 1.05vw, 1.2rem);
-  line-height: 1.24;
-  letter-spacing: -.01em;
-  color: #d4d4d8;
-}
-
-@media (max-width: 860px) {
-  /* the narrowed column is a luxury of wide screens; here the block takes
-     the page and the fact columns stack under the prose */
-  .project-info__col { width: 100%; }
-  .project-info__grid { grid-template-columns: minmax(0, 1fr); }
-}
-
-/* one blank line between blocks, measured in the copy's own leading, so the
-   rhythm holds when the type resizes */
-.project-copy p + p,
-.project-copy__list,
-.project-meta__value { margin-top: 1.24em; }
-
-.project-copy__list { list-style: none; }
-.project-meta__label { color: #8a8a92; }
-.project-meta__value { color: #f2f2f2; }
-
-/* the write-up is the payoff for the sequence, so it doesn't sit there
-   through it. It arrives on the wipe — one of the two gestures this site
-   is allowed (docs/design-direction.md), the same left-to-right pass the
-   curtain opens with and the contact rows answer to.
-
-   The start state is a clip, i.e. invisible, so it is gated on [data-reveal]
-   — an attribute the script sets on itself before it observes anything. No
-   script, no clip: the write-up is simply there, which is the only
-   acceptable failure for the part of the page that carries the words. */
-.project-info[data-reveal] .project-reveal {
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path .7s cubic-bezier(.76, 0, .18, 1) calc(var(--i, 0) * 110ms);
-}
-.project-info[data-reveal].is-in .project-reveal { clip-path: inset(0 0 0 0); }
 
 @media (prefers-reduced-motion: reduce) {
-  /* no pin, no sequence: one screen of the work, then the write-up */
+  /* no pin, no sequence: one screen of the work, already lifted */
   .project-stage { height: auto; }
-  .project-stage__frame { position: static; height: calc(100dvh - var(--project-pin)); }
-  .project-stage__img { transform: none; animation: none; }
-  .project-info[data-reveal] .project-reveal { clip-path: none; transition: none; }
-}
-
-/* --- project page: the gallery ----------------------------------------- *
- *  The work, one piece after another, each at its own proportions. A column
- *  narrower than the page is what makes a stack of screenshots read as a
- *  portfolio rather than as a scroll of assets — the margin either side is
- *  doing as much work as the pictures.
- *
- *  Square corners, deliberately: a rounded frame is a device the site uses
- *  nowhere else, and the work inside these frames has corners of its own.
- * ------------------------------------------------------------------------ */
-.project-gallery {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(60px, 12vh, 144px);
-  padding: clamp(40px, 8vh, 96px) clamp(8px, 1.2vw, 18px);
-}
-
-.project-gallery__item {
-  width: min(63vw, 100%);
-  margin: 0;
-  border: 1px solid rgba(255, 255, 255, .1);
-
-  /* the corner dots off the featured-work frames, and only those — the hatch
-     and the fill there are a placeholder for a picture that hasn't loaded,
-     which is not this frame's job. Sits on the border box, so the dots ride
-     the hairline rather than getting covered by the picture. */
-  background:
-    radial-gradient(circle, #fff .75px, transparent 1px) left -1px top -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) right -1px top -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) left -1px bottom -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) right -1px bottom -1px / 2px 2px no-repeat;
-  background-origin: border-box;
-}
-
-/* each piece keeps its own aspect — nothing here is cropped to a common
-   shape, because a screenshot cropped to fit is a screenshot lying */
-.project-gallery__media {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-@media (max-width: 860px) {
-  /* the column that made the stack read as a portfolio is a wide-screen
-     luxury; here the picture takes the page */
-  .project-gallery__item { width: 100%; }
+  .project-stage__frame { position: relative; height: calc(100dvh - var(--project-pin)); }
+  .project-stage__art { animation: none; --p: 1; }
 }
 
 /* --- contact ----------------------------------------------------------- *
- *  The closing screen: one statement, two full-bleed action rows, a
- *  standing line. The section's own left/right inset, so the hover wipe
- *  can bleed past the text to the screen edges.
+ *  The closing screen: the statement in colour, the promises, two full-bleed
+ *  action rows, a standing line. --bleed is the section's own inset, so the
+ *  rows' hover wipe can run past the text to the screen edges.
  * ------------------------------------------------------------------------ */
-.contact { --bleed: clamp(8px, 1.2vw, 18px); }
-
-/* --- the closing light --- *
- *  The page opens on the hero video and closes on two lit forms. Not a wash
- *  behind the type: bodies with edges, dark everywhere except where the rim
- *  catches. The light burns the site's own #8b5cf6 rather than a new colour,
- *  so the tick bar and the nav's active link sit inside it.
- *
- *  isolation + z-index:-1 puts the whole thing above the page ground but
- *  under every child, so the action rows' white wipe still covers it. */
 .contact {
+  --bleed: clamp(8px, 1.2vw, 18px);
+  /* the statement's size, shared with the line under it, which has to clear
+     the field's overshoot below the letters */
+  --ct-size: clamp(3.1rem, 12.5vw, 11.5rem);
   position: relative;
-  isolation: isolate;
-}
-
-/* The frame that keeps the light inside the section. The layers below are
-   scaled past their own box so they have room to drift, and 6% of each one
-   hangs over the edge — without this it paints up into the Work items.
-   inset:0, no --bleed offset: an absolutely positioned child resolves
-   against .contact's PADDING box, and with no left border that edge is
-   already the section's outer edge. */
-.contact-light-frame {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-/* Each form is its own promoted layer, painted once. The circles inside are
-   enormous but the SVG viewport clips them, so a layer never exceeds the
-   frame. */
-.contact-light {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  /* transform ONLY. That is the whole performance story: the compositor moves
-     an already-rasterised bitmap and the renderer is never asked for a new
-     pixel. The version that made this page crawl rotated the geometry inside
-     the SVG, which invalidates the raster and re-runs every gradient and mask
-     in the drawing, every frame. Same visual family, ~40x the cost. */
-  will-change: transform;
-}
-
-/* The base scale is what buys room to move. At 1.12 there is 6% of overscan
-   on every side, so a drift of up to 3% plus ~1.5deg of roll never pulls an
-   edge into frame — no wrapper and no overflow clipping needed.
-   13s and 17s: close enough to feel like one atmosphere, coprime enough that
-   the pair doesn't visibly repeat. */
-.contact-light--warm {
-  animation: contact-warm 13s ease-in-out infinite alternate;
-}
-.contact-light--cool {
-  animation: contact-cool 17s ease-in-out infinite alternate;
-}
-
-/* The two run opposite on x, which is what turns a slide into parallax —
-   the gap between the two rims opens and closes as they pass. */
-@keyframes contact-warm {
-  from { transform: scale(1.12) translate(-2.6%, 1.4%) rotate(-.9deg); }
-  to   { transform: scale(1.12) translate(2.6%, -1.4%) rotate(.9deg); }
-}
-
-@keyframes contact-cool {
-  from { transform: scale(1.12) translate(2.2%, 1.8%) rotate(.7deg); }
-  to   { transform: scale(1.12) translate(-2.2%, -1%) rotate(-.7deg); }
-}
-
-/* THE GRAIN is not decoration. Gradients this dark and this wide ramp one
-   8-bit level per ~40px, which shows as concentric rings on a good display
-   in a dark room. Noise breaks the step up, and hero.mp4 is grainy film, so
-   the fix and the reference are the same thing. Alpha is deliberately tiny —
-   it lifts the section's black by about one level, which is the size of the
-   artifact it's cancelling. Painted last, above the light, or it would have
-   nothing to dither. */
-.contact::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .14 0 0 0 -.06'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
-}
-
-.contact-statement { font-variation-settings: 'opsz' 96; }
-
-/* --- the rotating line --- *
- *  Beside the statement, where there was nothing. Grid-stacked so every
- *  line occupies the same cell: the block is as tall as the longest one
- *  and never reflows as they swap. */
-.contact-why {
-  flex: none;
-  width: clamp(260px, 30vw, 400px);
-}
-
-/* --- the ticks --- *
- *  Each one is a track that fills over exactly one cycle, so the row is a
- *  countdown to the next line as well as a position in the list. --cycle
- *  is the single source of truth for the timing: the script reads it back
- *  out rather than holding its own copy, so the bar can't drift out of
- *  step with the rotation. Written in ms, but the minifier ships it as
- *  "4.2s" — which is why the script parses the unit instead of trusting
- *  parseFloat. */
-.contact-why__ticks {
-  --cycle: 3200ms;
   display: flex;
-  gap: 6px;
-  margin-bottom: clamp(16px, 2.4vh, 24px);
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(72px, 11vh, 130px) var(--bleed) clamp(18px, 2.6vh, 28px);
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  scroll-margin-top: var(--nav-h);
 }
 
-.contact-why__tick {
+.ct-label {
+  margin: 0;
+  font-size: clamp(1rem, 1.1vw, 1.1rem);
+  font-weight: 650;
+  font-variation-settings: 'opsz' 8;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #8a8a92;
+}
+
+.ct-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 6vh, 72px) 0;
+}
+
+/* the box the field fills. Its font size is the statement's, so the canvas
+   can overshoot the letters in em — descenders and the last letter's
+   overhang — without reaching the line below it. */
+.ct-word {
   position: relative;
-  width: 30px;
-  height: 2px;
-  background: rgba(255, 255, 255, .16);
+  font-size: var(--ct-size);
 }
-.contact-why__tick::after {
-  content: '';
+.ct-statement {
+  margin: 0;
+  font-size: 1em;
+  font-weight: 450;
+  font-variation-settings: 'opsz' 144;
+  letter-spacing: -.055em;
+  line-height: .9;
+  color: #fff;
+  text-wrap: balance;
+}
+.ct-field {
   position: absolute;
-  inset: 0;
-  background: #8b5cf6;      /* the section's only colour, spent on 2px */
-  transform: scaleX(0);
-  transform-origin: left;
+  inset: -.08em -.16em -.26em -.12em;
+  width: calc(100% + .28em);
+  height: calc(100% + .34em);
+  display: block;
+  pointer-events: none;
+  /* darken keeps the darker of the two: the ground stays exactly itself and
+     the white letters take the field's colour */
+  mix-blend-mode: darken;
+}
+.ct-field.is-armed {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.6s cubic-bezier(.76, 0, .18, 1);
+}
+.ct-field.is-armed.is-in { clip-path: inset(0 0 0 0); }
+
+.ct-sub {
+  /* clears the field's overshoot below the statement (.26em of its size),
+     or darken would tint the top of this line */
+  margin: calc(var(--ct-size) * .32) 0 0;
+  max-width: 42ch;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.4;
+  color: #8a8a92;
+  text-wrap: pretty;
 }
 
-/* lines already shown stay filled but drop to grey — without this the row
-   shows how long is left without showing how far in you are */
-.contact-why__tick.is-done::after {
-  transform: scaleX(1);
-  background: rgba(255, 255, 255, .3);
-}
-
-.contact-why__tick.is-current::after {
-  animation: contact-tick var(--cycle) linear forwards;
-}
-
-@keyframes contact-tick {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-
-.contact-why__list {
+/* --- the promises --- */
+.ct-why {
   display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px clamp(18px, 2.4vw, 36px);
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: clamp(20px, 3vh, 30px) 0;
+  border-top: 1px solid rgba(255, 255, 255, .15);
 }
-.contact-why__item {
-  grid-area: 1 / 1;
-  font-size: clamp(1.15rem, 1.9vw, 1.55rem);
-  font-weight: 400;
-  letter-spacing: -.015em;
-  line-height: 1.35;
-  color: #c7c7c7;
+.ct-why li {
+  display: flex;
+  gap: 10px;
+  font-size: .9rem;
+  line-height: 1.4;
+  color: #d4d4d8;
   text-wrap: pretty;
-  /* stacked in one cell, so the hidden lines must not be selectable. The
-     delay holds the outgoing line visible just long enough to fade. */
-  visibility: hidden;
-  transition: visibility 0s linear .22s;
 }
-.contact-why__item.is-current { visibility: visible; transition-delay: 0s; }
-
-/* WORD AT A TIME — the swap staggers across the words rather than typing
-   out characters. The unit is the word because that's the unit you read
-   in, so it lands as a reveal instead of a performance, and the whole line
-   has arrived in ~250ms and then holds still and readable. */
-.contact-why__word {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(.45em);
-  transition:
-    opacity .42s ease,
-    transform .42s cubic-bezier(.2, 0, .2, 1);
-  transition-delay: calc(var(--i) * 45ms);
-}
-.contact-why__item.is-current .contact-why__word { opacity: 1; transform: none; }
-
-/* leaving, the line goes all at once and fast — staggering the exit too
-   would double the time the column has nothing readable in it */
-.contact-why__item:not(.is-current) .contact-why__word {
-  transition-duration: .18s;
-  transition-delay: 0s;
+.ct-why__mark {
+  flex: none;
+  width: 6px;
+  height: 10px;
+  margin-top: .3em;
+  background: currentColor;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
-/* the rotation is the only thing carrying these lines, so when motion is
-   off they all show at once as a plain list rather than four of them
-   becoming unreachable */
-@media (prefers-reduced-motion: reduce) {
-  .contact-why__ticks { display: none; }
-  .contact-why__list { display: block; }
-  .contact-why__item {
-    visibility: visible;
-    transition: none;
-    font-size: clamp(1rem, 1.4vw, 1.15rem);
-    margin-bottom: .5em;
-  }
-  .contact-why__word {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
+/* --- the way in --- */
+.ct-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px clamp(28px, 3.4vw, 48px);
+  margin-top: clamp(24px, 4vh, 40px);
 }
+.cta--lg { gap: 16px; padding: 20px 26px 20px 28px; font-size: 1.05rem; }
+.cta--lg .cta__mark { width: 10px; height: 17px; }
 
-/* --- action rows --- *
- *  Not buttons. The hairline rule is this site's unit in every other
- *  section, so the two ways to reach us are rules too — which also means
- *  they fill the viewport structurally instead of floating in it. */
-.contact-actions { border-top: 1px solid rgba(255, 255, 255, .15); }
-
-.contact-action {
-  position: relative;
+.ct-mail {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: baseline;
-  gap: 0 clamp(16px, 2.5vw, 40px);
-  width: 100%;
-  padding: clamp(20px, 3.4vh, 38px) 0;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, .15);
-  background: transparent;
+  gap: 4px;
+  margin: 0;
+  font-size: .78rem;
+  font-weight: 500;
+  color: #8a8a92;
+}
+.ct-mail a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
   color: #f2f2f2;
-  font-family: inherit;
-  text-align: left;
   text-decoration: none;
-  cursor: pointer;
-  isolation: isolate;
-  transition: color .25s ease .06s;
-}
-
-/* THE WIPE — white sweeps in from the left and the type inverts to ink.
-   Same left-to-right reveal as the opening curtain, so the page closes in
-   the motion it opened with. clip-path, not scaleX: a scaled panel would
-   smear its own edge. Bleeds past the section inset to the screen edges. */
-.contact-action::before {
-  content: '';
-  position: absolute;
-  inset: 0 calc(-1 * var(--bleed));
-  z-index: -1;
-  background: #f2f2f2;
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path .5s cubic-bezier(.76, 0, .18, 1);
-}
-.contact-action:hover,
-.contact-action:focus-visible { color: #0a0a0d; outline: none; }
-.contact-action:hover::before,
-.contact-action:focus-visible::before { clip-path: inset(0 0 0 0); }
-
-.contact-action__label {
-  font-size: clamp(1.45rem, 3.4vw, 2.75rem);
-  font-weight: 400;
-  letter-spacing: -.025em;
-  line-height: 1.05;
-  min-width: 0;
   overflow-wrap: anywhere;
 }
-
-/* says what happens next, so neither row is a leap of faith */
-.contact-action__meta {
-  font-size: .8rem;
-  font-weight: 500;
-  letter-spacing: .02em;
-  color: #8a8a92;
-  white-space: nowrap;
-  transition: color .25s ease .06s;
-}
-.contact-action:hover .contact-action__meta,
-.contact-action:focus-visible .contact-action__meta { color: #57575e; }
-
-.contact-action__mark {
-  align-self: center;
-  display: block;
+.ct-mail a:hover,
+.ct-mail a:focus-visible { text-decoration: underline; text-underline-offset: .2em; }
+.ct-mail svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
   transition: transform .35s cubic-bezier(.6, 0, .2, 1);
 }
-.contact-action__mark svg { display: block; width: 13px; height: 22px; }
-.contact-action__mark--arrow svg { width: 22px; height: 22px; }
-.contact-action:hover .contact-action__mark { transform: translateX(6px); }
-.contact-action:hover .contact-action__mark--arrow { transform: translate(4px, -4px); }
+.ct-mail a:hover svg { transform: translate(3px, -3px); }
 
+@media (max-width: 1100px) {
+  .ct-why { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 640px) {
-  /* the meta line is the first thing to go — the label and the mark are
-     what the row is for */
-  .contact-action { grid-template-columns: minmax(0, 1fr) auto; }
-  .contact-action__meta { display: none; }
+  .contact { --ct-size: 15.5vw; }
+  .ct-actions .cta { flex: 1 1 100%; justify-content: space-between; }
+  .ct-why { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-field.is-armed { transition: none; clip-path: none; }
 }
 
 /* --- standing line --- */
@@ -943,6 +681,7 @@ html {
   justify-content: space-between;
   gap: clamp(12px, 2vw, 28px);
   padding-top: clamp(14px, 2.2vh, 20px);
+  border-top: 1px solid rgba(255, 255, 255, .15);
   font-size: .78rem;
   font-weight: 500;
   letter-spacing: .02em;
@@ -952,17 +691,16 @@ html {
 .contact-social {
   transition: transform .2s ease;
 }
+.contact-top { color: #8a8a92; text-decoration: none; transition: color .2s ease; }
+.contact-top:hover,
+.contact-top:focus-visible { color: #f2f2f2; }
 .contact-social:hover,
 .contact-social:focus-visible {
   transform: scale(1.15);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .contact-action::before { transition-duration: .01s; }
-  .contact-action__mark, .contact-social { transition-property: color; }
-  /* the light stays, the drift stops — it's atmosphere, not information.
-     The scale has to survive or the composition reframes when it settles. */
-  .contact-light { animation: none; transform: scale(1.12); }
+  .contact-social, .ct-mail svg { transition-property: color; }
 }
 
 /* --- contact modal ------------------------------------------------------ *
@@ -997,7 +735,7 @@ html {
 /* the -webkit- alias is for Safari < 18, and it has to live in its own
    block: declared next to the standard property, the minifier treats the
    two as duplicates and keeps only the prefixed one — which silently drops
-   the blur in Firefox. (.nav.is-transparent has this bug today.) */
+   the blur in Firefox. */
 @supports (-webkit-backdrop-filter: blur(1px)) {
   .contact-dialog::backdrop { -webkit-backdrop-filter: blur(14px); }
 }
@@ -1101,7 +839,7 @@ html {
 .contact-row__error {
   margin-top: .6em;
   font-size: .78rem;
-  color: #8b5cf6;
+  color: #ff6a37;
 }
 
 /* keyed to the panel, not the viewport — see .contact-dialog__inner */
@@ -1148,9 +886,11 @@ html {
 }
 
 /* pick many — the whole diamond fills */
+/* a ticked option is a diamond with the prism inside it — the page's one
+   rule for colour, at the size of a checkbox */
 .contact-option input:checked ~ .contact-mark--multi {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  background: linear-gradient(135deg, #3f6bff, #9a5cff 30%, #ff3f9a 60%, #ff9a2e);
+  border-color: transparent;
 }
 
 /* pick one — an inner diamond, which the 45° parent gives us for free */
@@ -1158,11 +898,11 @@ html {
   content: '';
   position: absolute;
   inset: 3px;
-  background: #8b5cf6;
+  background: linear-gradient(135deg, #3f6bff, #9a5cff 30%, #ff3f9a 60%, #ff9a2e);
   transform: scale(0);
   transition: transform .15s cubic-bezier(.4, 1.6, .6, 1);
 }
-.contact-option input:checked ~ .contact-mark--single { border-color: #8b5cf6; }
+.contact-option input:checked ~ .contact-mark--single { border-color: #f2f2f2; }
 .contact-option input:checked ~ .contact-mark--single::after { transform: scale(1); }
 .contact-option input:checked ~ .contact-option__text { color: #fff; }
 .contact-option input:focus-visible ~ .contact-mark {
@@ -1183,7 +923,7 @@ html {
   transition: border-color .2s ease;
 }
 .contact-input::placeholder { color: #57575e; }
-.contact-input:focus { outline: none; border-bottom-color: #8b5cf6; }
+.contact-input:focus { outline: none; border-bottom-color: #f2f2f2; }
 .contact-textarea { resize: vertical; min-height: 5.5em; line-height: 1.45; }
 
 /* The date field is native, so the browser draws the calendar popup and the
@@ -1225,7 +965,10 @@ html {
   transition: background .2s ease, color .2s ease;
 }
 .contact-submit:hover:not(:disabled),
-.contact-submit:focus-visible:not(:disabled) { background: #8b5cf6; color: #fff; }
+.contact-submit:focus-visible:not(:disabled) {
+  background: linear-gradient(100deg, #3f6bff, #9a5cff 30%, #ff3f9a 55%, #ff6a37 78%, #ff9a2e);
+  color: #0a0a0d;
+}
 .contact-submit:disabled { opacity: .55; cursor: default; }
 
 .contact-sent { padding: clamp(32px, 8vh, 80px) 0; border-top: 1px solid rgba(255, 255, 255, .15); }
@@ -1326,7 +1069,10 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 @keyframes diamond-in   { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fluid-in     { from { opacity: 0; } to { opacity: 1; } }
 
-.blob { transform-box: fill-box; transform-origin: center; will-change: transform; mix-blend-mode: screen; }
+/* normal blending, not screen: five bright blobs screened together add up
+   to white where they overlap, which is what made the diamond read pastel.
+   Layered normally they stay the colours they are, like the hero field. */
+.blob { transform-box: fill-box; transform-origin: center; will-change: transform; }
 .b1 { animation: drift1 3.2s ease-in-out infinite; }
 .b2 { animation: drift2 3.9s ease-in-out infinite; }
 .b3 { animation: drift3 2.8s ease-in-out infinite; }
@@ -1360,14 +1106,6 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   /* the diamond arrives formed rather than growing */
   #clipShape { animation: none; }
   .diamond, .fluid { animation-duration: .01s; animation-delay: 0s; }
-  /* no scroll-driven pinning/covering for reduced-motion users */
-  .work-item {
-    position: static;
-    transform: none;
-    margin-bottom: 0;
-  }
-  .work-list__hold { height: clamp(40px, 6vh, 80px); }
-
 }
 
 /* --- contact toast ------------------------------------------------------- *
@@ -1399,7 +1137,7 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   background: #0a0a0d;
   border: 1px solid rgba(255, 255, 255, .15);
   border-radius: 8px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, .4), 0 0 0 1px rgba(139, 92, 246, .15);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .4);
   min-width: 280px;
   max-width: 420px;
 }
@@ -1408,7 +1146,7 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   flex: none;
   width: 20px;
   height: 20px;
-  color: #8b5cf6;
+  color: #f2f2f2;
   stroke-width: 2.5;
 }
 

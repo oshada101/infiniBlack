@@ -1,93 +1,296 @@
 ---
+/* THE HERO — black ground, colour only inside the diamond.
+ *
+ * The loader's diamond doesn't vanish when the curtain parts: the hole it
+ * leaves is this aperture, already in place at the same size, and it opens
+ * out to fill the stage. Inside it is the prism field (src/lib/prism-field.ts),
+ * the loader's five colours as a living surface.
+ *
+ * The headline runs straight across it. Outside the diamond it is white on
+ * black; inside, a second copy registered exactly over the first is set in
+ * ink, so where the words cross the colour they turn black. That copy is
+ * decorative (aria-hidden) — the <h1> is the only one a reader gets.
+ */
 interface Props {
   base: string;
 }
 
-const { base } = Astro.props;
+// the line break is the composition: one line leaves on the left, the other
+// arrives on the right, and the diamond sits where they cross
+const lines = [
+  { text: 'We build the software', align: 'start' },
+  { text: 'your business runs on.', align: 'end' },
+];
 ---
 
-<!-- hero: one viewport tall; video fills whatever space the text doesn't use -->
-<div class="hero h-screen flex flex-col">
-  <div class="hero-media relative flex-1 min-h-0 w-full overflow-hidden">
-    <video class="w-full h-full object-cover block" src={`${base}hero.mp4`} autoplay muted loop playsinline preload="auto" data-curtain-media></video>
-  </div>
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-stage" data-hero-stage>
+    <h1 class="hero-type" id="hero-title">
+      {lines.map((line, i) => (
+        <>
+          <span class={`hero-line hero-line--${line.align}`}><span class="hero-line__inner">{line.text}</span></span>
+          {i < lines.length - 1 && ' '}
+        </>
+      ))}
+    </h1>
 
-  <div class="hero-copy flex-none flex flex-col py-[clamp(10px,1.5vh,20px)] px-[clamp(4px,1.2vw,18px)]">
-    <h1 class="hero-copy__title text-[clamp(2.3rem,6.4vw,5rem)] font-normal tracking-[-.025em] leading-[1] max-w-[20ch] text-[#f2f2f2]">An engineering powerhouse shipping software that actually works</h1>
-    <p class="hero-copy__body mt-[clamp(16px,2.4vh,26px)] text-[clamp(.9rem,1.25vw,1.1rem)] font-normal leading-[1.32] max-w-[50ch] text-[#eaeaea]">infiniblack is a product engineering studio. AI systems and complete web, mobile, and desktop products. designed by one team, engineered for the years they'll actually run.</p>
+    <div class="hero-aperture" data-hero-aperture>
+      <canvas class="hero-field" data-hero-field></canvas>
+      <div class="hero-type hero-type--ink" aria-hidden="true">
+        {lines.map((line) => (
+          <span class={`hero-line hero-line--${line.align}`}><span class="hero-line__inner">{line.text}</span></span>
+        ))}
+      </div>
+    </div>
+
+    <div class="hero-foot">
+      <p class="hero-standfirst" data-hero-fade>
+        Websites, apps and AI, designed and built by one team. Weekly demos, so you see it long before it’s done.
+      </p>
+      <div class="hero-actions" data-hero-fade>
+        {/* same words as the contact section's door, and the same dialog —
+            Contact.astro binds every [data-contact-open] on the page */}
+        <button class="cta hero-cta" type="button" data-contact-open>
+          Make a request
+          <svg class="cta__mark" viewBox="0 0 100 170" fill="currentColor" aria-hidden="true">
+            <path d="M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z" />
+          </svg>
+        </button>
+        <a class="hero-link" href="#work">
+          See the work
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 6 18 18M18 8.5V18H8.5" />
+          </svg>
+        </a>
+      </div>
+    </div>
   </div>
-</div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    min-height: 540px;
+  }
+
+  .hero-stage {
+    /* the diamond's height; its width follows at the mark's 100:170 */
+    --dh: min(76svh, 150vw);
+    --pad: clamp(8px, 1.2vw, 18px);
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* --- the aperture ------------------------------------------------------ */
+  .hero-aperture {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    width: calc(var(--dh) / 1.7);
+    height: var(--dh);
+    translate: -50% -50%;
+    transform-origin: 50% 50%;
+    /* the loader's rounded diamond, sampled to a polygon so it scales with
+       the box and survives a transform in every engine */
+    clip-path: polygon(43.62% 3.19%, 45.21% 1.80%, 46.81% 0.80%, 48.40% 0.20%, 50.00% 0.00%, 51.60% 0.20%, 53.19% 0.80%, 54.79% 1.80%, 56.38% 3.19%, 96.81% 43.62%, 98.20% 45.21%, 99.20% 46.81%, 99.80% 48.40%, 100.00% 50.00%, 99.80% 51.60%, 99.20% 53.19%, 98.20% 54.79%, 96.81% 56.38%, 56.38% 96.81%, 54.79% 98.20%, 53.19% 99.20%, 51.60% 99.80%, 50.00% 100.00%, 48.40% 99.80%, 46.81% 99.20%, 45.21% 98.20%, 43.62% 96.81%, 3.19% 56.38%, 1.80% 54.79%, 0.80% 53.19%, 0.20% 51.60%, 0.00% 50.00%, 0.20% 48.40%, 0.80% 46.81%, 1.80% 45.21%, 3.19% 43.62%);
+    /* shown only if WebGL isn't there to draw the field */
+    background:
+      radial-gradient(60% 40% at 30% 25%, #3f6bff, transparent 70%),
+      radial-gradient(55% 35% at 75% 45%, #ff3f9a, transparent 70%),
+      radial-gradient(60% 40% at 35% 70%, #ff6a37, transparent 70%),
+      radial-gradient(50% 30% at 70% 85%, #ff9a2e, transparent 70%),
+      #9a5cff;
+  }
+
+  .hero-field {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* --- the headline, twice ----------------------------------------------- */
+  .hero-type {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* the lines sit a third of the way in from each tip of the diamond */
+    gap: calc(var(--dh) * .3);
+    padding: 0 var(--pad);
+    font-size: clamp(2.5rem, 7.3vw, 8.6rem);
+    font-weight: 300;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -.04em;
+    line-height: .92;
+    color: #f2f2f2;
+    pointer-events: none;
+  }
+
+  /* registered over the white copy: same box as the stage, pulled back by
+     the aperture's own offset (the aperture is centred, so that offset is
+     half the difference). --sw/--sh come from the stage's ResizeObserver. */
+  .hero-type--ink {
+    inset: auto;
+    left: calc((100% - var(--sw, 100vw)) / 2);
+    top: calc((100% - var(--sh, 100vh)) / 2);
+    width: var(--sw, 100vw);
+    height: var(--sh, 100vh);
+    color: #0a0a0d;
+  }
+
+  .hero-line {
+    display: block;
+    overflow: hidden;
+    /* room for the descenders the mask would otherwise shear off */
+    padding-bottom: .12em;
+    margin-bottom: -.12em;
+  }
+  .hero-line--start { align-self: flex-start; text-align: left; }
+  .hero-line--end { align-self: flex-end; text-align: right; }
+  /* balance, so a narrow screen breaks "your business / runs on." and
+     never strands the last word on a line of its own */
+  .hero-line__inner { display: block; text-wrap: balance; }
+
+  .hero-foot {
+    position: absolute;
+    z-index: 2;
+    left: var(--pad);
+    right: var(--pad);
+    bottom: clamp(18px, 4vh, 40px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .hero-standfirst {
+    max-width: 36ch;
+    margin: 0;
+    font-size: clamp(.98rem, 1.15vw, 1.12rem);
+    line-height: 1.4;
+    color: #d4d4d8;
+    text-wrap: pretty;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: clamp(18px, 2vw, 28px);
+  }
+
+  .hero-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 0;
+    color: #f2f2f2;
+    font-size: .95rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .hero-link svg {
+    width: 18px;
+    height: 18px;
+    transition: transform .35s cubic-bezier(.6, 0, .2, 1);
+  }
+  .hero-link:hover svg { transform: translate(2px, 2px); }
+  .hero-link:hover { text-decoration: underline; text-underline-offset: .2em; }
+
+  /* One "Make a request" per screen. Above 860px the nav carries it, top
+     right, for the whole page; below that the nav has no room for it, so
+     the hero's own button is the one. */
+  @media (min-width: 861px) {
+    .hero-cta { display: none; }
+  }
+
+  @media (max-width: 760px) {
+    .hero-stage { --dh: min(54svh, 122vw); }
+    .hero-type { font-size: clamp(2.4rem, 13vw, 4.6rem); gap: calc(var(--dh) * .36); }
+    .hero-foot { flex-direction: column; align-items: stretch; gap: 18px; }
+    .hero-standfirst { font-size: .95rem; }
+    .hero-actions { justify-content: space-between; }
+    .hero-cta { flex: 1; justify-content: space-between; }
+  }
+</style>
 
 <script>
-  import { animate, stagger } from 'motion';
-  import { EASE, LINE_STEP, LINE_TRAVEL, RISE, reducedMotion, splitLines } from '../lib/reveal';
+  import { animate } from 'motion';
+  import { EASE, reducedMotion } from '../lib/reveal';
+  import { prismField } from '../lib/prism-field';
 
-  /* The hero's entrance is the second half of the loader's, not a separate
-     event. The curtain spends .82s travelling off the sides, and if the page
-     underneath only started moving once that was over, the visitor would
-     watch two animations in a row instead of one handover. So the hero starts
-     LEAD ms BEFORE the halves do: by the time there is a gap to see through,
-     the headline is already on its way up. */
-  const LEAD = 250;
-
-  const title = document.querySelector<HTMLElement>('.hero-copy__title');
-  const body = document.querySelector<HTMLElement>('.hero-copy__body');
-  const video = document.querySelector<HTMLElement>('.hero-media video');
+  const stage = document.querySelector<HTMLElement>('[data-hero-stage]');
+  const aperture = document.querySelector<HTMLElement>('[data-hero-aperture]');
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-field]');
   const nav = document.querySelector<HTMLElement>('.nav');
 
-  if (title && !reducedMotion()) {
-    const run = () => {
-      /* Split here rather than up front, deliberately. The line breaks are
-         only true for the width they were measured at, so the less time the
-         headline spends held in that shape the smaller the window in which a
-         resize can strand it — and restore() closes it for good afterwards. */
-      const { lines, restore } = splitLines(title);
-      lines.forEach((line) => { line.style.transform = `translateY(${LINE_TRAVEL})`; });
-      if (body) body.style.opacity = '0';
+  if (stage && aperture && canvas) {
+    // keep the ink headline registered to the white one at every size
+    const register = () => {
+      stage.style.setProperty('--sw', `${stage.clientWidth}px`);
+      stage.style.setProperty('--sh', `${stage.clientHeight}px`);
+    };
+    register();
+    new ResizeObserver(register).observe(stage);
+
+    const still = reducedMotion();
+    const curtain = document.getElementById('curtain');
+    // behind the curtain the field draws its first frame and holds; it only
+    // starts moving once there is a gap to see it through
+    const field = prismField(canvas, { animate: !still, autoplay: !curtain, pointerTarget: stage });
+    if (curtain && field) {
+      document.addEventListener('curtain:reveal', () => field.start(), { once: true });
+    }
+
+    /* The entrance is the loader's second half. At the cut the curtain knocks
+       a diamond hole the size of the loader (--w × 1.7) in the middle of the
+       screen — so the aperture waits behind it at exactly that size, and the
+       hole shows colour instead of a black gap. When the halves start to
+       travel, it opens out with them. */
+    if (!still && curtain) {
+      const pairs = [0, 1].map((i) =>
+        [...stage.querySelectorAll<HTMLElement>(`.hero-line:nth-of-type(${i + 1}) .hero-line__inner`)],
+      );
+      const fades = [...stage.querySelectorAll<HTMLElement>('[data-hero-fade]')];
+
+      const w = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--w')) || 30;
+      const s0 = (w * 1.7) / aperture.offsetHeight;
+
+      aperture.style.transform = `scale(${s0})`;
+      pairs.flat().forEach((el) => { el.style.transform = 'translateY(110%)'; });
+      fades.forEach((el) => { el.style.opacity = '0'; });
       if (nav) nav.style.opacity = '0';
 
-      /* the video is already playing behind the curtain; easing the last of a
-         push-in away is what stops the reveal landing on a static frame */
-      if (video) {
-        animate(video, { scale: [1.06, 1] }, { duration: 2.4, ease: EASE });
-      }
+      const run = () => {
+        animate(aperture, { scale: [s0, 1] }, { duration: 1.5, ease: [0.65, 0, 0.15, 1] });
 
-      animate(
-        lines,
-        { y: [LINE_TRAVEL, '0%'] },
-        { duration: .95, ease: EASE, delay: stagger(LINE_STEP) },
-      ).then(() => {
-        // back to ordinary text, so the headline reflows normally from here on
-        restore();
-      });
+        // both copies of a line move as one, or the ink one would visibly slip
+        pairs.forEach((els, i) => {
+          animate(els, { y: ['110%', '0%'] }, { duration: 1.1, ease: EASE, delay: 0.8 + i * 0.12 });
+        });
 
-      // the standfirst follows the headline in rather than with it — the two
-      // arriving together reads as one block sliding, which is the cheap version
-      if (body) {
-        animate(body, { opacity: [0, 1], y: [RISE, 0] }, { duration: .8, ease: EASE, delay: .42 });
-      }
+        fades.forEach((el, i) => {
+          animate(el, { opacity: [0, 1], y: [14, 0] }, { duration: 0.8, ease: EASE, delay: 1.25 + i * 0.07 });
+        });
 
-      // last, and opacity only: the nav sits over the video with a
-      // backdrop-filter, and moving that layer makes the blur crawl
-      if (nav) {
-        animate(nav, { opacity: [0, 1] }, { duration: .7, ease: EASE, delay: .55 });
-      }
-    };
+        if (nav) animate(nav, { opacity: [0, 1] }, { duration: 0.7, ease: EASE, delay: 1.5 });
+      };
 
-    /* No curtain in the document means nothing is going to announce itself —
-       a reload straight onto a deep link, or the loader failing to render. Go
-       on the spot rather than waiting for a cue that is never coming. */
-    if (document.getElementById('curtain')) {
       document.addEventListener(
         'curtain:reveal',
         (e) => {
           const partsIn = (e as CustomEvent<{ partsIn: number }>).detail?.partsIn ?? 950;
-          setTimeout(run, Math.max(0, partsIn - LEAD));
+          setTimeout(run, partsIn + 60);
         },
         { once: true },
       );
-    } else {
-      run();
     }
   }
 </script>

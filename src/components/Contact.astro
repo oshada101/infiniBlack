@@ -6,11 +6,6 @@ import { contact, deadlineOptions, sourceOptions, services, reasons } from '../d
 // sell. "Something else" catches the rest without inviting a wishlist.
 const helpOptions = [...services.map((s) => s.title), 'Something else'];
 
-// Split for the staggered swap. Done here rather than in the browser so the
-// words ship in the markup — the animation is presentation, and the text has
-// to be complete with no JS.
-const reasonWords = reasons.map((reason) => reason.split(' '));
-
 // Social glyphs, drawn as strokes in a 24-unit box to match the line-mark
 // language the service cards already use. Brand marks rendered as outlines
 // stay recognisable and stop the row from turning into three logo stickers.
@@ -35,247 +30,55 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
 };
 ---
 
-<!-- contact: the last block on the page. Left states the invitation, right
-     holds the three ways to act on it, loudest last. -->
-{/* full viewport height, so the page closes on a held beat rather than
-    trailing off. The statement takes the leftover height and the two
-    action rows sit at the bottom — nothing is centred in a void. */}
-<section
-  class="contact min-h-screen flex flex-col scroll-mt-9 pt-[clamp(72px,11vh,130px)] px-[clamp(8px,1.2vw,18px)] pb-[clamp(18px,2.6vh,28px)] border-t border-[rgba(255,255,255,.08)]"
-  id="contact"
->
-  {/* THE CLOSING LIGHT
-      Two bodies lit from off-frame right. The thing that makes a rim light
-      read as a rim light is that a FORM ENDS at it: lit mass on one side,
-      black on the other. So each body is a <circle> whose fill is a radial
-      gradient in the circle's own coordinates — offset 1 IS the silhouette,
-      so the glow hugs the edge and the geometry cuts it dead.
+<!-- contact: the last screen. The statement the page has been building to,
+     the five things we promise, the two ways in, and a standing line. -->
+{/* THE CLOSE. The prism field opened the page inside a diamond and came
+    back one service name at a time; here it fills the whole closing
+    sentence. Same mechanism as Services: the field's canvas over white type
+    with mix-blend-mode: darken, so the ground stays itself and the letters
+    become the field. It wipes in left to right as the section arrives. */}
+<section class="contact" id="contact" aria-labelledby="contact-title">
+  <p class="ct-label" aria-hidden="true">Contact</p>
 
-      NO FILTERS. The bloom is built from concentric ring gradients whose peak
-      stop sits exactly on the body's radius, not from feGaussianBlur. A blur
-      over a region this size is a convolution the compositor cannot cache,
-      and running one per frame is what made this page crawl. Ring gradients
-      paint once, cost nothing, and land in the same place.
-
-      TWO SEPARATE <svg>s, not two <g>s in one. Each is its own promoted
-      layer, so the drift below is a composited transform — the GPU moves an
-      already-painted bitmap and the renderer is never asked for a new pixel.
-      Transforming a <g> inside a single SVG would re-rasterise the whole
-      drawing every frame instead. Separate layers also mean the two forms
-      move at different rates, which is what makes it read as depth rather
-      than as one picture sliding.
-
-      Radii are huge (1250 / 1000 against a 1600-wide box) on purpose: we are
-      looking at a fragment of something much bigger, the way the reference
-      is. Anything tighter reads as a circle, or worse as a swoosh.
-
-      The two arcs converge toward the bottom and never cross — crossing
-      lines destroy the sense that one form is in front of the other.
-
-      Everything lives right of x≈850, past the statement's measure, so the
-      left half of the screen stays pure black. */}
-
-  {/* A clipping frame. The two layers below are scaled up 12% so they have
-     room to drift without pulling an edge into shot — which means 6% of each
-     one hangs outside the section, and without this it paints straight over
-     the Work items above. inset:0 with no --bleed offset: an absolutely
-     positioned child resolves against .contact’s PADDING box, whose left edge
-     is already the section’s outer edge. The negative offset that
-     .contact-action::before needs (it starts from the content box) would push
-     this one off the side of the page. */}
-  <div class="contact-light-frame" aria-hidden="true">
-    {/* --- the warm body. Fills the right of the frame; its lit edge is the
-            long, shallow arc falling from the top down past the rows. --- */}
-    <svg
-      class="contact-light contact-light--warm"
-      viewBox="0 0 1600 900"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <defs>
-        {/* userSpaceOnUse, matched to the circle's own centre and radius, so
-            the brightest part of the fill lands exactly on the edge and stops */}
-        <radialGradient id="cl-warm-body" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1250">
-          <stop offset=".55" stop-color="#8b5cf6" stop-opacity="0" />
-          <stop offset=".84" stop-color="#3b0764" stop-opacity=".10" />
-          <stop offset=".955" stop-color="#6d28d9" stop-opacity=".26" />
-          <stop offset="1" stop-color="#7c3aed" stop-opacity=".42" />
-        </radialGradient>
-
-        {/* THE BLOOM, as rings rather than blurs. Each gradient is sized to a
-            circle slightly larger than the body, with its peak stop placed at
-            body-radius ÷ ring-radius — so the falloff straddles the real edge.
-            Two widths, because the air around a hot edge doesn't fall off at a
-            single rate and one blur always looks like one blur. */}
-        <radialGradient id="cl-warm-bloom-far" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1420">
-          <stop offset=".79" stop-color="#8b5cf6" stop-opacity="0" />
-          <stop offset=".880" stop-color="#7c3aed" stop-opacity=".15" />
-          <stop offset=".97" stop-color="#8b5cf6" stop-opacity="0" />
-        </radialGradient>
-
-        <radialGradient id="cl-warm-bloom-near" gradientUnits="userSpaceOnUse" cx="2100" cy="150" r="1310">
-          <stop offset=".895" stop-color="#8b5cf6" stop-opacity="0" />
-          <stop offset=".954" stop-color="#c4b5fd" stop-opacity=".34" />
-          <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
-        </radialGradient>
-
-        {/* the specular core. A rim light blows past its own hue at the peak
-            before falling back to the accent, which is why the middle stop is
-            near-white and the ends are pure #8b5cf6. */}
-        <linearGradient id="cl-hot" gradientUnits="userSpaceOnUse" x1="860" y1="180" x2="1120" y2="880">
-          <stop offset="0" stop-color="#8b5cf6" stop-opacity="0" />
-          <stop offset=".26" stop-color="#8b5cf6" stop-opacity=".45" />
-          <stop offset=".47" stop-color="#ede9fe" stop-opacity="1" />
-          <stop offset=".66" stop-color="#8b5cf6" stop-opacity=".62" />
-          <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
-        </linearGradient>
-
-        {/* Masks trim the bloom and the core to the arc facing the light.
-            Gradient masks, not hard clips, so the highlight dies out instead of
-            ending — a cut end is the tell that something was drawn, not lit.
-            This arc is near-vertical, so its mask runs down the y. */}
-        <linearGradient id="cl-mask-warm" gradientUnits="userSpaceOnUse" x1="0" y1="120" x2="0" y2="920">
-          <stop offset="0" stop-color="#000" />
-          <stop offset=".3" stop-color="#fff" />
-          <stop offset=".72" stop-color="#fff" />
-          <stop offset="1" stop-color="#000" />
-        </linearGradient>
-        <mask id="cl-rim-warm">
-          <rect x="700" y="0" width="900" height="900" fill="url(#cl-mask-warm)" />
-        </mask>
-      </defs>
-
-      <circle cx="2100" cy="150" r="1250" fill="url(#cl-warm-body)" />
-      {/* far bloom, near bloom, then the core on top of its own light */}
-      <circle cx="2100" cy="150" r="1420" fill="url(#cl-warm-bloom-far)" mask="url(#cl-rim-warm)" />
-      <circle cx="2100" cy="150" r="1310" fill="url(#cl-warm-bloom-near)" mask="url(#cl-rim-warm)" />
-      <circle
-        cx="2100" cy="150" r="1250"
-        fill="none" stroke="url(#cl-hot)" stroke-width="1.5"
-        mask="url(#cl-rim-warm)"
-      />
-    </svg>
-
-    {/* --- the cool body, wedged into the bottom-right corner and behind the
-            warm one. Same light source at a glancing angle, so its rim is
-            thinner and never gets as hot. Drifts on its own clock. --- */}
-    <svg
-      class="contact-light contact-light--cool"
-      viewBox="0 0 1600 900"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <defs>
-        <radialGradient id="cl-cool-body" gradientUnits="userSpaceOnUse" cx="1750" cy="1750" r="1000">
-          <stop offset=".6" stop-color="#7fc0d4" stop-opacity="0" />
-          <stop offset=".86" stop-color="#1d4753" stop-opacity=".12" />
-          <stop offset=".97" stop-color="#3f8296" stop-opacity=".22" />
-          <stop offset="1" stop-color="#8fcadb" stop-opacity=".3" />
-        </radialGradient>
-
-        <radialGradient id="cl-cool-bloom" gradientUnits="userSpaceOnUse" cx="1750" cy="1750" r="1120">
-          <stop offset=".81" stop-color="#8b5cf6" stop-opacity="0" />
-          <stop offset=".893" stop-color="#a78bfa" stop-opacity=".20" />
-          <stop offset=".97" stop-color="#8b5cf6" stop-opacity="0" />
-        </radialGradient>
-
-        <linearGradient id="cl-hot-lower" gradientUnits="userSpaceOnUse" x1="1120" y1="900" x2="1600" y2="740">
-          <stop offset="0" stop-color="#8b5cf6" stop-opacity="0" />
-          <stop offset=".4" stop-color="#7c3aed" stop-opacity=".5" />
-          <stop offset=".72" stop-color="#c4b5fd" stop-opacity=".85" />
-          <stop offset="1" stop-color="#a78bfa" stop-opacity=".5" />
-        </linearGradient>
-
-        <linearGradient id="cl-mask-cool" gradientUnits="userSpaceOnUse" x1="1040" y1="0" x2="1600" y2="0">
-          <stop offset="0" stop-color="#000" />
-          <stop offset=".35" stop-color="#fff" />
-          <stop offset="1" stop-color="#fff" />
-        </linearGradient>
-        <mask id="cl-rim-cool">
-          <rect x="1000" y="600" width="600" height="300" fill="url(#cl-mask-cool)" />
-        </mask>
-      </defs>
-
-      <circle cx="1750" cy="1750" r="1000" fill="url(#cl-cool-body)" />
-      <circle cx="1750" cy="1750" r="1120" fill="url(#cl-cool-bloom)" mask="url(#cl-rim-cool)" />
-      <circle
-        cx="1750" cy="1750" r="1000"
-        fill="none" stroke="url(#cl-hot-lower)" stroke-width="1.3"
-        mask="url(#cl-rim-cool)"
-      />
-    </svg>
-  </div>
-
-  {/* the statement. Larger than the hero h1 on purpose: the hero opens the
-      argument, this closes it, and it is the last thing anyone reads. */}
-  <div class="flex-1 flex flex-wrap items-center justify-between gap-x-[clamp(32px,6vw,88px)] gap-y-[clamp(36px,5vh,56px)] py-[clamp(40px,7vh,90px)]">
-    <div class="flex-1 min-w-[300px]">
-      <h2 class="contact-statement text-[clamp(2.6rem,8vw,6.5rem)] font-normal tracking-[-.035em] leading-[.94] text-[#f2f2f2] max-w-[15ch] text-balance">
-        Tell us what you’re building.
-      </h2>
-      <p class="mt-[clamp(18px,3vh,32px)] max-w-[42ch] text-[clamp(1rem,1.45vw,1.2rem)] leading-[1.4] text-grey-300 text-pretty">
-        We reply within 48 hours, and there’s no sales call.
-      </p>
+  <div class="ct-main">
+    <div class="ct-word" data-ct-word>
+      <h2 class="ct-statement" id="contact-title">Tell us what you’re building.</h2>
+      <canvas class="ct-field" aria-hidden="true" data-ct-field></canvas>
     </div>
+    <p class="ct-sub">We reply within 48 hours, and there’s no sales call.</p>
 
-    {/* The column that used to be dead space, now carrying the argument.
-        Every line is in the DOM — the rotation is visual only, so a screen
-        reader gets the whole list rather than whichever line happened to be
-        showing. The ticks say "this is a list being stepped through", which
-        is what stops it reading as text that wanders on its own. */}
-    <div class="contact-why">
-      <div class="contact-why__ticks" aria-hidden="true">
-        {reasons.map((_, i) => <span class:list={['contact-why__tick', i === 0 && 'is-current']}></span>)}
-      </div>
-
-      <ul class="contact-why__list" data-reasons>
-        {reasonWords.map((words, i) => (
-          <li class:list={['contact-why__item', i === 0 && 'is-current']}>
-            {/* the space between words is a real text node, not a margin —
-                so the line still reads and copies as a sentence */}
-            {words.map((word, w) => (
-              <Fragment>
-                <span class="contact-why__word" style={`--i:${w}`}>{word}</span>{' '}
-              </Fragment>
-            ))}
-          </li>
-        ))}
-      </ul>
-    </div>
-  </div>
-
-  {/* the two doors. Full-bleed rows rather than buttons: the hairline rule
-      is this site's unit everywhere else, and stacked rules fill the height
-      structurally instead of leaving small controls floating in it. */}
-  <div class="contact-actions">
-    <button class="contact-action" type="button" data-contact-open>
-      {/* "Make a request", not "Start a project": nobody arriving cold is
-          ready to start one, and the button has to name what they're
-          actually about to do — ask us something. */}
-      <span class="contact-action__label">Make a request</span>
-      <span class="contact-action__meta">Seven questions, two minutes</span>
-      <span class="contact-action__mark" aria-hidden="true">
-        <svg viewBox="0 0 100 170" fill="currentColor" aria-hidden="true">
+    {/* one action and one alternative, not two rows of equal weight: the
+        button is the same one the nav and the hero carry, so the page ends
+        on the thing it has been offering all along. "Make a request", not
+        "Start a project": nobody arriving cold is ready to start one. */}
+    <div class="ct-actions">
+      <button class="cta cta--lg" type="button" data-contact-open>
+        Make a request
+        <svg class="cta__mark" viewBox="0 0 100 170" fill="currentColor" aria-hidden="true">
           <path d="M 56 10.2 L 94 74.8 Q 100 85 94 95.2 L 56 159.8 Q 50 170 44 159.8 L 6 95.2 Q 0 85 6 74.8 L 44 10.2 Q 50 0 56 10.2 Z" />
         </svg>
-      </span>
-    </button>
-
-    <a class="contact-action" href={`mailto:${contact.email}`}>
-      <span class="contact-action__label">{contact.email}</span>
-      <span class="contact-action__meta">Or just write to us</span>
-      <span class="contact-action__mark contact-action__mark--arrow" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M6 18 18 6M8.5 6H18v9.5" />
-        </svg>
-      </span>
-    </a>
+      </button>
+      <p class="ct-mail">
+        <span>Or write to us</span>
+        <a href={`mailto:${contact.email}`}>
+          {contact.email}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 18 18 6M8.5 6H18v9.5" />
+          </svg>
+        </a>
+      </p>
+    </div>
   </div>
 
-  {/* standing line: the footer the page never had. Socials live here rather
-      than in a row of their own — three 22px glyphs can't carry a row. */}
+  {/* the promises, all at once. They used to rotate one at a time beside
+      the statement; a reader deciding whether to write deserves the list. */}
+  <ul class="ct-why" aria-label="How we work">
+    {reasons.map((reason, i) => (
+      <li style={`--i:${i}`}><span class="ct-why__mark" aria-hidden="true"></span>{reason}</li>
+    ))}
+  </ul>
+
+  {/* standing line: the footer the page never had */}
   <div class="contact-foot">
     <p>© {new Date().getFullYear()} infiniblack</p>
 
@@ -306,7 +109,7 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
       ))}
     </ul>
 
-    <p>Currently taking Q3 2026 builds</p>
+    <a class="contact-top" href="#">Back to top <span aria-hidden="true">↑</span></a>
   </div>
 </section>
 
@@ -466,30 +269,34 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
 </dialog>
 
 <script>
-  // --- the rotating line --------------------------------------------------
-  const reasonList = document.querySelector('[data-reasons]');
+  import { prismField } from '../lib/prism-field';
 
-  if (reasonList && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const items = [...reasonList.querySelectorAll('.contact-why__item')];
-    const tickRow = document.querySelector('.contact-why__ticks');
-    const ticks = [...document.querySelectorAll('.contact-why__tick')];
+  // --- the closing statement ---------------------------------------------
+  const ctWord = document.querySelector<HTMLElement>('[data-ct-word]');
+  const ctCanvas = document.querySelector<HTMLCanvasElement>('[data-ct-field]');
+  const ctSection = document.querySelector<HTMLElement>('.contact');
 
-    // the fill animation's duration is the interval — read it back out of
-    // the stylesheet so there is one number, not two that can drift apart
-    const raw = tickRow ? getComputedStyle(tickRow).getPropertyValue('--cycle').trim() : '';
-    const cycle = raw.endsWith('ms') ? parseFloat(raw) : raw.endsWith('s') ? parseFloat(raw) * 1000 : 4200;
+  if (ctWord && ctCanvas) {
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // autoplay is fine here: the field pauses itself whenever it is off screen
+    const field = prismField(ctCanvas, {
+      animate: !still,
+      unit: window.innerHeight * 0.76, // the hero aperture's height, so it is the same field
+      pointerTarget: ctSection ?? undefined,
+    });
 
-    let current = 0;
-
-    if (items.length > 1) {
-      setInterval(() => {
-        current = (current + 1) % items.length;
-        items.forEach((el, i) => el.classList.toggle('is-current', i === current));
-        ticks.forEach((el, i) => {
-          el.classList.toggle('is-current', i === current);
-          el.classList.toggle('is-done', i < current);
-        });
-      }, cycle);
+    if (field && !still) {
+      // held closed until the statement is properly on screen, then wiped open
+      ctCanvas.classList.add('is-armed');
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          ctCanvas.classList.add('is-in');
+          io.disconnect();
+        },
+        { threshold: 0.6 },
+      );
+      io.observe(ctWord);
     }
   }
 
@@ -513,6 +320,21 @@ const glyphs: Record<string, { d: string; fill?: boolean }[]> = {
     const close = () => dialog.close();
 
     document.querySelectorAll('[data-contact-open]').forEach((el) => el.addEventListener('click', open));
+
+    // Arriving at /#request (the project pages' "Make a request") opens the
+    // form straight away — once the curtain has cleared, if there is one —
+    // and takes the hash back off so a reload doesn't open it again.
+    if (window.location.hash === '#request') {
+      const go = () => {
+        open();
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      };
+      if (document.getElementById('curtain')) {
+        document.addEventListener('curtain:reveal', () => setTimeout(go, 1200), { once: true });
+      } else {
+        go();
+      }
+    }
     dialog.querySelectorAll('[data-contact-close]').forEach((el) => el.addEventListener('click', close));
 
     dialog.addEventListener('close', () => {

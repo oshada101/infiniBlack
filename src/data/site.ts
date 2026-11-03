@@ -75,7 +75,16 @@ export interface WorkItem {
   desc: string;
   title: string;
   tags: string[];
+  /** the project's own page uses this for its full-screen still */
   media: WorkItemMediaHoverVideo | WorkItemMediaImage;
+  /** what the homepage panel shows: the work itself, not a title card.
+      `position` is the object-position to crop from (default: centre). */
+  cover:
+    | { kind: 'image'; src: string; alt: string; position?: string }
+    /** a product shot: the brand field behind, one screen of the product
+        rising into it from the bottom edge. `width`: the screen's share of
+        the frame, in percent (default 74) */
+    | { kind: 'shot'; field: string; screen: string; alt: string; width?: number };
 
   /* --- the project's own page ------------------------------------------ *
    *  PLACEHOLDER COPY. Written to hold the shape of the layout; replace it
@@ -85,8 +94,10 @@ export interface WorkItem {
 
   /** the write-up, one string per paragraph */
   body: string[];
-  /** the column beside it: label above value, no rules, everything one size */
+  /** the facts beside it — type, industry, year or status, role */
   meta: { label: string; value: string }[];
+  /** the live product, when there is one to send people to */
+  url?: string;
   /** what was actually handed over, under its own heading */
   delivered: { heading: string; items: string[] };
   /** the work itself, stacked under the write-up. Videos come first — the
@@ -94,9 +105,10 @@ export interface WorkItem {
   gallery: WorkGalleryItem[];
 }
 
+/** `caption`: one line under the picture saying what it shows */
 export type WorkGalleryItem =
-  | { kind: 'video'; src: string; poster?: string }
-  | { kind: 'image'; src: string; alt: string };
+  | { kind: 'video'; src: string; poster?: string; caption?: string }
+  | { kind: 'image'; src: string; alt: string; caption?: string };
 
 export const workItems: WorkItem[] = [
   {
@@ -109,16 +121,30 @@ export const workItems: WorkItem[] = [
       img: { src: 'projects/glorious.jpg', alt: 'Glorious wordmark on a dark field' },
       video: { src: 'projects/glorious.mp4' },
     },
+    // a still, not the recording: a site scrolling by itself inside a
+    // page that is also scrolling was disorienting
+    cover: {
+      kind: 'shot',
+      field: 'projects/glorious.jpg',
+      screen: 'projects/glorious.webp',
+      alt: 'Glorious Fitness Center home page: “Wear the moment.” over a photo of the gym floor',
+      // narrower than the default, so the frame shows down to the red
+      // headline block rather than only the nav and the photo above it
+      width: 52,
+    },
     body: [
       'Glorious Fitness Center needed a website people could be pointed to. Word of mouth was doing the work, but anyone who heard about the gym and wanted to know what it offers, who the trainers are, and where to find it had no page to open.',
       'The site answers those questions and stops there. It’s a marketing site in the plainest sense — programs, trainers, opening hours, and contact details, arranged so a visitor on a phone gets the whole picture in one scroll. Static pages, nothing to log into, nothing to learn.',
     ],
     meta: [
-      { label: 'Client', value: 'Glorious Fitness Center' },
-      { label: 'Role', value: 'Marketing site — design, build and launch' },
+      { label: 'Type', value: 'Marketing site' },
+      { label: 'Industry', value: 'Fitness' },
+      { label: 'Year', value: '2025' },
+      { label: 'Role', value: 'Design, build and launch' },
     ],
+    url: 'https://gloriousfitness.lk/',
     delivered: {
-      heading: 'infiniblack for Glorious Fitness Center',
+      heading: 'What we delivered',
       items: [
         'Site design',
         'Program and trainer pages',
@@ -128,8 +154,18 @@ export const workItems: WorkItem[] = [
       ],
     },
     gallery: [
-      { kind: 'video', src: 'projects/glorious.mp4', poster: 'projects/glorious.webp' },
-      { kind: 'image', src: 'projects/glorious.webp', alt: 'Glorious Fitness Center — home page' },
+      {
+        kind: 'video',
+        src: 'projects/glorious.mp4',
+        poster: 'projects/glorious.webp',
+        caption: 'The site from top to bottom — the opening screen, about, the programs and the gallery.',
+      },
+      {
+        kind: 'image',
+        src: 'projects/glorious.webp',
+        alt: 'Glorious Fitness Center home page: “Wear the moment.” over a photo of the gym floor',
+        caption: 'The home page — one line over the gym floor, and two ways in.',
+      },
     ],
   },
   {
@@ -145,16 +181,26 @@ export const workItems: WorkItem[] = [
         style: 'width:100%;height:100%;object-fit:cover;',
       },
     },
+    // the wordmark card with the product rising into it: brand first, then
+    // proof. A full-bleed screenshot on its own read as a bug report.
+    cover: {
+      kind: 'shot',
+      field: 'projects/kratos.jpg',
+      screen: 'projects/kratos-1.png',
+      alt: 'Kratos overview: check-ins today, today’s income, memberships expiring soon, and recent payments',
+    },
     body: [
       'A gym knows things about itself that live in six different places: who is a member, who has paid, who actually turned up, who is on the floor this morning. Kratos is the one place to keep them, built so the person on the desk can answer any of those questions without opening anything else.',
       'The work is ongoing. We build it in short cycles against a real gym running real days, which is the only way to find out that renewals matter more than reports and that attendance has to be one tap, not a form.',
     ],
     meta: [
-      { label: 'Client', value: 'Kratos' },
-      { label: 'Role', value: 'Product design and engineering, ongoing' },
+      { label: 'Type', value: 'Gym management system' },
+      { label: 'Industry', value: 'Fitness' },
+      { label: 'Status', value: 'Ongoing' },
+      { label: 'Role', value: 'Product design and engineering' },
     ],
     delivered: {
-      heading: 'infiniblack for Kratos',
+      heading: 'What we delivered',
       items: [
         'Member records',
         'Billing and renewals',
@@ -164,13 +210,27 @@ export const workItems: WorkItem[] = [
         'Weekly build cycles',
       ],
     },
-    // alt text is honest but generic — replace it with what each screen
-    // actually shows, which only someone who has used the thing can write
+    // kratos-2.png (a member's profile) is left out: it was shot with test
+    // data in it. Re-shoot it with believable demo data and add it back.
     gallery: [
-      { kind: 'image', src: 'projects/kratos-1.png', alt: 'Kratos gym management system — screen one' },
-      { kind: 'image', src: 'projects/kratos-2.png', alt: 'Kratos gym management system — screen two' },
-      { kind: 'image', src: 'projects/kratos-3.png', alt: 'Kratos gym management system — screen three' },
-      { kind: 'image', src: 'projects/kratos-4.png', alt: 'Kratos gym management system — screen four' },
+      {
+        kind: 'image',
+        src: 'projects/kratos-1.png',
+        alt: 'Kratos overview: check-ins today, today’s income, memberships expiring soon, quick actions and recent payments',
+        caption: 'Overview — today’s check-ins and income, memberships about to lapse, recent payments, and the four things the desk does most.',
+      },
+      {
+        kind: 'image',
+        src: 'projects/kratos-3.png',
+        alt: 'Kratos membership plans with the new-plan form open: name, price, duration, gender, age group and inclusions',
+        caption: 'Membership plans — price, length, who it’s for and what it includes, in one form.',
+      },
+      {
+        kind: 'image',
+        src: 'projects/kratos-4.png',
+        alt: 'Kratos check-ins with the check-in dialog open, searching members by name or code',
+        caption: 'Check-in — find a member by name or code, and they’re in.',
+      },
     ],
   },
 ];
