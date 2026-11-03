@@ -134,14 +134,34 @@ void main() {
 `;
 
 export interface PrismField {
+  /** begin the motion; a no-op if already running or built still */
+  start: () => void;
   stop: () => void;
 }
 
 export function prismField(
   canvas: HTMLCanvasElement,
-  { animate = true, pointerTarget }: { animate?: boolean; pointerTarget?: HTMLElement } = {},
+  {
+    animate = true,
+    autoplay = true,
+    pointerTarget,
+  }: {
+    animate?: boolean;
+    /** false: draw the first frame and wait for start(). Anything hidden at
+        load (behind the curtain) shouldn't spend frames nobody can see. */
+    autoplay?: boolean;
+    pointerTarget?: HTMLElement;
+  } = {},
 ): PrismField | null {
-  const gl = canvas.getContext('webgl', { antialias: false, alpha: false, premultipliedAlpha: false });
+  // failIfMajorPerformanceCaveat: refuse a software renderer. There the
+  // shader costs seconds of main thread — enough to hold the curtain shut —
+  // and the CSS gradient under the canvas is the better fallback.
+  const gl = canvas.getContext('webgl', {
+    antialias: false,
+    alpha: false,
+    premultipliedAlpha: false,
+    failIfMajorPerformanceCaveat: true,
+  });
   if (!gl) return null;
 
   const compile = (type: number, src: string) => {
@@ -206,7 +226,7 @@ export function prismField(
   resize();
   draw();
 
-  if (!animate) return { stop: () => ro.disconnect() };
+  if (!animate) return { start: () => {}, stop: () => ro.disconnect() };
 
   const onPointer = (e: PointerEvent) => {
     const r = canvas.getBoundingClientRect();
@@ -217,6 +237,7 @@ export function prismField(
   (pointerTarget ?? window).addEventListener('pointermove', onPointer as EventListener, { passive: true });
 
   let visible = true;
+  let running = autoplay;
   let raf = 0;
   const loop = (now: number) => {
     raf = 0;
@@ -229,7 +250,7 @@ export function prismField(
     schedule();
   };
   const schedule = () => {
-    if (!raf && visible && !document.hidden) {
+    if (running && !raf && visible && !document.hidden) {
       last = performance.now();
       raf = requestAnimationFrame(loop);
     }
@@ -245,7 +266,12 @@ export function prismField(
   schedule();
 
   return {
+    start: () => {
+      running = true;
+      schedule();
+    },
     stop: () => {
+      running = false;
       cancelAnimationFrame(raf);
       ro.disconnect();
       io.disconnect();

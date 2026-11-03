@@ -1326,7 +1326,10 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 @keyframes diamond-in   { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fluid-in     { from { opacity: 0; } to { opacity: 1; } }
 
-.blob { transform-box: fill-box; transform-origin: center; will-change: transform; mix-blend-mode: screen; }
+/* normal blending, not screen: five bright blobs screened together add up
+   to white where they overlap, which is what made the diamond read pastel.
+   Layered normally they stay the colours they are, like the hero field. */
+.blob { transform-box: fill-box; transform-origin: center; will-change: transform; }
 .b1 { animation: drift1 3.2s ease-in-out infinite; }
 .b2 { animation: drift2 3.9s ease-in-out infinite; }
 .b3 { animation: drift3 2.8s ease-in-out infinite; }

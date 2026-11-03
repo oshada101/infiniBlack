@@ -305,14 +305,19 @@ const offer = ['AI', 'Websites', 'Apps', 'Business software', 'Marketing'];
     new ResizeObserver(register).observe(stage);
 
     const still = reducedMotion();
-    prismField(canvas, { animate: !still, pointerTarget: stage });
+    const curtain = document.getElementById('curtain');
+    // behind the curtain the field draws its first frame and holds; it only
+    // starts moving once there is a gap to see it through
+    const field = prismField(canvas, { animate: !still, autoplay: !curtain, pointerTarget: stage });
+    if (curtain && field) {
+      document.addEventListener('curtain:reveal', () => field.start(), { once: true });
+    }
 
     /* The entrance is the loader's second half. At the cut the curtain knocks
        a diamond hole the size of the loader (--w × 1.7) in the middle of the
        screen — so the aperture waits behind it at exactly that size, and the
        hole shows colour instead of a black gap. When the halves start to
        travel, it opens out with them. */
-    const curtain = document.getElementById('curtain');
     if (!still && curtain) {
       const pairs = [0, 1].map((i) =>
         [...stage.querySelectorAll<HTMLElement>(`.hero-line:nth-of-type(${i + 1}) .hero-line__inner`)],

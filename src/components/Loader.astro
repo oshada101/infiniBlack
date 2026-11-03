@@ -34,7 +34,10 @@
         </defs>
 
         <g class="diamond" clip-path="url(#diamond)">
-          <rect x="0" y="0" width="100" height="170" fill="#fff"/>
+          <!-- a purple ground, not white: on white the blobs read pastel, and the
+               hero field this hands off to is the same five colours at full
+               strength. Purple is one of the five, so no gap shows between blobs. -->
+          <rect x="0" y="0" width="100" height="170" fill="#9a5cff"/>
           <g class="fluid" filter="url(#goo)">
             <circle class="blob b1" cx="50" cy="66"  r="38" fill="url(#gCoral)"/>
             <circle class="blob b2" cx="50" cy="104" r="38" fill="url(#gPurple)"/>
@@ -59,8 +62,10 @@
      Which element is the one to wait on depends on the page — the home hero's
      video, a project page's full-screen still — so the page marks its own
      with [data-curtain-media] rather than the curtain hunting for a hero. */
-  const MIN_HOLD  = 2600; // ms from navigation; the diamond finishes at ~1.3s
-  const PAD       = 1000; // deliberate extra beat after everything is ready
+  const MIN_HOLD  = 1400; // ms from navigation; the diamond finishes at ~1.3s
+  const PAD       = 250;  // a short beat after everything is ready. This was a
+                          // full second while the hero was a video still
+                          // buffering; the field draws on its first frame.
   const MAX_HOLD  = 6000; // ms from navigation; open regardless past this
   const REVEAL_MS = 1900; // length of the CSS cut -> seam -> part sequence
   const PART_MS   = 950;  // when the halves start travelling — the transition-delay
