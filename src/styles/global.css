@@ -397,99 +397,6 @@ html {
   .is-entering { opacity: 1; }
 }
 
-/* --- work: featured projects list --- */
-
-.work {
-  /* clearance under the fixed nav. kept in px, not rem: the release script
-     reads this value straight off the custom property. */
-  --work-pin: var(--nav-h);
-}
-
-/* the "Featured Work" heading stays pinned at the top while the cards stack.
-   Its own sticky range runs to the end of .work, which outlasts the final
-   card — the script translates it up early so the two leave together.
-   Opaque bg + z-index keep it above the stacking cards. */
-.work .section-title {
-  position: sticky;
-  top: var(--work-pin);
-  z-index: 2;
-  background: #0a0a0d;
-}
-
-/* --- stacking cards --------------------------------------------------- *
- *  Each card sticks below the pinned title. Every card shares .work-list
- *  as its containing block and the same top anchor, so later cards — later
- *  in source order — simply paint over (fully cover) whichever card is
- *  currently pinned.
- * ------------------------------------------------------------------------ */
-.work-item {
-  position: sticky;
-  /* pin below the sticky title: nav height + measured title height (JS sets
-     --work-title-h; fallback keeps it sane before the script runs) */
-  top: calc(var(--work-pin) + var(--work-title-h, 6rem));
-  background: #0a0a0d;             /* opaque: fully hides the card stacked underneath */
-}
-
-/* The room the last card sticks into: without it the card sits flush with the
-   bottom of .work-list and never pins at all.
-
-   Kept short on purpose. Every pixel here is scroll during which the last
-   card is pinned and nothing on screen moves — a held beat at 20vh reads as
-   the page having stopped responding, not as emphasis, and Contact's own
-   padding-top follows it immediately with more of the same. .work carries no
-   padding-bottom for that reason: this is the section's bottom spacing. */
-.work-list__hold {
-  height: clamp(24px, 4vh, 48px);
-}
-
-/* below the nav breakpoint, drop the effect: plain stacked rows */
-@media (max-width: 860px) {
-  .work-item {
-    position: static;
-    transform: none;
-    margin-bottom: 0;
-    border-top: 1px solid rgba(255, 255, 255, .12);
-  }
-  .work-item:first-child { border-top: none; }
-  /* nothing pins here, so the hold has no beat to keep — drop it to the
-     standard section bottom padding the other sections use */
-  .work-list__hold { height: clamp(40px, 6vh, 80px); }
-}
-
-/* decorative corner dots + diagonal hatch behind the project media */
-.work-item__media {
-  background:
-    radial-gradient(circle, #fff .75px, transparent 1px) left -1px top -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) right -1px top -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) left -1px bottom -1px / 2px 2px no-repeat,
-    radial-gradient(circle, #fff .75px, transparent 1px) right -1px bottom -1px / 2px 2px no-repeat,
-    repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 12px, rgba(255,255,255,.02) 12px 24px),
-    #141417;
-  background-origin: border-box;
-}
-
-.work-item__tooltip {
-  backdrop-filter: blur(2px);
-}
-
-/* --- the masthead ------------------------------------------------------ *
- *  Standfirst and project name sit on one baseline and share a bottom edge.
- *  Without that closing rule the two blocks float, and their opposed ragged
- *  edges read as interference down the middle of the column; with it, the
- *  gutter is a gutter. Quiet on purpose — the phase track below is where
- *  this section spends itself.
- * ------------------------------------------------------------------------ */
-.work-item__masthead {
-  padding-bottom: clamp(14px, 2vh, 22px);
-  border-bottom: 1px solid rgba(255, 255, 255, .14);
-}
-
-.work-item__foot {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(18px, 2.6vh, 30px);
-}
-
 /* --- project page: the stage ------------------------------------------- *
  *  The work arrives at full screen and scroll takes it down continuously,
  *  100% to 40%, passing through 70% at the halfway mark. The frame is
@@ -503,7 +410,7 @@ html {
  * ------------------------------------------------------------------------ */
 .project-stage {
   /* nav height, and the scroll the shrink plays out over: one screen of
-     frame, and the rest is travel. In px, like --work-pin, because the
+     frame, and the rest is travel. In px, because the
      script reads the value straight off the property. */
   --project-pin: var(--nav-h);
   height: 150dvh;
@@ -1287,14 +1194,6 @@ html.is-loading, html.is-loading body { overflow: hidden; }
   /* the diamond arrives formed rather than growing */
   #clipShape { animation: none; }
   .diamond, .fluid { animation-duration: .01s; animation-delay: 0s; }
-  /* no scroll-driven pinning/covering for reduced-motion users */
-  .work-item {
-    position: static;
-    transform: none;
-    margin-bottom: 0;
-  }
-  .work-list__hold { height: clamp(40px, 6vh, 80px); }
-
 }
 
 /* --- contact toast ------------------------------------------------------- *

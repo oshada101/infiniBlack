@@ -75,7 +75,17 @@ export interface WorkItem {
   desc: string;
   title: string;
   tags: string[];
+  /** the project's own page uses this for its full-screen still */
   media: WorkItemMediaHoverVideo | WorkItemMediaImage;
+  /** what the homepage panel shows: the work itself, not a title card.
+      `position` is the object-position to crop from (default: centre). */
+  cover:
+    /** `start`: seconds to begin (and loop back to), past any intro card */
+    | { kind: 'video'; src: string; poster: string; start?: number }
+    | { kind: 'image'; src: string; alt: string; position?: string }
+    /** a product shot: the brand field behind, one screen of the product
+        rising into it from the bottom edge */
+    | { kind: 'shot'; field: string; screen: string; alt: string };
 
   /* --- the project's own page ------------------------------------------ *
    *  PLACEHOLDER COPY. Written to hold the shape of the layout; replace it
@@ -109,6 +119,9 @@ export const workItems: WorkItem[] = [
       img: { src: 'projects/glorious.jpg', alt: 'Glorious wordmark on a dark field' },
       video: { src: 'projects/glorious.mp4' },
     },
+    // the recording opens on the site's own loading card; start where the
+    // site itself appears
+    cover: { kind: 'video', src: 'projects/glorious.mp4', poster: 'projects/glorious.webp', start: 4.2 },
     body: [
       'Glorious Fitness Center needed a website people could be pointed to. Word of mouth was doing the work, but anyone who heard about the gym and wanted to know what it offers, who the trainers are, and where to find it had no page to open.',
       'The site answers those questions and stops there. It’s a marketing site in the plainest sense — programs, trainers, opening hours, and contact details, arranged so a visitor on a phone gets the whole picture in one scroll. Static pages, nothing to log into, nothing to learn.',
@@ -144,6 +157,14 @@ export const workItems: WorkItem[] = [
         alt: 'Kratos wordmark on a red field',
         style: 'width:100%;height:100%;object-fit:cover;',
       },
+    },
+    // the wordmark card with the product rising into it: brand first, then
+    // proof. A full-bleed screenshot on its own read as a bug report.
+    cover: {
+      kind: 'shot',
+      field: 'projects/kratos.jpg',
+      screen: 'projects/kratos-1.png',
+      alt: 'Kratos overview: check-ins today, today’s income, memberships expiring soon, and recent payments',
     },
     body: [
       'A gym knows things about itself that live in six different places: who is a member, who has paid, who actually turned up, who is on the floor this morning. Kratos is the one place to keep them, built so the person on the desk can answer any of those questions without opening anything else.',

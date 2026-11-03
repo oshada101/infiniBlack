@@ -1,4 +1,16 @@
 ---
+/* WORK — the projects, one screen each.
+ *
+ * Each project is a panel nearly the height of the screen: the work itself,
+ * as large as the page allows, and under it one row set like a Services row
+ * (name, what it was, what kind, the way in). The panels stick under the nav
+ * and the next one slides up over the last, so the section reads as a stack
+ * being dealt rather than a list being scrolled.
+ *
+ * The section brings no colour of its own. Glorious is broadcast red, Kratos
+ * is a dark dashboard with a red accent — the work supplies the colour, which
+ * is the hero's rule seen from the other side: colour lives inside a frame.
+ */
 import { workItems, workHref } from '../data/site';
 
 interface Props {
@@ -8,137 +20,263 @@ interface Props {
 const { base } = Astro.props;
 ---
 
-<!-- work: featured projects -->
-<section class="work pt-[clamp(80px,12vh,140px)] px-[clamp(8px,1.2vw,18px)] border-t border-[rgba(255,255,255,.08)]" id="work">
-  <h2 class="section-title text-[clamp(2.2rem,5.5vw,4rem)] font-normal tracking-[-.02em] text-grey-200 pt-[clamp(20px,3vh,34px)] pb-[clamp(16px,2.5vh,28px)] border-b border-[rgba(255,255,255,.15)]">Featured Work</h2>
+<section class="work" id="work" aria-labelledby="work-title">
+  <header class="wk-head">
+    <h2 class="wk-label" id="work-title">Work</h2>
+  </header>
 
-  <div class="work-list relative ">
-    {workItems.map((item) => (
-      <article class="work-item flex flex-wrap gap-[clamp(24px,3vw,48px)] py-[clamp(16px,2vh,22px)] shadow-[0_-1px_0_rgba(255,255,255,.12)]">
-        {item.media.kind === 'hover-video' ? (
-          <a
-            class="work-item__media work-item__media--hover-video group relative flex-[1_1_55%] min-w-[280px] aspect-video flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
-            href={workHref(base, item)}
-          >
-            <img
-              class="work-item__media-img absolute inset-0 w-full h-full object-cover [transition:opacity_.2s_ease] group-hover:opacity-0"
-              src={`${base}${item.media.img.src}`}
-              alt={item.media.img.alt}
-            />
+  <div class="wk-list">
+    {workItems.map((item, i) => (
+      <article class="wk-panel" style={`--i:${i}`}>
+        <div class="wk-media">
+          {item.cover.kind === 'video' ? (
             <video
-              class="work-item__media-video absolute inset-0 w-full h-full object-cover opacity-0 [transition:opacity_.2s_ease] group-hover:opacity-100"
-              src={`${base}${item.media.video.src}`}
+              class="wk-media__el"
+              src={`${base}${item.cover.src}`}
+              poster={`${base}${item.cover.poster}`}
               muted
-              loop
+              loop={!item.cover.start}
               playsinline
-              preload="metadata"
+              preload="none"
+              aria-hidden="true"
+              data-wk-video
+              data-start={item.cover.start}
             ></video>
-            <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
-          </a>
-        ) : (
-          <a
-            class="work-item__media group relative flex-[1_1_55%] min-w-[280px] aspect-video flex items-center justify-center text-[rgba(255,255,255,.35)] text-[.85rem] font-medium no-underline cursor-pointer"
-            href={workHref(base, item)}
-          >
-            <img src={`${base}${item.media.img.src}`} alt={item.media.img.alt} style={item.media.img.style} />
-            <span class="work-item__tooltip absolute top-0 left-0 px-[9px] py-1 bg-[rgba(10,10,13,.8)] text-white text-[.62rem] font-semibold tracking-[.03em] whitespace-nowrap opacity-0 pointer-events-none [transition:opacity_.15s_ease] group-hover:opacity-100">[View Project]</span>
-          </a>
-        )}
-        <div class="work-item__info flex-[1_1_35%] min-w-[240px] flex flex-col justify-between gap-[clamp(24px,4vh,48px)] bg-ink">
-          {/* masthead: standfirst left, name right, closed by a hairline. The
-              shared bottom edge is what stops the two ragged edges reading as
-              a jagged channel — same trick a newspaper nameplate uses. */}
-          <div class="work-item__masthead flex justify-between items-start gap-[clamp(20px,2.6vw,52px)]">
-            <p class="work-item__desc min-w-0 text-[1.15rem] font-normal leading-[1.4] text-grey-200 max-w-[30ch] text-pretty">{item.desc}</p>
-            <h3 class="work-item__title flex-initial text-[clamp(1.7rem,3vw,2.6rem)] font-normal [font-variation-settings:'opsz'_40] text-white tracking-[-.015em] leading-[1.05] text-right text-balance"><a class="text-inherit no-underline hover:underline hover:[text-underline-offset:.12em]" href={workHref(base, item)}>{item.title}</a></h3>
-          </div>
+          ) : item.cover.kind === 'shot' ? (
+            <>
+              <img class="wk-media__el" src={`${base}${item.cover.field}`} alt="" loading="lazy" decoding="async" />
+              <img class="wk-shot" src={`${base}${item.cover.screen}`} alt={item.cover.alt} loading="lazy" decoding="async" />
+            </>
+          ) : (
+            <img
+              class="wk-media__el"
+              src={`${base}${item.cover.src}`}
+              alt={item.cover.alt}
+              loading="lazy"
+              decoding="async"
+              style={item.cover.position ? `object-position:${item.cover.position}` : undefined}
+            />
+          )}
+        </div>
 
-          <div class="work-item__foot">
-            <ul class="work-item__tags list-none">
-              {item.tags.map((tag) => <li class="text-[.82rem] font-semibold uppercase tracking-[.08em] text-grey-300 leading-[1.9]">{tag}</li>)}
-            </ul>
-          </div>
+        <div class="wk-info">
+          {/* the name is the link; its ::after stretches over the whole panel */}
+          <h3 class="wk-title"><a href={workHref(base, item)}>{item.title}</a></h3>
+          <p class="wk-desc">{item.desc}</p>
+          <ul class="wk-tags" aria-label="Project type">
+            {item.tags.map((tag) => <li>{tag}</li>)}
+          </ul>
+          <span class="wk-view" aria-hidden="true">
+            View project
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 18 18 6M8.5 6H18v9.5" />
+            </svg>
+          </span>
         </div>
       </article>
     ))}
-    <div class="work-list__hold" aria-hidden="true"></div>
   </div>
 </section>
 
-<script>
-  const workSection = document.querySelector('.work') as HTMLElement | null;
-  const workTitle = workSection?.querySelector('.section-title') as HTMLElement | null;
-  const workHold = workSection?.querySelector('.work-list__hold') as HTMLElement | null;
-  const workCards = [...(workSection?.querySelectorAll('.work-item') ?? [])] as HTMLElement[];
-  const lastCard = workCards[workCards.length - 1];
-
-  let pin = 0;
-  let titleH = 0;
-  let cardH = 0;
-
-  // keep the stacking cards pinned right below the sticky "Featured Work"
-  // title — measure its height (fluid font, so it changes on resize).
-  const measure = () => {
-    if (!workSection || !workTitle) return;
-    pin = parseFloat(getComputedStyle(workSection).getPropertyValue('--work-pin')) || 0;
-    titleH = workTitle.offsetHeight;
-    cardH = lastCard ? lastCard.offsetHeight : 0;
-    document.documentElement.style.setProperty('--work-title-h', titleH + 'px');
-  };
-
-  /* Both the title and the cards are clamped by the bottom of their sticky
-     containing block, and a taller box hits that clamp sooner — so the last
-     card (a whole card tall) unpins one card-height of scroll BEFORE the
-     title does, stranding "Featured Work" over dead space.
-
-     Rather than fight the clamp, close that gap by hand: the .work-list__hold
-     spacer is static, so its bottom edge is a reliable read on how far the
-     stack has left to travel. Once that edge climbs past where the pinned
-     title + last card end, drag the title up by the difference and the two
-     exit as one. Cheaper than it looks — one rect read per frame. */
-  const syncRelease = () => {
-    if (!workTitle || !workHold) return;
-    const overshoot = pin + titleH + cardH - workHold.getBoundingClientRect().bottom;
-    workTitle.style.transform = overshoot > 0 ? `translateY(${-overshoot}px)` : '';
-  };
-
-  if (workSection && workTitle) {
-    let queued = false;
-    const onScroll = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(() => {
-        queued = false;
-        syncRelease();
-      });
-    };
-
-    measure();
-    syncRelease();
-    window.addEventListener('resize', () => {
-      measure();
-      syncRelease();
-    });
-    window.addEventListener('scroll', onScroll, { passive: true });
+<style>
+  .work {
+    --gut: clamp(8px, 1.2vw, 18px);
+    padding: clamp(80px, 12vh, 140px) var(--gut) clamp(40px, 6vh, 72px);
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    scroll-margin-top: var(--nav-h);
   }
 
-  // hover-to-play: pauses in place on mouseleave, no rewind
-  document.querySelectorAll('.work-item__media--hover-video').forEach((el) => {
-    const video = el.querySelector('video');
-    if (!video) return;
-    el.addEventListener('mouseenter', () => video.play());
-    el.addEventListener('mouseleave', () => video.pause());
-  });
+  .wk-head { margin-bottom: clamp(24px, 4vh, 48px); }
+  .wk-label {
+    margin: 0;
+    font-size: clamp(1rem, 1.1vw, 1.1rem);
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #8a8a92;
+  }
 
-  // tooltip follows the cursor while hovering a project's media
-  document.querySelectorAll('.work-item__media').forEach((el) => {
-    const tooltip = el.querySelector('.work-item__tooltip') as HTMLElement | null;
-    if (!tooltip) return;
-    el.addEventListener('mousemove', (e) => {
-      const rect = (el as HTMLElement).getBoundingClientRect();
-      const x = (e as MouseEvent).clientX - rect.left + 14;
-      const y = (e as MouseEvent).clientY - rect.top + 14;
-      tooltip.style.transform = `translate(${x}px, ${y}px)`;
+  /* the panels run out to <main>'s edge, past the section's own inset, so
+     the work gets the full width the page has */
+  .wk-list { margin: 0 calc(-1 * var(--gut)); }
+
+  /* --- the panel ------------------------------------------------------- */
+  .wk-panel {
+    position: sticky;
+    top: var(--nav-h);
+    display: flex;
+    flex-direction: column;
+    height: calc(100svh - var(--nav-h));
+    min-height: 520px;
+    background: #0a0a0d;
+    /* the edge the next panel slides in on: a shadow cast up onto the one
+       being covered, so the stack reads as depth and not as a cut */
+    box-shadow: 0 -24px 60px rgba(0, 0, 0, .65);
+  }
+  .wk-panel + .wk-panel { margin-top: clamp(32px, 6vh, 64px); }
+
+  .wk-media {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: #000;
+  }
+  .wk-media__el {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transform: scale(1.001);
+    transition: transform 1.4s cubic-bezier(.22, 1, .36, 1);
+  }
+  .wk-panel:hover .wk-media__el { transform: scale(1.035); }
+
+  /* the product shot: one screen rising out of the bottom edge, below the
+     field's wordmark, cropped by the frame so only its top shows */
+  .wk-shot {
+    position: absolute;
+    left: 50%;
+    top: 60%;
+    width: min(74%, 1180px);
+    height: auto;
+    display: block;
+    translate: -50% 0;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, .08),
+      0 40px 120px rgba(0, 0, 0, .65);
+    transition: transform 1.2s cubic-bezier(.22, 1, .36, 1);
+  }
+  .wk-panel:hover .wk-shot { transform: translateY(-14px); }
+
+  /* --- the row under it ------------------------------------------------ */
+  .wk-info {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px clamp(24px, 4vw, 64px);
+    padding: clamp(18px, 3vh, 30px) var(--gut) clamp(8px, 1.6vh, 16px);
+  }
+
+  .wk-title {
+    margin: 0;
+    font-size: clamp(2.2rem, 5vw, 5.4rem);
+    font-weight: 450;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -.05em;
+    line-height: .95;
+    text-wrap: balance;
+  }
+  .wk-title a { color: #f2f2f2; text-decoration: none; }
+  .wk-title a::after { content: ''; position: absolute; inset: 0; }
+  .wk-title a:focus-visible { outline: none; }
+  .wk-panel:has(.wk-title a:focus-visible) { outline: 1px solid #f2f2f2; outline-offset: 4px; }
+
+  .wk-desc {
+    margin: 0;
+    max-width: 36ch;
+    font-size: .98rem;
+    line-height: 1.45;
+    color: #8a8a92;
+    text-wrap: pretty;
+    transition: color .3s ease;
+  }
+  .wk-panel:hover .wk-desc { color: #d4d4d8; }
+
+  .wk-tags {
+    display: grid;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: .66rem;
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    line-height: 2;
+    text-transform: uppercase;
+    color: #8a8a92;
+  }
+
+  .wk-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .68rem;
+    font-weight: 650;
+    font-variation-settings: 'opsz' 8;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #f2f2f2;
+  }
+  .wk-view svg {
+    width: 16px;
+    height: 16px;
+    transition: transform .35s cubic-bezier(.6, 0, .2, 1);
+  }
+  .wk-panel:hover .wk-view svg { transform: translate(3px, -3px); }
+
+  /* --- narrower -------------------------------------------------------- */
+  @media (max-width: 1100px) {
+    .wk-info { grid-template-columns: minmax(0, 1fr) auto; }
+    .wk-title { grid-column: 1 / -1; }
+    .wk-tags { display: flex; flex-wrap: wrap; gap: 0 1.4em; }
+  }
+
+  @media (max-width: 640px) {
+    .wk-panel { height: auto; min-height: 0; }
+    /* a phone frame is portrait and the work is landscape: show it whole,
+       at its own shape, rather than a sliver of it cropped to the screen */
+    .wk-media { flex: none; aspect-ratio: 16 / 10; }
+    .wk-shot { width: 86%; top: 62%; }
+    .wk-info { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .wk-view { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wk-panel { position: relative; top: auto; }
+    .wk-media__el, .wk-shot, .wk-view svg { transition: none; }
+  }
+</style>
+
+<script>
+  /* The video plays while its panel is on screen and stops when it isn't —
+     on every device, because hover was the only way to see it before and a
+     phone has no hover. preload="none" until then, so the eight megabytes
+     are only spent on visitors who actually reach it. Reduced motion keeps
+     the poster. */
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const videos = [...document.querySelectorAll<HTMLVideoElement>('[data-wk-video]')];
+
+  // where a clip starts, and loops back to, past any intro card
+  const start = (video: HTMLVideoElement) => Number(video.dataset.start) || 0;
+
+  videos.forEach((video) => {
+    if (!start(video)) return;
+    video.addEventListener('ended', () => {
+      video.currentTime = start(video);
+      video.play().catch(() => {});
     });
   });
+
+  if (!still && videos.length) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) {
+            video.preload = 'auto';
+            if (video.currentTime < start(video)) video.currentTime = start(video);
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.35 },
+    );
+    videos.forEach((video) => io.observe(video));
+  }
 </script>
