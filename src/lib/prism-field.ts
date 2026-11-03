@@ -136,6 +136,8 @@ void main() {
 export interface PrismField {
   /** begin the motion; a no-op if already running or built still */
   start: () => void;
+  /** hold the current frame; start() picks up again from it */
+  pause: () => void;
   stop: () => void;
 }
 
@@ -226,7 +228,7 @@ export function prismField(
   resize();
   draw();
 
-  if (!animate) return { start: () => {}, stop: () => ro.disconnect() };
+  if (!animate) return { start: () => {}, pause: () => {}, stop: () => ro.disconnect() };
 
   const onPointer = (e: PointerEvent) => {
     const r = canvas.getBoundingClientRect();
@@ -269,6 +271,11 @@ export function prismField(
     start: () => {
       running = true;
       schedule();
+    },
+    pause: () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      raf = 0;
     },
     stop: () => {
       running = false;
