@@ -75,7 +75,10 @@ html {
 }
 
 .nav__word { justify-self: start; display: flex; align-items: center; }
-.nav__logo { display: block; width: auto; height: 17px; filter: invert(1); }
+/* the 2026 wordmark ships in white with the prism baked into the i and the bar;
+   inverting it would invert the prism too. 20px tall = 120px wide, the
+   pack's minimum on-screen width. */
+.nav__logo { display: block; width: auto; height: 20px; }
 
 .nav__links { display: flex; align-items: center; gap: clamp(26px, 3vw, 44px); }
 
