@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # claude code worktrees
 .claude/
+
+# brand source packs (assets copied into public/ as needed)
+infiniblack-logo-pack-2026.zip
