@@ -41,7 +41,6 @@ const dateLabel = `${part('weekday')}, ${part('day')} ${part('month')}.`;
   <footer class="teaser__foot">
     <span class="teaser__name">infiniblack</span>
     <nav aria-label="Contact">
-      <span class="teaser__label">Write to us</span>
       {launch.links.map((l) => <a href={l.href}>{l.label}</a>)}
     </nav>
   </footer>
@@ -147,7 +146,6 @@ const dateLabel = `${part('weekday')}, ${part('day')} ${part('month')}.`;
   @media (min-width: 720px) { .teaser__foot { padding: 32px 48px 40px; } }
   .teaser__name { font-weight: 600; font-size: 16px; color: var(--t-grey-300); letter-spacing: -0.01em; }
   .teaser nav { display: flex; gap: 8px 24px; flex-wrap: wrap; align-items: center; }
-  .teaser__label,
   .teaser nav a {
     font-weight: 650;
     font-variation-settings: "opsz" 8;
@@ -155,7 +153,6 @@ const dateLabel = `${part('weekday')}, ${part('day')} ${part('month')}.`;
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
-  .teaser__label { color: var(--t-grey-500); }
   .teaser nav a {
     color: var(--t-paper);
     text-decoration: none;
@@ -168,6 +165,8 @@ const dateLabel = `${part('weekday')}, ${part('day')} ${part('month')}.`;
 
   @media (max-width: 560px) {
     .teaser__foot { flex-direction: column; align-items: flex-start; }
+    /* all four links on one line at 360px and up */
+    .teaser nav { column-gap: 18px; }
   }
 
   /* launch: the teaser fades to the site's ink and the page reloads as the site */
