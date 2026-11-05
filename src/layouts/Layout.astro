@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import LaunchOverlay from '../components/LaunchOverlay.astro';
+import { launch } from '../data/site';
 
 interface Props {
   title?: string;
@@ -10,12 +12,18 @@ interface Props {
   ground?: 'ink' | 'black';
 }
 
+// While the teaser is up, every page — and every link to it — is the teaser.
+const teaser = launch.enabled;
+
 const {
-  title = 'Infiniblack — a product engineering studio',
-  description =
+  title: pageTitle = 'Infiniblack — a product engineering studio',
+  description: pageDescription =
     'infiniblack is a product engineering studio. AI systems and complete web, mobile, and desktop products, designed by one team and engineered for the years they will actually run.',
   ground = 'ink',
 } = Astro.props;
+
+const title = teaser ? 'infiniblack' : pageTitle;
+const description = teaser ? launch.headline : pageDescription;
 
 // set on the body so it propagates to the canvas — overscroll past either
 // end of the page has to be the same colour as the page
@@ -23,16 +31,32 @@ const groundClass = ground === 'black' ? 'bg-black' : 'bg-ink';
 
 const base = import.meta.env.BASE_URL;
 // link previews need an absolute URL; scrapers don't resolve relative ones
-const ogImage = new URL(`${base}og-image.png`, Astro.site ?? Astro.url).href;
+const ogImage = new URL(`${base}${teaser ? launch.ogImage : 'og-image.png'}`, Astro.site ?? Astro.url).href;
 ---
 
 <!doctype html>
-<html lang="en" class="h-full scroll-smooth">
+<html lang="en" class:list={['h-full scroll-smooth', { 'is-teaser': teaser }]}>
   <head>
     <meta charset="UTF-8" />
+    {teaser && (
+      /* Before anything paints: past launch, or for someone holding a
+         preview pass, the page is the site and the teaser never shows. */
+      <script is:inline define:vars={{ at: launch.at }}>
+        (function () {
+          var off = Date.now() >= Date.parse(at);
+          try {
+            var q = new URLSearchParams(location.search);
+            if (q.get('preview') === 'off') localStorage.removeItem('ib-preview');
+            else if (q.has('preview')) localStorage.setItem('ib-preview', '1');
+            if (localStorage.getItem('ib-preview') === '1') off = true;
+          } catch (e) {}
+          if (off) document.documentElement.classList.remove('is-teaser');
+        })();
+      </script>
+    )}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content={ground === 'black' ? '#000000' : '#0a0a0d'} />
+    <meta name="theme-color" content={!teaser && ground === 'black' ? '#000000' : '#0a0a0d'} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -54,6 +78,7 @@ const ogImage = new URL(`${base}og-image.png`, Astro.site ?? Astro.url).href;
   </head>
   <body class:list={['h-full font-display overflow-x-clip', groundClass]}>
     <slot />
+    {teaser && <LaunchOverlay />}
 
     {/* Site-wide, so the whole page reads as one surface — a project page
         that glides while the home page steps would be worse than neither.

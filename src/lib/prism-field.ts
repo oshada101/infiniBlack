@@ -150,6 +150,8 @@ export function prismField(
     autoplay = true,
     unit,
     pointerTarget,
+    seed = 14,
+    pointerFrame = 'canvas',
   }: {
     animate?: boolean;
     /** false: draw the first frame and wait for start(). Anything hidden at
@@ -160,6 +162,13 @@ export function prismField(
         the same field reads as a busier one. */
     unit?: number;
     pointerTarget?: HTMLElement;
+    /** the moment in the field's life the first frame shows. The launch
+        posts were rendered from 97, so the teaser opens on their colours. */
+    seed?: number;
+    /** what the lean is measured across: the canvas, or the whole screen.
+        A canvas much narrower than the screen leans all the way the moment
+        the pointer leaves it, so a thin one wants the screen. */
+    pointerFrame?: 'canvas' | 'viewport';
   } = {},
 ): PrismField | null {
   // failIfMajorPerformanceCaveat: refuse a software renderer. There the
@@ -221,7 +230,7 @@ export function prismField(
   };
 
   // a fixed starting point, so the first frame is always a good one
-  const T0 = 14;
+  const T0 = seed;
   let elapsed = 0;
   let last = performance.now();
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -240,7 +249,10 @@ export function prismField(
   if (!animate) return { start: () => {}, pause: () => {}, stop: () => ro.disconnect() };
 
   const onPointer = (e: PointerEvent) => {
-    const r = canvas.getBoundingClientRect();
+    const r =
+      pointerFrame === 'viewport'
+        ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }
+        : canvas.getBoundingClientRect();
     // -1..1 across the aperture, clamped so a far-off cursor can't yank it
     pointer.tx = Math.max(-1.5, Math.min(1.5, ((e.clientX - r.left) / r.width - 0.5) * 2));
     pointer.ty = Math.max(-1.5, Math.min(1.5, -((e.clientY - r.top) / r.height - 0.5) * 2));

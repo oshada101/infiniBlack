@@ -311,3 +311,31 @@ export const sourceOptions = [
   'A referral',
   'Other',
 ];
+
+// --- launch ---------------------------------------------------------------
+
+/**
+ * The teaser that stands over every page until launch (LaunchOverlay.astro).
+ *
+ * It lifts on its own at `at`, in each visitor's browser — nothing has to be
+ * deployed on the day. `enabled` is the manual switch: set it to false and
+ * push to take the teaser down early, or to remove it for good after launch
+ * (which also puts the site's own link preview back).
+ *
+ * Anyone can see the site behind it by visiting with ?preview; the browser
+ * remembers that until ?preview=off.
+ */
+export const launch = {
+  enabled: true,
+  /** Sri Lanka time, so the countdown reaches zero at midnight in Colombo */
+  at: '2026-11-10T00:00:00+05:30',
+  headline: 'We’re building something.',
+  /** link preview while the teaser is up */
+  ogImage: 'og-teaser.png',
+  links: [
+    { label: 'WhatsApp', href: 'https://wa.me/94770411844' },
+    { label: 'Email', href: 'mailto:infiniblackteam@gmail.com' },
+    { label: 'Instagram', href: 'https://www.instagram.com/infiniblack2026/' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/infiniblack/' },
+  ],
+};
